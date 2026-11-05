@@ -1,0 +1,216 @@
+# Рамки интерфейса. Параметр slice — ширина краёв, которые не растягиваются.
+
+sprite panel 7 7 slice=3
+.KKKKK.
+KHHHHHK
+KHPPPDK
+KHPPPDK
+KHPPPDK
+KHDDDDK
+.KKKKK.
+
+sprite inset 7 7 slice=3
+.KKKKK.
+KKKKKKK
+KKDDDHK
+KKDDDHK
+KKDDDHK
+KKHHHHK
+.KKKKK.
+
+sprite window 7 7 slice=3
+.KKKKK.
+KLLLLLK
+KLDDDHK
+KLDDDHK
+KLDDDHK
+KLHHHHK
+.KKKKK.
+
+sprite title_bar 5 5 slice=2
+.VVV.
+VVVVV
+vvvvv
+vvvvv
+.KKK.
+
+sprite button 7 7 slice=3
+.KKKKK.
+KMMMMMK
+KMHHHPK
+KMHHHPK
+KMHHHPK
+KPPPPPK
+.KKKKK.
+
+sprite button_hover 7 7 slice=3
+.KKKKK.
+KTTTTTK
+KTLLLHK
+KTLLLHK
+KTLLLHK
+KHHHHHK
+.KKKKK.
+
+sprite button_down 7 7 slice=3
+.KKKKK.
+KPPPPPK
+KPHHHHK
+KPHHHHK
+KPHHHHK
+KHHHHHK
+.KKKKK.
+
+sprite button_disabled 7 7 slice=3
+.KKKKK.
+KPPPPPK
+KPPPPPK
+KPPPPPK
+KPPPPPK
+KPPPPPK
+.KKKKK.
+
+sprite button_primary 7 7 slice=3
+.KKKKK.
+KYYYYYK
+KYOOOBK
+KYOOOBK
+KYOOOBK
+KBBBBBK
+.KKKKK.
+
+sprite button_primary_hover 7 7 slice=3
+.KKKKK.
+KTTTTTK
+KTYYYOK
+KTYYYOK
+KTYYYOK
+KOOOOOK
+.KKKKK.
+
+sprite button_primary_down 7 7 slice=3
+.KKKKK.
+KBBBBBK
+KBOOOOK
+KBOOOOK
+KBOOOOK
+KOOOOOK
+.KKKKK.
+
+sprite button_danger 7 7 slice=3
+.KKKKK.
+KRRRRRK
+KRrrrvK
+KRrrrvK
+KRrrrvK
+KvvvvvK
+.KKKKK.
+
+sprite button_danger_hover 7 7 slice=3
+.KKKKK.
+KTTTTTK
+KTRRRrK
+KTRRRrK
+KTRRRrK
+KrrrrrK
+.KKKKK.
+
+sprite button_danger_down 7 7 slice=3
+.KKKKK.
+KvvvvvK
+KvrrrrK
+KvrrrrK
+KvrrrrK
+KrrrrrK
+.KKKKK.
+
+sprite tab 7 7 slice=3
+.KKKKK.
+KPPPPPK
+KPDDDPK
+KPDDDPK
+KPDDDPK
+KPDDDPK
+KKKKKKK
+
+sprite tab_hover 7 7 slice=3
+.KKKKK.
+KHHHHHK
+KHDDDHK
+KHDDDHK
+KHDDDHK
+KHDDDHK
+KKKKKKK
+
+sprite tab_active 7 7 slice=3
+.KKKKK.
+KHHHHHK
+KHPPPDK
+KHPPPDK
+KHPPPDK
+KHPPPDK
+KHPPPDK
+
+sprite list_hover 5 5 slice=2
+.HHH.
+HHHHH
+HHHHH
+HHHHH
+.HHH.
+
+sprite list_selected 5 5 slice=2
+.CCC.
+CcccC
+CcccC
+CcccC
+.CCC.
+
+sprite scroll_thumb 5 5 slice=2
+.KKK.
+KMMMK
+KMHPK
+KMPPK
+.KKK.
+
+sprite scroll_thumb_hover 5 5 slice=2
+.KKK.
+KTTTK
+KTLHK
+KTHHK
+.KKK.
+
+sprite toast_info 7 7 slice=3
+.KKKKK.
+KCCCCCK
+KCPPPcK
+KCPPPcK
+KCPPPcK
+KcccccK
+.KKKKK.
+
+sprite toast_reward 7 7 slice=3
+.KKKKK.
+KYYYYYK
+KYPPPOK
+KYPPPOK
+KYPPPOK
+KOOOOOK
+.KKKKK.
+
+sprite toast_success 7 7 slice=3
+.KKKKK.
+KGGGGGK
+KGPPPgK
+KGPPPgK
+KGPPPgK
+KgggggK
+.KKKKK.
+
+sprite toast_danger 7 7 slice=3
+.KKKKK.
+KRRRRRK
+KRPPPrK
+KRPPPrK
+KRPPPrK
+KrrrrrK
+.KKKKK.

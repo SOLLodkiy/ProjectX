@@ -7,6 +7,10 @@
     <UseWPF>true</UseWPF>
     <!-- WinForms нужен только для значка в трее. -->
     <UseWindowsForms>true</UseWindowsForms>
+    <ApplicationIcon>$(RepoRoot)assets\app.ico</ApplicationIcon>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <!-- WFO0003 относится к приложениям WinForms. Здесь интерфейс на WPF, и масштаб задаётся в манифесте. -->
+    <NoWarn>$(NoWarn);WFO0003</NoWarn>
     <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
     <PublishSelfContained>true</PublishSelfContained>
   </PropertyGroup>
@@ -28,6 +32,12 @@
   <ItemGroup>
     <Content Include="$(RepoRoot)data\**\*"
              Link="data\%(RecursiveDir)%(Filename)%(Extension)"
+             CopyToOutputDirectory="PreserveNewest"
+             CopyToPublishDirectory="PreserveNewest" />
+    <!-- Исходники спрайтов в программу не входят: нужны только собранные ресурсы. -->
+    <Content Include="$(RepoRoot)assets\**\*"
+             Exclude="$(RepoRoot)assets\src\**\*"
+             Link="assets\%(RecursiveDir)%(Filename)%(Extension)"
              CopyToOutputDirectory="PreserveNewest"
              CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>

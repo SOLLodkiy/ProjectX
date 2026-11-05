@@ -1,0 +1,25 @@
+{
+  // Единая палитра интерфейса и спрайтов. key — символ цвета в assets/src/sprites/*.txt.
+  "colors": [
+    { "name": "ink", "key": "K", "hex": "#14121F" },
+    { "name": "night", "key": "D", "hex": "#1F1B33" },
+    { "name": "panel", "key": "P", "hex": "#2B2647" },
+    { "name": "panelHi", "key": "H", "hex": "#3D3663" },
+    { "name": "line", "key": "L", "hex": "#5A5289" },
+    { "name": "mist", "key": "M", "hex": "#A89FC4" },
+    { "name": "text", "key": "T", "hex": "#F4EFE0" },
+    { "name": "white", "key": "W", "hex": "#FFFFFF" },
+    { "name": "gold", "key": "Y", "hex": "#FFCF4A" },
+    { "name": "amber", "key": "O", "hex": "#F09A27" },
+    { "name": "bronze", "key": "B", "hex": "#8F4A1A" },
+    { "name": "green", "key": "G", "hex": "#5FD068" },
+    { "name": "greenDark", "key": "g", "hex": "#2C8F59" },
+    { "name": "red", "key": "R", "hex": "#FF5A5F" },
+    { "name": "redDark", "key": "r", "hex": "#A82A4E" },
+    { "name": "blue", "key": "C", "hex": "#4FB3FF" },
+    { "name": "blueDark", "key": "c", "hex": "#2A5FC4" },
+    { "name": "violet", "key": "V", "hex": "#9B5DE5" },
+    { "name": "violetDark", "key": "v", "hex": "#5B2FA8" },
+    { "name": "pink", "key": "N", "hex": "#FF7AC6" }
+  ]
+}

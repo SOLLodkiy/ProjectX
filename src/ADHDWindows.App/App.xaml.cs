@@ -1,5 +1,7 @@
+using System.IO;
 using System.Windows;
 using System.Windows.Threading;
+using ADHDWindows.App.Design;
 using ADHDWindows.Core.Hosting;
 using ADHDWindows.Core.Logging;
 using ADHDWindows.Platform;
@@ -12,6 +14,7 @@ public partial class App : Application
     private SingleInstanceGuard? _instanceGuard;
     private GameHost? _host;
     private TrayIcon? _tray;
+    private ShowcaseWindow? _showcase;
 
     protected override void OnStartup(StartupEventArgs e)
     {
@@ -36,7 +39,45 @@ public partial class App : Application
         log.Info($"Запуск, режим разработчика: {options.DeveloperMode}");
         _host = new GameHost(paths, options, log);
         _host.Start();
-        _tray = new TrayIcon(_host.Texts, options.DeveloperMode, onExit: () => Shutdown());
+
+        var designReady = InstallDesignSystem(paths, log);
+        _tray = new TrayIcon(
+            _host.Texts,
+            Path.Combine(paths.AssetsDir, "app.ico"),
+            designReady ? OpenShowcase : null,
+            options.DeveloperMode,
+            onExit: () => Shutdown());
+
+        if (designReady && options.OpenShowcase)
+        {
+            OpenShowcase();
+        }
+    }
+
+    private bool InstallDesignSystem(AppPaths paths, FileLog log)
+    {
+        try
+        {
+            PixelAssets.Install(Resources, paths.AssetsDir, _host!.Texts);
+            return true;
+        }
+        catch (Exception exception) when (exception is IOException or FormatException or UnauthorizedAccessException)
+        {
+            log.Error("Не удалось загрузить ресурсы интерфейса", exception);
+            return false;
+        }
+    }
+
+    private void OpenShowcase()
+    {
+        if (_showcase is null)
+        {
+            _showcase = new ShowcaseWindow();
+            _showcase.Closed += (_, _) => _showcase = null;
+            _showcase.Show();
+        }
+
+        _showcase.Activate();
     }
 
     protected override void OnExit(ExitEventArgs e)

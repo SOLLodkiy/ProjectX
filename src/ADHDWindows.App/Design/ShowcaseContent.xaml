@@ -1,0 +1,96 @@
+<UserControl x:Class="ADHDWindows.App.Design.ShowcaseContent"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="clr-namespace:ADHDWindows.App.Design">
+    <Grid>
+        <TabControl x:Name="Tabs" Width="340" Height="244">
+
+            <TabItem Header="{d:T showcase.tab.basics}">
+                <StackPanel>
+                    <d:PixelText Text="{d:T showcase.palette}" Style="{StaticResource Text.Title}" Margin="0,0,0,4" />
+                    <d:PixelFrame Sprite="inset" Padding="3,3,2,2" Margin="0,0,0,6">
+                        <WrapPanel x:Name="PaletteRow" />
+                    </d:PixelFrame>
+
+                    <d:PixelText Text="{d:T showcase.type}" Style="{StaticResource Text.Title}" Margin="0,0,0,4" />
+                    <d:PixelFrame Style="{StaticResource Inset}" Margin="0,0,0,6">
+                        <StackPanel>
+                            <d:PixelText Text="{d:T showcase.type.sample}" Wrap="True" />
+                            <d:PixelText Text="{d:T showcase.type.caps}" Wrap="True" Margin="0,2,0,0" />
+                            <d:PixelText Text="{d:T showcase.type.digits}" Margin="0,2,0,0"
+                                         Style="{StaticResource Text.Dim}" />
+                        </StackPanel>
+                    </d:PixelFrame>
+
+                    <d:PixelText Text="{d:T showcase.sprites}" Style="{StaticResource Text.Title}" Margin="0,0,0,4" />
+                    <WrapPanel x:Name="SpriteRow" />
+                </StackPanel>
+            </TabItem>
+
+            <TabItem Header="{d:T showcase.tab.components}">
+                <DockPanel>
+                    <StackPanel DockPanel.Dock="Left" Width="150" Margin="0,0,6,0">
+                        <d:PixelText Text="{d:T showcase.buttons}" Style="{StaticResource Text.Title}" Margin="0,0,0,4" />
+                        <WrapPanel Margin="0,0,0,6">
+                            <d:PixelButton Content="{d:T showcase.button.normal}" Margin="0,0,3,3" />
+                            <d:PixelButton Content="{d:T showcase.button.primary}" Kind="Primary" Margin="0,0,3,3" />
+                            <d:PixelButton Content="{d:T showcase.button.danger}" Kind="Danger" Margin="0,0,3,3" />
+                            <d:PixelButton Content="{d:T showcase.button.disabled}" IsEnabled="False" Margin="0,0,3,3" />
+                        </WrapPanel>
+                        <d:PixelText Text="{d:T showcase.panels}" Style="{StaticResource Text.Title}" Margin="0,0,0,4" />
+                        <d:PixelFrame Style="{StaticResource Panel}" Margin="0,0,0,4">
+                            <d:PixelText Text="{d:T showcase.panel.text}" Wrap="True" />
+                        </d:PixelFrame>
+                        <d:PixelFrame Style="{StaticResource Inset}">
+                            <d:PixelText Text="{d:T showcase.inset.text}" Wrap="True" Style="{StaticResource Text.Dim}" />
+                        </d:PixelFrame>
+                    </StackPanel>
+                    <DockPanel>
+                        <d:PixelText DockPanel.Dock="Top" Text="{d:T showcase.list}"
+                                     Style="{StaticResource Text.Title}" Margin="0,0,0,4" />
+                        <ListBox x:Name="SampleList" />
+                    </DockPanel>
+                </DockPanel>
+            </TabItem>
+
+            <TabItem Header="{d:T showcase.tab.motion}">
+                <Grid>
+                    <StackPanel>
+                        <d:PixelText Text="{d:T showcase.toasts}" Style="{StaticResource Text.Title}" Margin="0,0,0,4" />
+                        <WrapPanel Margin="0,0,0,6">
+                            <d:PixelButton Content="{d:T showcase.toast.info}" Click="OnToastInfo" Margin="0,0,3,3" />
+                            <d:PixelButton Content="{d:T showcase.toast.reward}" Kind="Primary" Click="OnToastReward" Margin="0,0,3,3" />
+                            <d:PixelButton Content="{d:T showcase.toast.danger}" Kind="Danger" Click="OnToastDanger" Margin="0,0,3,3" />
+                        </WrapPanel>
+
+                        <d:PixelText Text="{d:T showcase.effects}" Style="{StaticResource Text.Title}" Margin="0,0,0,4" />
+                        <WrapPanel Margin="0,0,0,6">
+                            <d:PixelButton Content="{d:T showcase.effect.shake}" Click="OnShake" Margin="0,0,3,3" />
+                            <d:PixelButton Content="{d:T showcase.effect.flash}" Click="OnFlash" Margin="0,0,3,3" />
+                            <d:PixelButton Content="{d:T showcase.effect.coin}" Click="OnCoin" Margin="0,0,3,3" />
+                        </WrapPanel>
+
+                        <d:PixelFrame x:Name="EffectTarget" Style="{StaticResource Panel}" Width="150"
+                                      HorizontalAlignment="Left" Margin="0,0,0,6">
+                            <DockPanel>
+                                <d:PixelImage Sprite="coin" Margin="0,0,4,0" />
+                                <d:PixelText Text="{d:T showcase.effect.target}" VerticalAlignment="Center" />
+                            </DockPanel>
+                        </d:PixelFrame>
+
+                        <d:PixelText Text="{d:T showcase.scale}" Style="{StaticResource Text.Title}" Margin="0,0,0,4" />
+                        <StackPanel Orientation="Horizontal">
+                            <d:PixelButton Content="×1" Tag="1" Click="OnScale" Margin="0,0,3,0" />
+                            <d:PixelButton Content="×2" Tag="2" Click="OnScale" Margin="0,0,3,0" />
+                            <d:PixelButton Content="×3" Tag="3" Click="OnScale" Margin="0,0,6,0" />
+                            <d:PixelText x:Name="ScaleInfo" VerticalAlignment="Center"
+                                         Style="{StaticResource Text.Dim}" />
+                        </StackPanel>
+                    </StackPanel>
+                    <Canvas x:Name="EffectLayer" IsHitTestVisible="False" />
+                </Grid>
+            </TabItem>
+
+        </TabControl>
+    </Grid>
+</UserControl>

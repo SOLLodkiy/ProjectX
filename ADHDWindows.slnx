@@ -5,6 +5,9 @@
     <Project Path="src/ADHDWindows.Modules.Sample/ADHDWindows.Modules.Sample.csproj" />
     <Project Path="src/ADHDWindows.Platform/ADHDWindows.Platform.csproj" />
   </Folder>
+  <Folder Name="/tools/">
+    <Project Path="tools/ADHDWindows.AssetTool/ADHDWindows.AssetTool.csproj" />
+  </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/ADHDWindows.Tests/ADHDWindows.Tests.csproj" />
   </Folder>

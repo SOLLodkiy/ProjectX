@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net10.0-windows</TargetFramework>
     <IsPackable>false</IsPackable>
+    <UseWPF>true</UseWPF>
   </PropertyGroup>
 
   <ItemGroup>
@@ -13,11 +14,13 @@
 
   <ItemGroup>
     <Using Include="Xunit" />
+    <Using Include="System.IO" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\ADHDWindows.Core\ADHDWindows.Core.csproj" />
     <ProjectReference Include="..\..\src\ADHDWindows.Platform\ADHDWindows.Platform.csproj" />
+    <ProjectReference Include="..\..\src\ADHDWindows.App\ADHDWindows.App.csproj" />
     <!-- Тестовый модуль загружается из файла, как в программе, поэтому сборка не подключается. -->
     <ProjectReference Include="..\..\src\ADHDWindows.Modules.Sample\ADHDWindows.Modules.Sample.csproj"
                       ReferenceOutputAssembly="false"
