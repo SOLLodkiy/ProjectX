@@ -1,0 +1,16 @@
+<Project>
+  <!-- Раскладывает собранный модуль в папку modules рядом с приложением. -->
+  <Target Name="DeployModuleToApp"
+          AfterTargets="Build"
+          Condition="'$(IsModuleProject)' == 'true'">
+    <PropertyGroup>
+      <ModuleDeployDir>$(RepoRoot)src\ADHDWindows.App\bin\$(Configuration)\net10.0-windows\modules\$(MSBuildProjectName)\</ModuleDeployDir>
+    </PropertyGroup>
+    <ItemGroup>
+      <ModuleOutputFile Include="$(OutDir)**\*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(ModuleOutputFile)"
+          DestinationFiles="@(ModuleOutputFile->'$(ModuleDeployDir)%(RecursiveDir)%(Filename)%(Extension)')"
+          SkipUnchangedFiles="true" />
+  </Target>
+</Project>

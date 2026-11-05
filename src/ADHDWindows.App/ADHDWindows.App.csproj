@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <AssemblyName>ADHDWindows</AssemblyName>
+    <UseWPF>true</UseWPF>
+    <!-- WinForms нужен только для значка в трее. -->
+    <UseWindowsForms>true</UseWindowsForms>
+    <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
+    <PublishSelfContained>true</PublishSelfContained>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Using Remove="System.Windows.Forms" />
+    <Using Remove="System.Drawing" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ADHDWindows.Core\ADHDWindows.Core.csproj" />
+    <ProjectReference Include="..\ADHDWindows.Platform\ADHDWindows.Platform.csproj" />
+    <!-- Только порядок сборки: приложение не знает о модулях, новый проект подхватывается по имени. -->
+    <ProjectReference Include="..\ADHDWindows.Modules.*\*.csproj"
+                      ReferenceOutputAssembly="false"
+                      Private="false" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="$(RepoRoot)data\**\*"
+             Link="data\%(RecursiveDir)%(Filename)%(Extension)"
+             CopyToOutputDirectory="PreserveNewest"
+             CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>

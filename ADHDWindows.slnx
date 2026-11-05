@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/ADHDWindows.App/ADHDWindows.App.csproj" />
+    <Project Path="src/ADHDWindows.Core/ADHDWindows.Core.csproj" />
+    <Project Path="src/ADHDWindows.Modules.Sample/ADHDWindows.Modules.Sample.csproj" />
+    <Project Path="src/ADHDWindows.Platform/ADHDWindows.Platform.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/ADHDWindows.Tests/ADHDWindows.Tests.csproj" />
+  </Folder>
+</Solution>
