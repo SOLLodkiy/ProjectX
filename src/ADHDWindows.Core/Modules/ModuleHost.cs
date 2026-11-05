@@ -2,6 +2,7 @@ using ADHDWindows.Core.Data;
 using ADHDWindows.Core.Economy;
 using ADHDWindows.Core.Events;
 using ADHDWindows.Core.Logging;
+using ADHDWindows.Core.Safety;
 using ADHDWindows.Core.Storage;
 
 namespace ADHDWindows.Core.Modules;
@@ -14,6 +15,7 @@ public sealed class ModuleHost(
     IEconomy economy,
     IKeyValueStore saves,
     IKeyValueStore settings,
+    RecoveryService recovery,
     ILog log,
     bool developerMode)
 {
@@ -31,7 +33,17 @@ public sealed class ModuleHost(
                 continue;
             }
 
-            var context = new ModuleContext(module.Id, events, data, texts, economy, saves, settings, log, developerMode);
+            var context = new ModuleContext(
+                module.Id,
+                events,
+                data,
+                texts,
+                economy,
+                saves,
+                settings,
+                recovery.For(module.Id),
+                log,
+                developerMode);
             try
             {
                 module.Start(context);

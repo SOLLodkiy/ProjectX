@@ -3,6 +3,7 @@ using ADHDWindows.Core.Economy;
 using ADHDWindows.Core.Events;
 using ADHDWindows.Core.Input;
 using ADHDWindows.Core.Modules;
+using ADHDWindows.Core.Safety;
 using ADHDWindows.Core.Storage;
 using ADHDWindows.Modules.Clicks;
 
@@ -22,7 +23,7 @@ public sealed class ClicksModuleTests : IDisposable
         var data = new GameData(_temp.Path, _log);
         var store = new JsonFileStore(_temp.Combine("store.json"), _log);
         _economy = new CoinEconomy(store, _bus, TimeProvider.System);
-        _host = new ModuleHost(_bus, data, new TextCatalog(data, "ru", _log), _economy, store, store, _log, developerMode: false);
+        _host = new ModuleHost(_bus, data, new TextCatalog(data, "ru", _log), _economy, store, store, new RecoveryService(new ChangeJournal(_temp.Combine("recovery.json"), _log), () => [], _log), _log, developerMode: false);
 
         // Модуль загружается из папки, как в программе.
         var modules = _temp.Combine("modules");

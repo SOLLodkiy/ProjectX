@@ -28,9 +28,6 @@ public sealed class MouseHook(Action<MouseButtonChanged> handler, ILog log) : ID
     public const uint LowerIntegrityInjectedFlag = 0x02;
 
     private const int MouseHookId = 14;
-    private const uint QuitMessage = 0x0012;
-    private const uint UserMessage = 0x0400;
-    private const uint NoRemove = 0;
 
     // Смещение поля flags в MSLLHOOKSTRUCT: POINT занимает 8 байт, mouseData 4.
     private const int FlagsOffset = 12;
@@ -92,7 +89,7 @@ public sealed class MouseHook(Action<MouseButtonChanged> handler, ILog log) : ID
         _stopped = true;
         if (_thread is not null)
         {
-            PostThreadMessageW(_threadId, QuitMessage, IntPtr.Zero, IntPtr.Zero);
+            NativeMessages.PostQuit(_threadId);
             _thread.Join();
         }
 
@@ -118,10 +115,8 @@ public sealed class MouseHook(Action<MouseButtonChanged> handler, ILog log) : ID
 
     private void Run(ManualResetEventSlim ready, Action<bool> report)
     {
-        _threadId = GetCurrentThreadId();
-
-        // Очередь сообщений создаётся при первом обращении, иначе сигнал остановки может потеряться.
-        PeekMessageW(out _, IntPtr.Zero, UserMessage, UserMessage, NoRemove);
+        _threadId = NativeMessages.GetCurrentThreadId();
+        NativeMessages.EnsureQueue();
 
         // Делегат хранится в поле: сборщик мусора не должен удалить его, пока им пользуется система.
         _callback = OnHook;
@@ -138,9 +133,9 @@ public sealed class MouseHook(Action<MouseButtonChanged> handler, ILog log) : ID
         ready.Set();
         log.Info("Хук мыши поставлен");
 
-        while (GetMessageW(out var message, IntPtr.Zero, 0, 0) > 0)
+        while (NativeMessages.GetMessageW(out var message, IntPtr.Zero, 0, 0) > 0)
         {
-            DispatchMessageW(ref message);
+            NativeMessages.DispatchMessageW(ref message);
         }
 
         UnhookWindowsHookEx(hook);
@@ -192,38 +187,8 @@ public sealed class MouseHook(Action<MouseButtonChanged> handler, ILog log) : ID
     [DllImport("user32.dll")]
     private static extern IntPtr CallNextHookEx(IntPtr hook, int code, IntPtr message, IntPtr data);
 
-    [DllImport("user32.dll")]
-    private static extern int GetMessageW(out NativeMessage message, IntPtr window, uint min, uint max);
-
-    [DllImport("user32.dll")]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    private static extern bool PeekMessageW(out NativeMessage message, IntPtr window, uint min, uint max, uint remove);
-
-    [DllImport("user32.dll")]
-    private static extern IntPtr DispatchMessageW(ref NativeMessage message);
-
-    [DllImport("user32.dll")]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    private static extern bool PostThreadMessageW(uint threadId, uint message, IntPtr wParam, IntPtr lParam);
-
-    [DllImport("kernel32.dll")]
-    private static extern uint GetCurrentThreadId();
-
     [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
     private static extern IntPtr GetModuleHandleW(string? name);
 
     private delegate IntPtr HookCallback(int code, IntPtr message, IntPtr data);
-
-    [StructLayout(LayoutKind.Sequential)]
-    private struct NativeMessage
-    {
-        public IntPtr Window;
-        public uint Message;
-        public IntPtr WParam;
-        public IntPtr LParam;
-        public uint Time;
-        public int X;
-        public int Y;
-        public uint Private;
-    }
 }

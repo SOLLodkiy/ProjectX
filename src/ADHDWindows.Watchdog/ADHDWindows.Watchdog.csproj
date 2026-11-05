@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <AssemblyName>ADHDWindows.Watchdog</AssemblyName>
+    <!-- Сторож всё время ждёт и должен занимать как можно меньше памяти. -->
+    <ConcurrentGarbageCollection>false</ConcurrentGarbageCollection>
+    <TieredPGO>false</TieredPGO>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ADHDWindows.Core\ADHDWindows.Core.csproj" />
+    <ProjectReference Include="..\ADHDWindows.Platform\ADHDWindows.Platform.csproj" />
+  </ItemGroup>
+
+</Project>

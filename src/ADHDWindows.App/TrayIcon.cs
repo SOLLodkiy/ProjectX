@@ -25,6 +25,7 @@ internal sealed class TrayIcon : IDisposable
             }
 
             menu.Items.Add(texts.Get("tray.grantCoins"), null, (_, _) => actions.OnGrantCoins());
+            menu.Items.Add(texts.Get("tray.recoveryProbe"), null, (_, _) => actions.OnRecoveryProbe());
             menu.Items.Add(new ToolStripSeparator());
         }
 
@@ -34,6 +35,7 @@ internal sealed class TrayIcon : IDisposable
             menu.Items.Add(new ToolStripSeparator());
         }
 
+        menu.Items.Add(new ToolStripMenuItem(texts.Get("tray.emergency", actions.EmergencyHotkey)) { Enabled = false });
         menu.Items.Add(texts.Get("tray.exit"), null, (_, _) => actions.OnExit());
 
         _icon = new NotifyIcon
@@ -99,4 +101,10 @@ internal sealed class TrayIcon : IDisposable
 }
 
 /// <summary>Что умеет меню трея. Значение null убирает пункт.</summary>
-internal sealed record TrayActions(HudSettings? Hud, Action? OnShowcase, Action OnGrantCoins, Action OnExit);
+internal sealed record TrayActions(
+    HudSettings? Hud,
+    Action? OnShowcase,
+    Action OnGrantCoins,
+    Action OnRecoveryProbe,
+    Action OnExit,
+    string EmergencyHotkey);

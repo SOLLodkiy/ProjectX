@@ -13,4 +13,19 @@
           DestinationFiles="@(ModuleOutputFile->'$(ModuleDeployDir)%(RecursiveDir)%(Filename)%(Extension)')"
           SkipUnchangedFiles="true" />
   </Target>
+
+  <!-- Сторож лежит в своей папке: у него свои файлы запуска, которые не должны смешиваться с файлами приложения. -->
+  <Target Name="DeployWatchdogToApp"
+          AfterTargets="Build"
+          Condition="'$(MSBuildProjectName)' == 'ADHDWindows.Watchdog'">
+    <PropertyGroup>
+      <WatchdogDeployDir>$(RepoRoot)src\ADHDWindows.App\bin\$(Configuration)\net10.0-windows\watchdog\</WatchdogDeployDir>
+    </PropertyGroup>
+    <ItemGroup>
+      <WatchdogOutputFile Include="$(OutDir)**\*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(WatchdogOutputFile)"
+          DestinationFiles="@(WatchdogOutputFile->'$(WatchdogDeployDir)%(RecursiveDir)%(Filename)%(Extension)')"
+          SkipUnchangedFiles="true" />
+  </Target>
 </Project>

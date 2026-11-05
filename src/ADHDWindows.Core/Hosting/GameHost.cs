@@ -3,6 +3,7 @@ using ADHDWindows.Core.Economy;
 using ADHDWindows.Core.Events;
 using ADHDWindows.Core.Logging;
 using ADHDWindows.Core.Modules;
+using ADHDWindows.Core.Safety;
 using ADHDWindows.Core.Storage;
 
 namespace ADHDWindows.Core.Hosting;
@@ -21,6 +22,7 @@ public sealed class GameHost : IDisposable
     private readonly JsonFileStore _settings;
     private readonly EventBus _events;
     private readonly CoinEconomy _economy;
+    private readonly RecoveryService _recovery;
     private readonly ModuleHost _modules;
     private Timer? _autosave;
     private bool _started;
@@ -35,7 +37,12 @@ public sealed class GameHost : IDisposable
         _economy = new CoinEconomy(_saves, _events, clock ?? TimeProvider.System);
         Data = new GameData(paths.DataDir, log);
         Texts = new TextCatalog(Data, DefaultLanguage, log);
-        _modules = new ModuleHost(_events, Data, Texts, _economy, _saves, _settings, log, options.DeveloperMode);
+        _recovery = new RecoveryService(
+            new ChangeJournal(paths.RecoveryPath, log),
+            () => ModuleLoader.LoadRestorers(paths.ModulesDir, log),
+            log,
+            clock);
+        _modules = new ModuleHost(_events, Data, Texts, _economy, _saves, _settings, _recovery, log, options.DeveloperMode);
     }
 
     public IEventBus Events => _events;
@@ -45,8 +52,12 @@ public sealed class GameHost : IDisposable
     public GameData Data { get; }
     public TextCatalog Texts { get; }
     public IReadOnlyList<IModule> RunningModules => _modules.Running;
+    public RecoveryService Recovery => _recovery;
 
-    public void Start()
+    /// <param name="beforeRecovery">
+    /// Вызывается, когда настройки уже прочитаны, но модули ещё не запущены: здесь запускается сторожевой процесс.
+    /// </param>
+    public void Start(Action? beforeRecovery = null)
     {
         if (_started)
         {
@@ -63,6 +74,10 @@ public sealed class GameHost : IDisposable
         var language = _settings.Get(LanguageSettingKey, DefaultLanguage) ?? DefaultLanguage;
         Texts.Use(language);
 
+        beforeRecovery?.Invoke();
+
+        // Изменения прошлого запуска, если сторож не смог их откатить. Модулям нужна чистая система.
+        _recovery.RestoreAll();
         _modules.Start(ModuleLoader.Load(_paths.ModulesDir, _log));
         _events.Publish(new AppStarted());
         _autosave = new Timer(_ => Save(), null, AutosaveInterval, AutosaveInterval);
@@ -88,6 +103,9 @@ public sealed class GameHost : IDisposable
         _autosave = null;
         _events.Publish(new AppStopping());
         _modules.StopAll();
+
+        // Изменения, которые модуль не снял сам, например из-за ошибки при остановке.
+        _recovery.RestoreSession(_recovery.Session);
         Save();
         _log.Info("Ядро остановлено");
     }

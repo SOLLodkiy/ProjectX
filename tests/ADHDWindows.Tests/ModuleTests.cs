@@ -3,6 +3,7 @@ using ADHDWindows.Core.Economy;
 using ADHDWindows.Core.Events;
 using ADHDWindows.Core.Hosting;
 using ADHDWindows.Core.Modules;
+using ADHDWindows.Core.Safety;
 using ADHDWindows.Core.Storage;
 
 namespace ADHDWindows.Tests;
@@ -19,7 +20,7 @@ public sealed class ModuleTests : IDisposable
         var data = new GameData(_temp.Path, _log);
         var store = new JsonFileStore(_temp.Combine("store.json"), _log);
         var economy = new CoinEconomy(store, bus, TimeProvider.System);
-        return new ModuleHost(bus, data, new TextCatalog(data, "ru", _log), economy, store, store, _log, developerMode: false);
+                return new ModuleHost(bus, data, new TextCatalog(data, "ru", _log), economy, store, store, new RecoveryService(new ChangeJournal(_temp.Combine("recovery.json"), _log), () => [], _log), _log, developerMode: false);
     }
 
     [Fact]
@@ -142,7 +143,7 @@ public sealed class ModuleTests : IDisposable
         var data = new GameData(_temp.Path, _log);
         var store = new JsonFileStore(_temp.Combine("store.json"), _log);
         var economy = new CoinEconomy(store, bus, TimeProvider.System);
-        var host = new ModuleHost(bus, data, new TextCatalog(data, "ru", _log), economy, store, store, _log, developerMode: true);
+        var host = new ModuleHost(bus, data, new TextCatalog(data, "ru", _log), economy, store, store, new RecoveryService(new ChangeJournal(_temp.Combine("recovery.json"), _log), () => [], _log), _log, developerMode: true);
         var module = new FakeModule("saver");
 
         host.Start([module]);
@@ -159,7 +160,7 @@ public sealed class ModuleTests : IDisposable
         var data = new GameData(_temp.Path, _log);
         var store = new JsonFileStore(_temp.Combine("store.json"), _log);
         var economy = new CoinEconomy(store, bus, TimeProvider.System);
-        var host = new ModuleHost(bus, data, new TextCatalog(data, "ru", _log), economy, store, store, _log, developerMode: false);
+        var host = new ModuleHost(bus, data, new TextCatalog(data, "ru", _log), economy, store, store, new RecoveryService(new ChangeJournal(_temp.Combine("recovery.json"), _log), () => [], _log), _log, developerMode: false);
         var module = new FakeModule("booster");
         host.Start([module]);
 

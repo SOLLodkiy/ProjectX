@@ -13,11 +13,14 @@ public sealed class FileLog : ILog
     private const int RetentionDays = 14;
 
     private readonly string _directory;
+    private readonly string _prefix;
     private readonly Lock _lock = new();
 
-    public FileLog(string directory)
+    /// <param name="prefix">Начало имени файла. Процессы пишут в разные файлы и не мешают друг другу.</param>
+    public FileLog(string directory, string prefix = "")
     {
         _directory = directory;
+        _prefix = prefix;
         try
         {
             Directory.CreateDirectory(directory);
@@ -40,7 +43,7 @@ public sealed class FileLog : ILog
     {
         var now = DateTime.Now;
         var line = $"{now:HH:mm:ss.fff} {level} {message}{Environment.NewLine}";
-        var path = Path.Combine(_directory, $"{now:yyyy-MM-dd}.log");
+        var path = Path.Combine(_directory, $"{_prefix}{now:yyyy-MM-dd}.log");
         lock (_lock)
         {
             try

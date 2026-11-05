@@ -2,6 +2,7 @@ using ADHDWindows.Core.Data;
 using ADHDWindows.Core.Economy;
 using ADHDWindows.Core.Events;
 using ADHDWindows.Core.Logging;
+using ADHDWindows.Core.Safety;
 using ADHDWindows.Core.Storage;
 
 namespace ADHDWindows.Core.Modules;
@@ -14,6 +15,7 @@ internal sealed class ModuleContext(
     IEconomy economy,
     IKeyValueStore saves,
     IKeyValueStore settings,
+    ISystemChanges changes,
     ILog log,
     bool developerMode) : IModuleContext
 {
@@ -26,6 +28,7 @@ internal sealed class ModuleContext(
     public IEconomy Economy => _economy;
     public IKeyValueStore Saves { get; } = new ScopedStore(saves, $"modules/{moduleId}");
     public IKeyValueStore Settings { get; } = new ScopedStore(settings, $"modules/{moduleId}");
+    public ISystemChanges Changes => changes;
     public ILog Log { get; } = new ScopedLog(log, moduleId);
     public bool DeveloperMode => developerMode;
 

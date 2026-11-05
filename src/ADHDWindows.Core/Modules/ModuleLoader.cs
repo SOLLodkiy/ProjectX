@@ -1,19 +1,28 @@
 using System.Reflection;
 using System.Runtime.Loader;
 using ADHDWindows.Core.Logging;
+using ADHDWindows.Core.Safety;
 
 namespace ADHDWindows.Core.Modules;
 
 /// <summary>Находит модули в папках modules/&lt;Имя&gt;/&lt;Имя&gt;.dll.</summary>
 public static class ModuleLoader
 {
-    public static IReadOnlyList<IModule> Load(string modulesDirectory, ILog log)
+    public static IReadOnlyList<IModule> Load(string modulesDirectory, ILog log) =>
+        LoadExports<IModule>(modulesDirectory, log);
+
+    /// <summary>Восстановители из сборок модулей. Сторожевой процесс получает их так же, как программа.</summary>
+    public static IReadOnlyList<ISystemRestorer> LoadRestorers(string modulesDirectory, ILog log) =>
+        LoadExports<ISystemRestorer>(modulesDirectory, log);
+
+    private static List<T> LoadExports<T>(string modulesDirectory, ILog log)
+        where T : class
     {
-        var modules = new List<IModule>();
+        var exports = new List<T>();
         if (!Directory.Exists(modulesDirectory))
         {
             log.Info($"Папка модулей не найдена: {modulesDirectory}");
-            return modules;
+            return exports;
         }
 
         foreach (var directory in Directory.GetDirectories(modulesDirectory).Order(StringComparer.Ordinal))
@@ -28,7 +37,7 @@ public static class ModuleLoader
 
             try
             {
-                modules.AddRange(CreateModules(assemblyPath));
+                exports.AddRange(CreateExports<T>(assemblyPath));
             }
             catch (Exception ex)
             {
@@ -36,16 +45,17 @@ public static class ModuleLoader
             }
         }
 
-        return modules;
+        return exports;
     }
 
-    private static List<IModule> CreateModules(string assemblyPath)
+    private static List<T> CreateExports<T>(string assemblyPath)
+        where T : class
     {
         var context = new ModuleLoadContext(assemblyPath);
         var assembly = context.LoadFromAssemblyPath(assemblyPath);
         return assembly.GetExportedTypes()
-            .Where(type => type is { IsClass: true, IsAbstract: false } && typeof(IModule).IsAssignableFrom(type))
-            .Select(type => (IModule)Activator.CreateInstance(type)!)
+            .Where(type => type is { IsClass: true, IsAbstract: false } && typeof(T).IsAssignableFrom(type))
+            .Select(type => (T)Activator.CreateInstance(type)!)
             .ToList();
     }
 

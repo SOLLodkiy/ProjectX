@@ -23,6 +23,10 @@
   <ItemGroup>
     <ProjectReference Include="..\ADHDWindows.Core\ADHDWindows.Core.csproj" />
     <ProjectReference Include="..\ADHDWindows.Platform\ADHDWindows.Platform.csproj" />
+    <!-- Сторож работает отдельным процессом, поэтому его сборка только раскладывается рядом. -->
+    <ProjectReference Include="..\ADHDWindows.Watchdog\ADHDWindows.Watchdog.csproj"
+                      ReferenceOutputAssembly="false"
+                      Private="false" />
     <!-- Только порядок сборки: приложение не знает о модулях, новый проект подхватывается по имени. -->
     <ProjectReference Include="..\ADHDWindows.Modules.*\*.csproj"
                       ReferenceOutputAssembly="false"

@@ -2,6 +2,7 @@ using ADHDWindows.Core.Data;
 using ADHDWindows.Core.Economy;
 using ADHDWindows.Core.Events;
 using ADHDWindows.Core.Logging;
+using ADHDWindows.Core.Safety;
 using ADHDWindows.Core.Storage;
 
 namespace ADHDWindows.Core.Modules;
@@ -39,6 +40,12 @@ public interface IModuleContext
 
     /// <summary>Настройки модуля, отдельные от других модулей.</summary>
     IKeyValueStore Settings { get; }
+
+    /// <summary>
+    /// Реестр изменений системы. Всё, что переживает завершение программы, записывается сюда до применения.
+    /// Для отката нужен <see cref="ISystemRestorer"/> в сборке модуля.
+    /// </summary>
+    ISystemChanges Changes { get; }
 
     ILog Log { get; }
     bool DeveloperMode { get; }

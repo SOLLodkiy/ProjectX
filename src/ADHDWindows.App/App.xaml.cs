@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Threading;
@@ -6,6 +7,7 @@ using ADHDWindows.App.Hud;
 using ADHDWindows.Core.Hosting;
 using ADHDWindows.Core.Hud;
 using ADHDWindows.Core.Logging;
+using ADHDWindows.Core.Safety;
 using ADHDWindows.Platform;
 
 namespace ADHDWindows.App;
@@ -14,27 +16,34 @@ public partial class App : Application
 {
     private const string DeveloperGrantSource = "developer";
     private const int DeveloperGrant = 1000;
+    private const string ManualProbeToken = "tray";
 
     private FileLog? _log;
     private SingleInstanceGuard? _instanceGuard;
     private GameHost? _host;
+    private WatchdogProcess? _watchdog;
+    private NamedSignal? _emergencyStop;
+    private NamedSignal? _hotkeyBusy;
+    private Hotkey _hotkey = Hotkey.Default;
     private MouseHook? _mouseHook;
     private TrayIcon? _tray;
     private HudWindow? _hud;
     private ShowcaseWindow? _showcase;
+    private bool _designReady;
 
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
 
-        var paths = AppPaths.ForCurrentUser();
+        var options = AppOptions.Parse(e.Args);
+        var paths = AppPaths.ForCurrentUser(options.UserDir);
         var log = new FileLog(paths.LogsDir);
         _log = log;
         DispatcherUnhandledException += OnDispatcherException;
         AppDomain.CurrentDomain.UnhandledException += OnDomainException;
         TaskScheduler.UnobservedTaskException += OnTaskException;
 
-        _instanceGuard = new SingleInstanceGuard(SingleInstanceGuard.ApplicationName);
+        _instanceGuard = new SingleInstanceGuard(SingleInstanceGuard.NameFor(options.UserDir));
         if (!_instanceGuard.TryAcquire())
         {
             log.Info("Программа уже запущена, вторая копия закрывается");
@@ -42,24 +51,25 @@ public partial class App : Application
             return;
         }
 
-        var options = AppOptions.Parse(e.Args);
         log.Info($"Запуск, режим разработчика: {options.DeveloperMode}");
         _host = new GameHost(paths, options, log);
-        _host.Start();
+        _host.Start(() => StartWatchdog(paths, log));
         _mouseHook = new MouseHook(_host.Events.Publish, log);
         _mouseHook.Start();
 
-        var designReady = InstallDesignSystem(paths, log);
-        var hudSettings = designReady ? new HudSettings(_host.Settings) : null;
+        _designReady = InstallDesignSystem(paths, log);
+        var hudSettings = _designReady ? new HudSettings(_host.Settings) : null;
         _tray = new TrayIcon(
             _host.Texts,
             Path.Combine(paths.AssetsDir, "app.ico"),
             options.DeveloperMode,
             new TrayActions(
                 hudSettings,
-                designReady ? OpenShowcase : null,
+                _designReady ? OpenShowcase : null,
                 () => _host.Economy.Earn(DeveloperGrantSource, DeveloperGrant),
-                () => Shutdown()));
+                () => _host.Events.Publish(new RecoveryProbeRequested(ManualProbeToken)),
+                () => Shutdown(),
+                _hotkey.ToString()));
 
         if (hudSettings is not null)
         {
@@ -67,11 +77,58 @@ public partial class App : Application
             _hud.Start();
         }
 
-        if (designReady && options.OpenShowcase)
+        if (_designReady && options.OpenShowcase)
         {
             OpenShowcase();
         }
+
+        if (options.RecoveryProbe is { } token)
+        {
+            _host.Events.Publish(new RecoveryProbeRequested(token));
+        }
     }
+
+    private void StartWatchdog(AppPaths paths, FileLog log)
+    {
+        _hotkey = Hotkey.FromSettings(_host!.Settings, log);
+        var session = _host.Recovery.Session;
+        _emergencyStop = new NamedSignal(ScopedName.EmergencyStop(session), OnEmergencyStop);
+        _hotkeyBusy = new NamedSignal(
+            ScopedName.HotkeyBusy(session),
+            () => ShowSafetyWarning("safety.hotkeyBusy", _hotkey));
+
+        using var current = Process.GetCurrentProcess();
+        _watchdog = new WatchdogProcess(
+            paths.WatchdogPath,
+            new WatchdogArguments(
+                current.Id,
+                current.StartTime.ToFileTimeUtc(),
+                session,
+                paths.InstallDir,
+                paths.UserDir,
+                _hotkey.ToString()),
+            log);
+        if (!_watchdog.Start())
+        {
+            ShowSafetyWarning("safety.noWatchdog");
+        }
+    }
+
+    /// <summary>Вызывается вне потока интерфейса: он может быть занят. Если он завис, программу завершит сторож.</summary>
+    private void OnEmergencyStop()
+    {
+        _log?.Warn("Аварийная остановка");
+        _host?.Save();
+        Dispatcher.BeginInvoke(() => Shutdown());
+    }
+
+    private void ShowSafetyWarning(string key, params object[] args) => Dispatcher.BeginInvoke(() =>
+    {
+        if (_designReady)
+        {
+            ToastManager.Show(ToastKind.Danger, _host!.Texts.Get($"{key}.title"), _host.Texts.Get($"{key}.text", args));
+        }
+    });
 
     private bool InstallDesignSystem(AppPaths paths, FileLog log)
     {
@@ -104,7 +161,10 @@ public partial class App : Application
         _mouseHook?.Dispose();
         _hud?.Dispose();
         _tray?.Dispose();
+        _watchdog?.Dispose();
         _host?.Dispose();
+        _emergencyStop?.Dispose();
+        _hotkeyBusy?.Dispose();
         _instanceGuard?.Dispose();
         base.OnExit(e);
     }
