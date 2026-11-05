@@ -1,0 +1,91 @@
+{
+  // Цены программ. Запись срабатывает, если совпали все поля хотя бы одного условия из match.
+  // Поля: company, product, original, description, package, path. Символ * заменяет любой текст.
+  // Имени файла здесь нет намеренно: переименование не должно менять цену или открывать программу.
+  "defaultPrice": 300,
+
+  // Слова в описании файла, по которым опознаётся установщик.
+  "installerWords": [ "setup", "install", "uninstall", "установ", "удален", "мастер настройки" ],
+
+  "programs": [
+    { "id": "notepad", "name": "Блокнот", "price": 50, "match": [
+      { "company": "Microsoft*", "original": "notepad.exe" },
+      { "package": "Microsoft.WindowsNotepad" } ] },
+    { "id": "calculator", "name": "Калькулятор", "price": 50, "match": [
+      { "company": "Microsoft*", "original": "calc.exe" },
+      { "package": "Microsoft.WindowsCalculator" } ] },
+    { "id": "paint", "name": "Paint", "price": 75, "match": [
+      { "company": "Microsoft*", "original": "mspaint.exe" },
+      { "package": "Microsoft.Paint" } ] },
+    { "id": "photos", "name": "Фотографии", "price": 75, "match": [
+      { "package": "Microsoft.Windows.Photos" } ] },
+
+    { "id": "word", "name": "Word", "price": 200, "match": [ { "company": "Microsoft*", "original": "WinWord.exe" } ] },
+    { "id": "excel", "name": "Excel", "price": 200, "match": [ { "company": "Microsoft*", "original": "Excel.exe" } ] },
+    { "id": "powerpoint", "name": "PowerPoint", "price": 200, "match": [ { "company": "Microsoft*", "original": "PowerPnt.exe" } ] },
+    { "id": "outlook", "name": "Outlook", "price": 150, "match": [ { "company": "Microsoft*", "original": "Outlook.exe" } ] },
+    { "id": "vscode", "name": "VS Code", "price": 250, "match": [ { "company": "Microsoft*", "product": "Visual Studio Code*" } ] },
+    { "id": "thunderbird", "name": "Thunderbird", "price": 150, "match": [ { "product": "Thunderbird" } ] },
+    { "id": "7zip", "name": "7-Zip", "price": 100, "match": [ { "product": "7-Zip" } ] },
+    { "id": "winrar", "name": "WinRAR", "price": 100, "match": [ { "product": "WinRAR*" } ] },
+    { "id": "acrobat", "name": "Adobe Acrobat", "price": 200, "match": [ { "company": "Adobe*", "product": "*Acrobat*" } ] },
+
+    { "id": "telegram", "name": "Telegram", "price": 500, "match": [ { "product": "Telegram Desktop" } ] },
+    { "id": "discord", "name": "Discord", "price": 500, "match": [ { "company": "Discord*" } ] },
+    { "id": "whatsapp", "name": "WhatsApp", "price": 500, "match": [
+      { "package": "5319275A.WhatsAppDesktop" },
+      { "company": "WhatsApp*" } ] },
+    { "id": "zoom", "name": "Zoom", "price": 400, "match": [ { "company": "Zoom*" } ] },
+    { "id": "skype", "name": "Skype", "price": 300, "match": [ { "product": "Skype*" } ] },
+
+    { "id": "spotify", "name": "Spotify", "price": 900, "match": [ { "company": "Spotify*" } ] },
+    { "id": "yandex-music", "name": "Яндекс Музыка", "price": 800, "match": [ { "product": "Яндекс Музыка" }, { "product": "Yandex Music" } ] },
+    { "id": "vlc", "name": "VLC", "price": 700, "match": [ { "product": "VLC media player" } ] },
+    { "id": "obs", "name": "OBS Studio", "price": 1000, "match": [ { "product": "OBS Studio" } ] },
+    { "id": "photoshop", "name": "Photoshop", "price": 1500, "match": [ { "company": "Adobe*", "product": "*Photoshop*" } ] },
+    { "id": "figma", "name": "Figma", "price": 1200, "match": [ { "company": "Figma*" } ] },
+    { "id": "blender", "name": "Blender", "price": 1200, "match": [ { "product": "Blender" } ] },
+
+    { "id": "steam", "name": "Steam", "price": 3000, "match": [ { "company": "Valve*", "product": "Steam*" } ] },
+    { "id": "epic-launcher", "name": "Epic Games Launcher", "price": 2500, "match": [ { "company": "Epic Games*", "product": "*Launcher*" } ] },
+    { "id": "battlenet", "name": "Battle.net", "price": 2500, "match": [ { "company": "Blizzard*", "product": "Battle.net*" } ] },
+    { "id": "ea-app", "name": "EA App", "price": 2500, "match": [ { "company": "Electronic Arts*", "product": "EA*" } ] }
+  ],
+
+  // Всегда бесплатное. Проверяется раньше цен. Папка Windows бесплатна сама, кроме программ с ценой выше.
+  "free": [
+    { "id": "claude", "match": [ { "company": "Anthropic*" }, { "package": "Claude" } ] },
+
+    { "id": "chrome", "match": [ { "company": "Google*", "product": "Google Chrome*" } ] },
+    { "id": "yandex-browser", "match": [ { "company": "YANDEX*", "product": "Yandex" } ] },
+    { "id": "edge", "match": [ { "company": "Microsoft*", "product": "Microsoft Edge*" } ] },
+    { "id": "firefox", "match": [ { "product": "Firefox*" } ] },
+
+    { "id": "windows-terminal", "match": [ { "package": "Microsoft.WindowsTerminal*" } ] },
+    { "id": "powershell", "match": [ { "company": "Microsoft*", "product": "PowerShell*" } ] },
+    { "id": "git-terminal", "match": [ { "product": "Git for Windows*" }, { "product": "MinTTY*" } ] },
+    { "id": "conemu", "match": [ { "product": "ConEmu*" } ] },
+    { "id": "alacritty", "match": [ { "product": "Alacritty" } ] },
+    { "id": "wezterm", "match": [ { "product": "WezTerm" } ] },
+
+    { "id": "windows-security", "match": [
+      { "path": "%ProgramFiles%\\Windows Defender\\*" },
+      { "package": "Microsoft.SecHealthUI" } ] },
+    { "id": "store-installer", "match": [
+      { "package": "Microsoft.DesktopAppInstaller" },
+      { "package": "Microsoft.WindowsStore" } ] },
+
+    { "id": "kaspersky", "match": [ { "company": "*Kaspersky*" } ] },
+    { "id": "eset", "match": [ { "company": "ESET*" } ] },
+    { "id": "drweb", "match": [ { "company": "Doctor Web*" } ] },
+    { "id": "avast", "match": [ { "company": "Avast*" }, { "company": "AVG*" } ] },
+    { "id": "bitdefender", "match": [ { "company": "Bitdefender*" } ] },
+    { "id": "norton", "match": [ { "company": "Norton*" }, { "company": "Symantec*" }, { "company": "McAfee*" } ] },
+    { "id": "malwarebytes", "match": [ { "company": "Malwarebytes*" } ] },
+
+    { "id": "nvidia", "match": [ { "company": "NVIDIA*" } ] },
+    { "id": "amd", "match": [ { "company": "Advanced Micro Devices*" }, { "company": "AMD*" } ] },
+    { "id": "intel", "match": [ { "company": "Intel*" } ] },
+    { "id": "realtek", "match": [ { "company": "Realtek*" } ] }
+  ]
+}

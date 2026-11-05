@@ -201,6 +201,7 @@ public sealed partial class EmergencyStopTests : IDisposable
         var settings = new JsonFileStore(new AppPaths(_temp.Path, UserDir).SettingsPath, _log);
         settings.Load();
         settings.Set(Hotkey.SettingKey, TestHotkey);
+        settings.Set("modules/locks/onlyUnder", _temp.Path);
         settings.Flush();
 
         var directory = Path.Combine(RepositoryRoot.Find(), "src", "ADHDWindows.App", "bin", Configuration, "net10.0-windows");

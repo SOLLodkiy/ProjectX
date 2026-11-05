@@ -22,6 +22,11 @@
     <ProjectReference Include="..\..\src\ADHDWindows.Platform\ADHDWindows.Platform.csproj" />
     <ProjectReference Include="..\..\src\ADHDWindows.App\ADHDWindows.App.csproj" />
     <ProjectReference Include="..\..\src\ADHDWindows.Modules.Clicks\ADHDWindows.Modules.Clicks.csproj" />
+    <ProjectReference Include="..\..\src\ADHDWindows.Modules.Locks\ADHDWindows.Modules.Locks.csproj" />
+    <!-- Отдельная программа: тесты запускают и замораживают её как процесс. -->
+    <ProjectReference Include="..\ADHDWindows.TestApp\ADHDWindows.TestApp.csproj"
+                      ReferenceOutputAssembly="false"
+                      Private="false" />
     <!-- Тестовый модуль загружается из файла, как в программе, поэтому сборка не подключается. -->
     <ProjectReference Include="..\..\src\ADHDWindows.Modules.Sample\ADHDWindows.Modules.Sample.csproj"
                       ReferenceOutputAssembly="false"

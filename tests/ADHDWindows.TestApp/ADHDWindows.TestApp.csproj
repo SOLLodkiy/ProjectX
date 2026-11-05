@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Безопасная программа для проверок блокировки: настоящие программы пользователя в тестах не замораживаются. -->
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <Company>ADHDWindows Tests</Company>
+    <Product>Lock Fixture</Product>
+    <AssemblyTitle>Lock Fixture</AssemblyTitle>
+  </PropertyGroup>
+
+</Project>

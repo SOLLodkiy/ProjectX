@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Threading;
 using ADHDWindows.App.Design;
 using ADHDWindows.App.Hud;
+using ADHDWindows.App.Locks;
 using ADHDWindows.Core.Hosting;
 using ADHDWindows.Core.Hud;
 using ADHDWindows.Core.Logging;
@@ -28,6 +29,7 @@ public partial class App : Application
     private MouseHook? _mouseHook;
     private TrayIcon? _tray;
     private HudWindow? _hud;
+    private LockScreen? _lockScreen;
     private ShowcaseWindow? _showcase;
     private bool _designReady;
 
@@ -53,6 +55,7 @@ public partial class App : Application
 
         log.Info($"Запуск, режим разработчика: {options.DeveloperMode}");
         _host = new GameHost(paths, options, log);
+        _lockScreen = new LockScreen(_host.Events, _host.Economy, _host.Texts, () => _designReady, Dispatcher);
         _host.Start(() => StartWatchdog(paths, log));
         _mouseHook = new MouseHook(_host.Events.Publish, log);
         _mouseHook.Start();
@@ -68,6 +71,7 @@ public partial class App : Application
                 _designReady ? OpenShowcase : null,
                 () => _host.Economy.Earn(DeveloperGrantSource, DeveloperGrant),
                 () => _host.Events.Publish(new RecoveryProbeRequested(ManualProbeToken)),
+                () => _lockScreen.Open(),
                 () => Shutdown(),
                 _hotkey.ToString()));
 
@@ -76,6 +80,9 @@ public partial class App : Application
             _hud = new HudWindow(_host.Economy, _host.Events, _host.Texts, hudSettings, log);
             _hud.Start();
         }
+
+        // Модуль мог заблокировать уже открытые программы раньше, чем загрузилась дизайн-система.
+        _lockScreen.Open();
 
         if (_designReady && options.OpenShowcase)
         {
@@ -159,6 +166,7 @@ public partial class App : Application
     protected override void OnExit(ExitEventArgs e)
     {
         _mouseHook?.Dispose();
+        _lockScreen?.Dispose();
         _hud?.Dispose();
         _tray?.Dispose();
         _watchdog?.Dispose();

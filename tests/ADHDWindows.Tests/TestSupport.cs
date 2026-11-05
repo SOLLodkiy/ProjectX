@@ -17,6 +17,10 @@ internal sealed class RecordingLog : ILog
 
 internal sealed class TempDirectory : IDisposable
 {
+    private const int DeleteAttempts = 20;
+
+    private static readonly TimeSpan DeleteDelay = TimeSpan.FromMilliseconds(100);
+
     public string Path { get; } = Directory.CreateTempSubdirectory("adhdwindows-tests-").FullName;
 
     public string Combine(params string[] parts) =>
@@ -24,13 +28,23 @@ internal sealed class TempDirectory : IDisposable
 
     public void Dispose()
     {
-        try
+        for (var attempt = 0; attempt < DeleteAttempts; attempt++)
         {
-            Directory.Delete(Path, recursive: true);
-        }
-        catch (UnauthorizedAccessException)
-        {
-            // Загруженная сборка модуля занята до конца процесса тестов.
+            try
+            {
+                Directory.Delete(Path, recursive: true);
+                return;
+            }
+            catch (UnauthorizedAccessException)
+            {
+                // Загруженная сборка модуля занята до конца процесса тестов.
+                return;
+            }
+            catch (IOException)
+            {
+                // Сторож ещё откатывает изменения завершённой программы и пишет файл.
+                Thread.Sleep(DeleteDelay);
+            }
         }
     }
 }
