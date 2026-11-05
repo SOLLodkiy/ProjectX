@@ -214,3 +214,19 @@ KRPPPrK
 KRPPPrK
 KrrrrrK
 .KKKKK.
+
+sprite grip 5 14
+MM.MM
+LL.LL
+.....
+MM.MM
+LL.LL
+.....
+MM.MM
+LL.LL
+.....
+MM.MM
+LL.LL
+.....
+MM.MM
+LL.LL

@@ -3,6 +3,8 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using ADHDWindows.App.Design;
+using ADHDWindows.App.Hud;
+using ADHDWindows.Core.Data;
 
 namespace ADHDWindows.Tests;
 
@@ -57,6 +59,25 @@ public class PixelRenderTests
     {
         var card = new ToastCard(kind, "Задание выполнено", "Вы получили 150 монеток, поздравляем!", "coin");
         AssertCrisp(card, 1.5, 3, $"toast-{kind}");
+    });
+
+    [Theory]
+    [InlineData(1.0, 2)]
+    [InlineData(1.25, 3)]
+    [InlineData(1.5, 3)]
+    public void Hud_stays_on_the_pixel_grid(double dpiScale, int devicePixels) => WpfThread.Run(() =>
+    {
+        var bar = new HudBar();
+        bar.ShowBalance(123_456_789);
+        AssertCrisp(bar, dpiScale, devicePixels, "hud-bar");
+
+        var data = new GameData(Path.Combine(RepositoryRoot.Find(), "data"), new RecordingLog());
+        data.Load();
+        var texts = new TextCatalog(data, "ru", new RecordingLog());
+        texts.Use("ru");
+        var panel = new HudPanel(texts);
+        panel.Show(123_456_789, 1250, "Сильная гравитация", null);
+        AssertCrisp(panel, dpiScale, devicePixels, "hud-panel");
     });
 
     [Fact]

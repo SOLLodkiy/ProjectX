@@ -2,7 +2,9 @@ using System.IO;
 using System.Windows;
 using System.Windows.Threading;
 using ADHDWindows.App.Design;
+using ADHDWindows.App.Hud;
 using ADHDWindows.Core.Hosting;
+using ADHDWindows.Core.Hud;
 using ADHDWindows.Core.Logging;
 using ADHDWindows.Platform;
 
@@ -10,10 +12,14 @@ namespace ADHDWindows.App;
 
 public partial class App : Application
 {
+    private const string DeveloperGrantSource = "developer";
+    private const int DeveloperGrant = 1000;
+
     private FileLog? _log;
     private SingleInstanceGuard? _instanceGuard;
     private GameHost? _host;
     private TrayIcon? _tray;
+    private HudWindow? _hud;
     private ShowcaseWindow? _showcase;
 
     protected override void OnStartup(StartupEventArgs e)
@@ -41,12 +47,22 @@ public partial class App : Application
         _host.Start();
 
         var designReady = InstallDesignSystem(paths, log);
+        var hudSettings = designReady ? new HudSettings(_host.Settings) : null;
         _tray = new TrayIcon(
             _host.Texts,
             Path.Combine(paths.AssetsDir, "app.ico"),
-            designReady ? OpenShowcase : null,
             options.DeveloperMode,
-            onExit: () => Shutdown());
+            new TrayActions(
+                hudSettings,
+                designReady ? OpenShowcase : null,
+                () => _host.Economy.Earn(DeveloperGrantSource, DeveloperGrant),
+                () => Shutdown()));
+
+        if (hudSettings is not null)
+        {
+            _hud = new HudWindow(_host.Economy, _host.Events, _host.Texts, hudSettings, log);
+            _hud.Start();
+        }
 
         if (designReady && options.OpenShowcase)
         {
@@ -82,6 +98,7 @@ public partial class App : Application
 
     protected override void OnExit(ExitEventArgs e)
     {
+        _hud?.Dispose();
         _tray?.Dispose();
         _host?.Dispose();
         _instanceGuard?.Dispose();

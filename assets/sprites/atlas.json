@@ -173,8 +173,18 @@
       "frames": 1
     },
     {
-      "name": "close",
+      "name": "grip",
       "x": 102,
+      "y": 33,
+      "width": 5,
+      "height": 14,
+      "slice": 0,
+      "fps": 0,
+      "frames": 1
+    },
+    {
+      "name": "close",
+      "x": 108,
       "y": 33,
       "width": 9,
       "height": 9,
@@ -184,7 +194,7 @@
     },
     {
       "name": "button",
-      "x": 112,
+      "x": 118,
       "y": 33,
       "width": 7,
       "height": 7,
@@ -194,7 +204,7 @@
     },
     {
       "name": "button_danger",
-      "x": 120,
+      "x": 126,
       "y": 33,
       "width": 7,
       "height": 7,
@@ -204,7 +214,7 @@
     },
     {
       "name": "button_danger_down",
-      "x": 128,
+      "x": 134,
       "y": 33,
       "width": 7,
       "height": 7,
@@ -214,7 +224,7 @@
     },
     {
       "name": "button_danger_hover",
-      "x": 136,
+      "x": 142,
       "y": 33,
       "width": 7,
       "height": 7,
@@ -224,7 +234,7 @@
     },
     {
       "name": "button_disabled",
-      "x": 144,
+      "x": 150,
       "y": 33,
       "width": 7,
       "height": 7,
@@ -234,7 +244,7 @@
     },
     {
       "name": "button_down",
-      "x": 152,
+      "x": 158,
       "y": 33,
       "width": 7,
       "height": 7,
@@ -244,7 +254,7 @@
     },
     {
       "name": "button_hover",
-      "x": 160,
+      "x": 166,
       "y": 33,
       "width": 7,
       "height": 7,
@@ -254,7 +264,7 @@
     },
     {
       "name": "button_primary",
-      "x": 168,
+      "x": 174,
       "y": 33,
       "width": 7,
       "height": 7,
@@ -264,7 +274,7 @@
     },
     {
       "name": "button_primary_down",
-      "x": 176,
+      "x": 182,
       "y": 33,
       "width": 7,
       "height": 7,
@@ -274,7 +284,7 @@
     },
     {
       "name": "button_primary_hover",
-      "x": 184,
+      "x": 190,
       "y": 33,
       "width": 7,
       "height": 7,
@@ -284,7 +294,7 @@
     },
     {
       "name": "inset",
-      "x": 192,
+      "x": 198,
       "y": 33,
       "width": 7,
       "height": 7,
@@ -294,7 +304,7 @@
     },
     {
       "name": "panel",
-      "x": 200,
+      "x": 206,
       "y": 33,
       "width": 7,
       "height": 7,
@@ -304,7 +314,7 @@
     },
     {
       "name": "tab",
-      "x": 208,
+      "x": 214,
       "y": 33,
       "width": 7,
       "height": 7,
@@ -314,7 +324,7 @@
     },
     {
       "name": "tab_active",
-      "x": 216,
+      "x": 222,
       "y": 33,
       "width": 7,
       "height": 7,
@@ -324,7 +334,7 @@
     },
     {
       "name": "tab_hover",
-      "x": 224,
+      "x": 230,
       "y": 33,
       "width": 7,
       "height": 7,
@@ -334,7 +344,7 @@
     },
     {
       "name": "toast_danger",
-      "x": 232,
+      "x": 238,
       "y": 33,
       "width": 7,
       "height": 7,
@@ -344,7 +354,7 @@
     },
     {
       "name": "toast_info",
-      "x": 240,
+      "x": 246,
       "y": 33,
       "width": 7,
       "height": 7,
@@ -354,16 +364,6 @@
     },
     {
       "name": "toast_reward",
-      "x": 248,
-      "y": 33,
-      "width": 7,
-      "height": 7,
-      "slice": 3,
-      "fps": 0,
-      "frames": 1
-    },
-    {
-      "name": "toast_success",
       "x": 0,
       "y": 50,
       "width": 7,
@@ -373,7 +373,7 @@
       "frames": 1
     },
     {
-      "name": "window",
+      "name": "toast_success",
       "x": 8,
       "y": 50,
       "width": 7,
@@ -383,8 +383,18 @@
       "frames": 1
     },
     {
-      "name": "list_hover",
+      "name": "window",
       "x": 16,
+      "y": 50,
+      "width": 7,
+      "height": 7,
+      "slice": 3,
+      "fps": 0,
+      "frames": 1
+    },
+    {
+      "name": "list_hover",
+      "x": 24,
       "y": 50,
       "width": 5,
       "height": 5,
@@ -394,7 +404,7 @@
     },
     {
       "name": "list_selected",
-      "x": 22,
+      "x": 30,
       "y": 50,
       "width": 5,
       "height": 5,
@@ -404,7 +414,7 @@
     },
     {
       "name": "scroll_thumb",
-      "x": 28,
+      "x": 36,
       "y": 50,
       "width": 5,
       "height": 5,
@@ -414,7 +424,7 @@
     },
     {
       "name": "scroll_thumb_hover",
-      "x": 34,
+      "x": 42,
       "y": 50,
       "width": 5,
       "height": 5,
@@ -424,7 +434,7 @@
     },
     {
       "name": "title_bar",
-      "x": 40,
+      "x": 48,
       "y": 50,
       "width": 5,
       "height": 5,

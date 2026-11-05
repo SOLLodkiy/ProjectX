@@ -51,20 +51,23 @@ public static class PixelAnimations
     }
 
     /// <summary>Вылет спрайта вверх с исчезновением: так показывается начисление.</summary>
-    public static void FlyUp(Canvas layer, string sprite, Point from, int height = 24)
+    public static void FlyUp(Canvas layer, string sprite, Point from, int height = 24) =>
+        FlyUp(layer, new PixelImage { Sprite = sprite, IsHitTestVisible = false }, from, height);
+
+    /// <summary>Вылет произвольного элемента. Отрицательная <paramref name="height"/> направляет его вниз.</summary>
+    public static void FlyUp(Canvas layer, UIElement element, Point from, int height)
     {
-        var image = new PixelImage { Sprite = sprite, IsHitTestVisible = false };
-        Canvas.SetLeft(image, Math.Round(from.X));
-        Canvas.SetTop(image, Math.Round(from.Y));
-        layer.Children.Add(image);
+        Canvas.SetLeft(element, Math.Round(from.X));
+        Canvas.SetTop(element, Math.Round(from.Y));
+        layer.Children.Add(element);
 
         var rise = Enumerable.Range(1, 8).Select(step => (double)(-height * step / 8));
-        Translate(image).BeginAnimation(TranslateTransform.YProperty, Steps(rise));
+        Translate(element).BeginAnimation(TranslateTransform.YProperty, Steps(rise));
 
         double[] fade = [1, 1, 1, 1, 1, 0.75, 0.5, 0];
         var animation = Steps(fade);
-        animation.Completed += (_, _) => layer.Children.Remove(image);
-        image.BeginAnimation(UIElement.OpacityProperty, animation);
+        animation.Completed += (_, _) => layer.Children.Remove(element);
+        element.BeginAnimation(UIElement.OpacityProperty, animation);
     }
 
     private static TranslateTransform Translate(UIElement element)

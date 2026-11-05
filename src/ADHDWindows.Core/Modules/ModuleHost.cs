@@ -1,4 +1,5 @@
 using ADHDWindows.Core.Data;
+using ADHDWindows.Core.Economy;
 using ADHDWindows.Core.Events;
 using ADHDWindows.Core.Logging;
 using ADHDWindows.Core.Storage;
@@ -10,6 +11,7 @@ public sealed class ModuleHost(
     IEventBus events,
     GameData data,
     TextCatalog texts,
+    IEconomy economy,
     IKeyValueStore saves,
     IKeyValueStore settings,
     ILog log,
@@ -29,7 +31,7 @@ public sealed class ModuleHost(
                 continue;
             }
 
-            var context = new ModuleContext(module.Id, events, data, texts, saves, settings, log, developerMode);
+            var context = new ModuleContext(module.Id, events, data, texts, economy, saves, settings, log, developerMode);
             try
             {
                 module.Start(context);

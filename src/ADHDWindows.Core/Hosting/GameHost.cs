@@ -1,4 +1,5 @@
 using ADHDWindows.Core.Data;
+using ADHDWindows.Core.Economy;
 using ADHDWindows.Core.Events;
 using ADHDWindows.Core.Logging;
 using ADHDWindows.Core.Modules;
@@ -19,23 +20,26 @@ public sealed class GameHost : IDisposable
     private readonly JsonFileStore _saves;
     private readonly JsonFileStore _settings;
     private readonly EventBus _events;
+    private readonly CoinEconomy _economy;
     private readonly ModuleHost _modules;
     private Timer? _autosave;
     private bool _started;
 
-    public GameHost(AppPaths paths, AppOptions options, ILog log)
+    public GameHost(AppPaths paths, AppOptions options, ILog log, TimeProvider? clock = null)
     {
         _paths = paths;
         _log = log;
         _saves = new JsonFileStore(paths.SavePath, log);
         _settings = new JsonFileStore(paths.SettingsPath, log);
         _events = new EventBus(log);
+        _economy = new CoinEconomy(_saves, _events, clock ?? TimeProvider.System);
         Data = new GameData(paths.DataDir, log);
         Texts = new TextCatalog(Data, DefaultLanguage, log);
-        _modules = new ModuleHost(_events, Data, Texts, _saves, _settings, log, options.DeveloperMode);
+        _modules = new ModuleHost(_events, Data, Texts, _economy, _saves, _settings, log, options.DeveloperMode);
     }
 
     public IEventBus Events => _events;
+    public IEconomy Economy => _economy;
     public IKeyValueStore Saves => _saves;
     public IKeyValueStore Settings => _settings;
     public GameData Data { get; }
@@ -54,6 +58,7 @@ public sealed class GameHost : IDisposable
         _settings.Load();
         _saves.Load();
         Data.Load();
+        _economy.Load();
 
         var language = _settings.Get(LanguageSettingKey, DefaultLanguage) ?? DefaultLanguage;
         Texts.Use(language);

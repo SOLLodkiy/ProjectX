@@ -1,4 +1,5 @@
 using ADHDWindows.Core.Data;
+using ADHDWindows.Core.Economy;
 using ADHDWindows.Core.Events;
 using ADHDWindows.Core.Logging;
 using ADHDWindows.Core.Storage;
@@ -29,6 +30,9 @@ public interface IModuleContext
     IEventBus Events { get; }
     GameData Data { get; }
     TextCatalog Texts { get; }
+
+    /// <summary>Кошелёк и формула дохода. Правки формулы ядро снимает при остановке модуля.</summary>
+    IEconomy Economy { get; }
 
     /// <summary>Игровое состояние модуля, отдельное от других модулей.</summary>
     IKeyValueStore Saves { get; }

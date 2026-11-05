@@ -1,4 +1,5 @@
 using ADHDWindows.Core.Data;
+using ADHDWindows.Core.Economy;
 using ADHDWindows.Core.Events;
 using ADHDWindows.Core.Hosting;
 using ADHDWindows.Core.Modules;
@@ -17,7 +18,8 @@ public sealed class ModuleTests : IDisposable
     {
         var data = new GameData(_temp.Path, _log);
         var store = new JsonFileStore(_temp.Combine("store.json"), _log);
-        return new ModuleHost(bus, data, new TextCatalog(data, "ru", _log), store, store, _log, developerMode: false);
+        var economy = new CoinEconomy(store, bus, TimeProvider.System);
+        return new ModuleHost(bus, data, new TextCatalog(data, "ru", _log), economy, store, store, _log, developerMode: false);
     }
 
     [Fact]
@@ -139,7 +141,8 @@ public sealed class ModuleTests : IDisposable
         var bus = new EventBus(_log);
         var data = new GameData(_temp.Path, _log);
         var store = new JsonFileStore(_temp.Combine("store.json"), _log);
-        var host = new ModuleHost(bus, data, new TextCatalog(data, "ru", _log), store, store, _log, developerMode: true);
+        var economy = new CoinEconomy(store, bus, TimeProvider.System);
+        var host = new ModuleHost(bus, data, new TextCatalog(data, "ru", _log), economy, store, store, _log, developerMode: true);
         var module = new FakeModule("saver");
 
         host.Start([module]);
@@ -147,6 +150,25 @@ public sealed class ModuleTests : IDisposable
 
         Assert.True(module.Context.DeveloperMode);
         Assert.Equal(5, store.Get<int>("modules/saver/value"));
+    }
+
+    [Fact]
+    public void Stopped_module_loses_its_income_modifiers()
+    {
+        var bus = new EventBus(_log);
+        var data = new GameData(_temp.Path, _log);
+        var store = new JsonFileStore(_temp.Combine("store.json"), _log);
+        var economy = new CoinEconomy(store, bus, TimeProvider.System);
+        var host = new ModuleHost(bus, data, new TextCatalog(data, "ru", _log), economy, store, store, _log, developerMode: false);
+        var module = new FakeModule("booster");
+        host.Start([module]);
+
+        module.Context!.Economy.AddModifier(new IncomeModifier(IncomeStep.Upgrade, 5m));
+        Assert.Equal(5m, economy.Preview("click", 1));
+
+        host.StopAll();
+
+        Assert.Equal(1m, economy.Preview("click", 1));
     }
 
     private sealed class FakeModule(
