@@ -21,6 +21,7 @@
     <ProjectReference Include="..\..\src\ADHDWindows.Core\ADHDWindows.Core.csproj" />
     <ProjectReference Include="..\..\src\ADHDWindows.Platform\ADHDWindows.Platform.csproj" />
     <ProjectReference Include="..\..\src\ADHDWindows.App\ADHDWindows.App.csproj" />
+    <ProjectReference Include="..\..\src\ADHDWindows.Modules.Clicks\ADHDWindows.Modules.Clicks.csproj" />
     <!-- Тестовый модуль загружается из файла, как в программе, поэтому сборка не подключается. -->
     <ProjectReference Include="..\..\src\ADHDWindows.Modules.Sample\ADHDWindows.Modules.Sample.csproj"
                       ReferenceOutputAssembly="false"

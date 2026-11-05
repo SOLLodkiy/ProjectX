@@ -18,6 +18,7 @@ public partial class App : Application
     private FileLog? _log;
     private SingleInstanceGuard? _instanceGuard;
     private GameHost? _host;
+    private MouseHook? _mouseHook;
     private TrayIcon? _tray;
     private HudWindow? _hud;
     private ShowcaseWindow? _showcase;
@@ -45,6 +46,8 @@ public partial class App : Application
         log.Info($"Запуск, режим разработчика: {options.DeveloperMode}");
         _host = new GameHost(paths, options, log);
         _host.Start();
+        _mouseHook = new MouseHook(_host.Events.Publish, log);
+        _mouseHook.Start();
 
         var designReady = InstallDesignSystem(paths, log);
         var hudSettings = designReady ? new HudSettings(_host.Settings) : null;
@@ -98,6 +101,7 @@ public partial class App : Application
 
     protected override void OnExit(ExitEventArgs e)
     {
+        _mouseHook?.Dispose();
         _hud?.Dispose();
         _tray?.Dispose();
         _host?.Dispose();

@@ -22,9 +22,12 @@ internal static class RepositoryRoot
     }
 
     /// <summary>Копирует собранный тестовый модуль в папку modules, как при установке.</summary>
-    public static void DeploySampleModule(string modulesDirectory)
+    public static void DeploySampleModule(string modulesDirectory) =>
+        DeployModule("ADHDWindows.Modules.Sample", modulesDirectory);
+
+    /// <summary>Копирует собранный модуль в папку modules, как при установке.</summary>
+    public static void DeployModule(string name, string modulesDirectory)
     {
-        const string name = "ADHDWindows.Modules.Sample";
         var output = Path.Combine(Find(), "src", name, "bin", Configuration, "net10.0");
         var target = Path.Combine(modulesDirectory, name);
         Directory.CreateDirectory(target);
