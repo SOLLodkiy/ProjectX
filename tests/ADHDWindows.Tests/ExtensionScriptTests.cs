@@ -17,6 +17,8 @@ public sealed class ExtensionScriptTests
             RedirectStandardError = true,
         };
         info.ArgumentList.Add("--test");
+        // С Node 23 отчёт по умолчанию — spec даже без терминала, а проверка ниже читает строки TAP.
+        info.ArgumentList.Add("--test-reporter=tap");
         info.ArgumentList.Add(script);
 
         Process process;
