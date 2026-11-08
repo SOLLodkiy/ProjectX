@@ -454,6 +454,14 @@ public sealed class QuestBoard : IDisposable
     private List<QuestView> ReplaceUnplayable()
     {
         var issued = new List<QuestView>();
+
+        // После перезапуска игры и покупки приходят из разных потоков в любом порядке.
+        // Пока не известен хотя бы один список, судить о сохранённом задании на игру рано.
+        if (_games is null || _unlockedGames is null)
+        {
+            return issued;
+        }
+
         var playable = PlayableLocked().Select(game => game.Key).ToHashSet(StringComparer.Ordinal);
         foreach (var state in _active.Values.ToList())
         {

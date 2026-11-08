@@ -361,6 +361,47 @@ public sealed class QuestBoardTests
         Assert.Equal(refresh, Quest(QuestTier.Hard).Refresh);
     }
 
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void Saved_game_quest_survives_a_restart_whichever_list_arrives_first(bool gamesFirst)
+    {
+        var game = new QuestTemplate("g", QuestTier.Hard, QuestTypes.Game, 10, 300, 300, "Поиграй в {game}", "trophy");
+        var bought = new CollectionChanged([new CollectionItem(Minecraft.Key, "Minecraft", LockKind.Game, 500, _clock.GetUtcNow())], []);
+        var board = Board(null, game, Clicks("c", QuestTier.Hard));
+        board.OnGames([Minecraft]);
+        board.OnCollection(bought);
+        for (var attempt = 0; attempt < 20 && _board!.Snapshot().FirstOrDefault()?.Template != "g"; attempt++)
+        {
+            board.RefreshAll();
+            board.Tick();
+        }
+
+        var id = Quest(QuestTier.Hard).Id;
+        Assert.Equal("g", Quest(QuestTier.Hard).Template);
+
+        // После перезапуска игры и покупки приходят из потоков модуля блокировки в любом порядке.
+        var restarted = Board(null, game, Clicks("c", QuestTier.Hard));
+        if (gamesFirst)
+        {
+            restarted.OnGames([Minecraft]);
+            Assert.Equal(id, Quest(QuestTier.Hard).Id);
+            restarted.OnCollection(bought);
+        }
+        else
+        {
+            restarted.OnCollection(bought);
+            Assert.Equal(id, Quest(QuestTier.Hard).Id);
+            restarted.OnGames([Minecraft]);
+        }
+
+        Assert.Equal(id, Quest(QuestTier.Hard).Id);
+
+        // Когда известны оба списка, задание на удалённую игру по-прежнему заменяется сразу.
+        restarted.OnGames([]);
+        Assert.NotEqual(id, Quest(QuestTier.Hard).Id);
+    }
+
     [Fact]
     public void Purchase_quests_count_spending_upgrades_and_unlocks_only_when_possible()
     {
