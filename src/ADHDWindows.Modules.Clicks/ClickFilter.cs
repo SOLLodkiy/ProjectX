@@ -4,7 +4,7 @@ namespace ADHDWindows.Modules.Clicks;
 
 public enum ClickVerdict
 {
-    /// <summary>Событие не является нажатием ЛКМ от устройства.</summary>
+    /// <summary>Событие не является нажатием своей кнопки от устройства.</summary>
     NotAClick,
 
     /// <summary>Кнопка уже нажата: такое нажатие не считается новым.</summary>
@@ -20,10 +20,10 @@ public enum ClickVerdict
 }
 
 /// <summary>
-/// Решает, засчитать ли клик. Не потокобезопасен: события должны приходить из одного потока по порядку.
+/// Решает, засчитать ли клик одной кнопкой. Не потокобезопасен: события должны приходить из одного потока по порядку.
 /// Время берётся только из событий, поэтому в тестах оно полностью управляемо.
 /// </summary>
-public sealed class ClickFilter
+public sealed class ClickFilter(MouseButton button = MouseButton.Left)
 {
     public const int MaxClicksPerSecond = 20;
 
@@ -49,7 +49,7 @@ public sealed class ClickFilter
     public ClickVerdict Process(MouseButtonChanged change)
     {
         // Синтетические события не меняют состояние: программа не может ни нажать кнопку за игрока, ни отпустить её.
-        if (change.Button != MouseButton.Left || change.Injected)
+        if (change.Button != button || change.Injected)
         {
             return ClickVerdict.NotAClick;
         }

@@ -7,6 +7,7 @@
     <Project Path="src/ADHDWindows.Modules.Locks/ADHDWindows.Modules.Locks.csproj" />
     <Project Path="src/ADHDWindows.Modules.Sample/ADHDWindows.Modules.Sample.csproj" />
     <Project Path="src/ADHDWindows.Modules.Time/ADHDWindows.Modules.Time.csproj" />
+    <Project Path="src/ADHDWindows.Modules.Upgrades/ADHDWindows.Modules.Upgrades.csproj" />
     <Project Path="src/ADHDWindows.Platform/ADHDWindows.Platform.csproj" />
     <Project Path="src/ADHDWindows.Watchdog/ADHDWindows.Watchdog.csproj" />
   </Folder>

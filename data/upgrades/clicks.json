@@ -1,0 +1,68 @@
+{
+  // Ветка магазина. Каждый файл в data/upgrades — одна ветка, порядок вкладок задаёт order.
+  // Запись улучшения: id — постоянный код покупки, effect и params — что делает улучшение,
+  // price — цена первого уровня, growth — во сколько раз дорожает каждый следующий, maxLevel — число уровней,
+  // requires — нужные уровни других улучшений: { "код": уровень }.
+  // Эффекты: income.bonus (amount монеток за уровень к базе источников source),
+  // income.multiplier (+percent процентов за уровень), clicks.button (button: right или middle начинает приносить монетки),
+  // time.completionBonus (+percent процентов к бонусу за досмотр за уровень).
+  // Источники дохода: click, click.right, click.middle, video, music, game.
+  "branch": { "id": "clicks", "name": "Клики", "icon": "cursor", "order": 1 },
+  "upgrades": [
+    {
+      "id": "clicks.left.plus",
+      "name": "Крепкий палец",
+      "description": "+1 монетка за каждый клик ЛКМ за уровень.",
+      "icon": "cursor",
+      "effect": "income.bonus",
+      "params": { "source": "click", "amount": 1 },
+      "price": 60,
+      "growth": 1.7,
+      "maxLevel": 10
+    },
+    {
+      "id": "clicks.right",
+      "name": "Правая рука",
+      "description": "Клики ПКМ тоже приносят монетку.",
+      "icon": "cursor",
+      "effect": "clicks.button",
+      "params": { "button": "right" },
+      "price": 150,
+      "requires": { "clicks.left.plus": 1 }
+    },
+    {
+      "id": "clicks.right.plus",
+      "name": "Крепкая правая",
+      "description": "+1 монетка за каждый клик ПКМ за уровень.",
+      "icon": "cursor",
+      "effect": "income.bonus",
+      "params": { "source": "click.right", "amount": 1 },
+      "price": 120,
+      "growth": 1.7,
+      "maxLevel": 5,
+      "requires": { "clicks.right": 1 }
+    },
+    {
+      "id": "clicks.middle",
+      "name": "Колёсико",
+      "description": "Нажатия средней кнопки мыши приносят монетку.",
+      "icon": "cursor",
+      "effect": "clicks.button",
+      "params": { "button": "middle" },
+      "price": 300,
+      "requires": { "clicks.right": 1 }
+    },
+    {
+      "id": "clicks.power",
+      "name": "Тяжёлая рука",
+      "description": "+25% к монеткам за клики всеми кнопками за уровень.",
+      "icon": "star",
+      "effect": "income.multiplier",
+      "params": { "source": [ "click", "click.right", "click.middle" ], "percent": 25 },
+      "price": 500,
+      "growth": 2,
+      "maxLevel": 5,
+      "requires": { "clicks.left.plus": 3 }
+    }
+  ]
+}

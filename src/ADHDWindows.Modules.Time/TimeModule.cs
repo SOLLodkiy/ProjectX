@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using ADHDWindows.Core.Media;
 using ADHDWindows.Core.Modules;
+using ADHDWindows.Core.Upgrades;
 using ADHDWindows.Platform;
 
 namespace ADHDWindows.Modules.Time;
@@ -21,6 +22,9 @@ public sealed class TimeModule : IModule
     /// «video.test=video, music.test=music». С ней же в журнал пишутся итоги каждого зачисления.
     /// </summary>
     public const string TestSitesSetting = "testSites";
+
+    /// <summary>Эффект улучшения: бонус за досмотр больше на <c>percent</c> процентов за уровень.</summary>
+    public const string CompletionBonusEffect = "time.completionBonus";
 
     private readonly ConcurrentQueue<Action> _queue = new();
     private readonly SemaphoreSlim _wake = new(0);
@@ -53,12 +57,18 @@ public sealed class TimeModule : IModule
         context.Events.Subscribe<BrowserMediaReported>(report => Enqueue(() => _rewards.OnBrowserMedia(report)));
         context.Events.Subscribe<InstalledGamesChanged>(change => Enqueue(() => _rewards.OnGames(change.Games)));
         context.Events.Subscribe<PresenceConfirmed>(_ => Enqueue(_rewards.ConfirmPresence));
+        context.Events.Subscribe<UpgradesChanged>(change =>
+        {
+            var extra = UpgradeEffects.Total(change.Owned, CompletionBonusEffect, "percent") / 100;
+            Enqueue(() => _rewards.ExtraCompletionBonus = extra);
+        });
 
         _worker = new Thread(Work) { IsBackground = true, Name = "Time" };
         _worker.Start();
 
         // Модуль блокировки мог запуститься раньше и уже разослать список игр.
         context.Events.Publish(new InstalledGamesRequested());
+        context.Events.Publish(new UpgradesRequested());
     }
 
     public void Stop()

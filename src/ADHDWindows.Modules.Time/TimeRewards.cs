@@ -40,6 +40,7 @@ public sealed class TimeRewards
     private static readonly TimeSpan StreamLifetime = TimeSpan.FromMinutes(30);
 
     private readonly TimeRules _rules;
+    private decimal _extraCompletionBonus;
     private readonly IEconomy _economy;
     private readonly IEventBus _events;
     private readonly ILog _log;
@@ -74,6 +75,15 @@ public sealed class TimeRewards
 
     /// <summary>Начисление за видео и игры остановлено до ответа «Я тут».</summary>
     public bool WaitingForPresence { get; private set; }
+
+    /// <summary>Прибавка к бонусу за досмотр от улучшений, доля от заработанного на ролике: 0,05 — ещё 5%.</summary>
+    public decimal ExtraCompletionBonus
+    {
+        get => _extraCompletionBonus;
+        set => _extraCompletionBonus = Math.Max(0, value);
+    }
+
+    private decimal CompletionBonus => _rules.CompletionBonus + _extraCompletionBonus;
 
     /// <summary>Накоплено и ещё не зачислено, для проверок.</summary>
     public decimal Pending(Activity activity) => _pending.GetValueOrDefault(activity);
@@ -265,14 +275,14 @@ public sealed class TimeRewards
                 // Последние секунды досмотренного ролика тоже получают бонус.
                 if (stream.Meter.Completed && !step.Completed)
                 {
-                    _pending[activity] = Pending(activity) + (earned * _rules.CompletionBonus);
+                    _pending[activity] = Pending(activity) + (earned * CompletionBonus);
                 }
             }
         }
 
         if (step.Completed && stream.Earned > 0)
         {
-            var bonus = stream.Earned * _rules.CompletionBonus;
+            var bonus = stream.Earned * CompletionBonus;
             _pending[activity] = Pending(activity) + bonus;
             _log.Info($"Досмотрено ({TimeRules.SourceOf(activity)}): бонус {bonus:0.##}");
         }

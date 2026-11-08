@@ -35,6 +35,7 @@ internal sealed class TrayIcon : IDisposable
             menu.Items.Add(new ToolStripSeparator());
         }
 
+        menu.Items.Add(texts.Get("tray.shop"), null, (_, _) => actions.OnShop());
         menu.Items.Add(texts.Get("tray.locks"), null, (_, _) => actions.OnLocks());
         menu.Items.Add(new ToolStripMenuItem(texts.Get("tray.emergency", actions.EmergencyHotkey)) { Enabled = false });
         menu.Items.Add(texts.Get("tray.exit"), null, (_, _) => actions.OnExit());
@@ -107,6 +108,7 @@ internal sealed record TrayActions(
     Action? OnShowcase,
     Action OnGrantCoins,
     Action OnRecoveryProbe,
+    Action OnShop,
     Action OnLocks,
     Action OnExit,
     string EmergencyHotkey);

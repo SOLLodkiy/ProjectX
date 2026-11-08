@@ -16,6 +16,9 @@ public sealed record AppStarted;
 
 public sealed record AppStopping;
 
+/// <summary>Важное изменение, например покупка: сохранение записывается на диск сразу, не дожидаясь автосохранения.</summary>
+public sealed record SaveRequested;
+
 public sealed class EventBus(ILog log) : IEventBus
 {
     private readonly Dictionary<Type, List<Delegate>> _handlers = [];

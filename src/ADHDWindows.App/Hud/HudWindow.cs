@@ -46,6 +46,7 @@ public sealed class HudWindow : Window, IDisposable
     private readonly DispatcherTimer _flyoutTimer;
     private readonly List<IDisposable> _subscriptions = [];
     private HudPanelWindow? _panelWindow;
+    private Func<bool>? _shopAvailable;
     private string? _configuration;
     private ScreenPoint _position;
     private ScreenPoint? _grab;
@@ -123,6 +124,20 @@ public sealed class HudWindow : Window, IDisposable
     private int ArtPixel => _root.DevicePixels;
 
     private ScreenRect HandleBounds => new(_position.X, _position.Y, HudBar.HandleWidth * ArtPixel, HudBar.BarHeight * ArtPixel);
+
+    /// <summary>
+    /// Подключает кнопку «Магазин» мини-панели. Кнопка доступна, пока <paramref name="available"/> возвращает true:
+    /// без модуля магазина открывать нечего.
+    /// </summary>
+    public void ConnectShop(Action open, Func<bool> available)
+    {
+        _shopAvailable = available;
+        _panel.Shop.Click += (_, _) =>
+        {
+            CloseMiniPanel();
+            open();
+        };
+    }
 
     /// <summary>Показывает HUD, если это разрешено настройками.</summary>
     public void Start()
@@ -327,7 +342,11 @@ public sealed class HudWindow : Window, IDisposable
         _panelWindow?.Hide();
     }
 
-    private void UpdatePanel() => _panel.Show(_economy.Balance, _economy.IncomePerMinute, _hardship, _quest);
+    private void UpdatePanel()
+    {
+        _panel.Shop.IsEnabled = _shopAvailable?.Invoke() == true;
+        _panel.Show(_economy.Balance, _economy.IncomePerMinute, _hardship, _quest);
+    }
 
     private void OnGrab(object sender, MouseButtonEventArgs e)
     {

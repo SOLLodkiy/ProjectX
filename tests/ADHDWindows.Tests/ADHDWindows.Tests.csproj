@@ -25,6 +25,7 @@
     <ProjectReference Include="..\..\src\ADHDWindows.Modules.Clicks\ADHDWindows.Modules.Clicks.csproj" />
     <ProjectReference Include="..\..\src\ADHDWindows.Modules.Locks\ADHDWindows.Modules.Locks.csproj" />
     <ProjectReference Include="..\..\src\ADHDWindows.Modules.Time\ADHDWindows.Modules.Time.csproj" />
+    <ProjectReference Include="..\..\src\ADHDWindows.Modules.Upgrades\ADHDWindows.Modules.Upgrades.csproj" />
     <!-- Отдельная программа: тесты запускают и замораживают её как процесс. -->
     <ProjectReference Include="..\ADHDWindows.TestApp\ADHDWindows.TestApp.csproj"
                       ReferenceOutputAssembly="false"

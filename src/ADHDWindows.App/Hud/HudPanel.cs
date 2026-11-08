@@ -41,7 +41,7 @@ public sealed class HudPanel : PixelFrame
         Child = rows;
     }
 
-    /// <summary>Откроется в окне магазина. Подключается вместе с ним.</summary>
+    /// <summary>Открывает окно магазина, подключается через <see cref="HudWindow.ConnectShop"/>.</summary>
     public PixelButton Shop { get; }
 
     /// <summary>Откроется в окне логов. Подключается вместе с ним.</summary>

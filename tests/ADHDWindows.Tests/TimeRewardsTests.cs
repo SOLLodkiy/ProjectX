@@ -424,6 +424,15 @@ public sealed class TimeRewardsTests
     }
 
     [Fact]
+    public void Completion_upgrade_raises_the_bonus()
+    {
+        // Улучшение на +10%: бонус за досмотр 20%, то есть 1,2 монетки за минутный ролик.
+        _rewards.ExtraCompletionBonus = 0.1m;
+        Run(66, BrowserInFront, second => [Tab(1, YouTube, true, Element("v", Math.Min(second - 2, 60), playing: second - 2 < 60, duration: 60))]);
+        Assert.Equal(7.2m, _economy.Total("video"), 1);
+    }
+
+    [Fact]
     public void Fourth_repeat_in_a_row_earns_less()
     {
         // Трек на 30 секунд четыре раза подряд: каждый раз с начала.

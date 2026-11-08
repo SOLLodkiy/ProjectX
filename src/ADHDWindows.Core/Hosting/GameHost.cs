@@ -81,6 +81,7 @@ public sealed class GameHost : IDisposable
         _recovery.RestoreAll();
         // Покупка записывается сразу: после сбоя она не должна пропасть до следующего автосохранения.
         _events.Subscribe<ItemUnlocked>(_ => Save());
+        _events.Subscribe<SaveRequested>(_ => Save());
         _modules.Start(ModuleLoader.Load(_paths.ModulesDir, _log));
         _events.Publish(new AppStarted());
         _autosave = new Timer(_ => Save(), null, AutosaveInterval, AutosaveInterval);

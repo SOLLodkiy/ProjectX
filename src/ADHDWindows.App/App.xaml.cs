@@ -5,6 +5,7 @@ using System.Windows.Threading;
 using ADHDWindows.App.Design;
 using ADHDWindows.App.Hud;
 using ADHDWindows.App.Locks;
+using ADHDWindows.App.Shop;
 using ADHDWindows.App.Time;
 using ADHDWindows.Core.Hosting;
 using ADHDWindows.Core.Hud;
@@ -33,6 +34,7 @@ public partial class App : Application
     private LockScreen? _lockScreen;
     private ExtensionScreen? _extensionScreen;
     private PresenceScreen? _presenceScreen;
+    private ShopScreen? _shopScreen;
     private ShowcaseWindow? _showcase;
     private bool _designReady;
 
@@ -61,6 +63,7 @@ public partial class App : Application
         _lockScreen = new LockScreen(_host.Events, _host.Economy, _host.Texts, () => _designReady, Dispatcher);
         _extensionScreen = new ExtensionScreen(_host.Events, _host.Texts, () => _designReady, Dispatcher);
         _presenceScreen = new PresenceScreen(_host.Events, _host.Texts, () => _designReady, Dispatcher);
+        _shopScreen = new ShopScreen(_host.Events, _host.Economy, _host.Texts, () => _designReady, Dispatcher);
         _host.Start(() => StartWatchdog(paths, log));
         _mouseHook = new MouseHook(_host.Events.Publish, log);
         _mouseHook.Start();
@@ -76,6 +79,7 @@ public partial class App : Application
                 _designReady ? OpenShowcase : null,
                 () => _host.Economy.Earn(DeveloperGrantSource, DeveloperGrant),
                 () => _host.Events.Publish(new RecoveryProbeRequested(ManualProbeToken)),
+                () => _shopScreen.Open(),
                 () => _lockScreen.Open(),
                 () => Shutdown(),
                 _hotkey.ToString()));
@@ -83,6 +87,7 @@ public partial class App : Application
         if (hudSettings is not null)
         {
             _hud = new HudWindow(_host.Economy, _host.Events, _host.Texts, hudSettings, log);
+            _hud.ConnectShop(_shopScreen.Open, () => _shopScreen.Available);
             _hud.Start();
         }
 
@@ -175,6 +180,7 @@ public partial class App : Application
         _lockScreen?.Dispose();
         _extensionScreen?.Dispose();
         _presenceScreen?.Dispose();
+        _shopScreen?.Dispose();
         _hud?.Dispose();
         _tray?.Dispose();
         _watchdog?.Dispose();

@@ -4,7 +4,12 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using ADHDWindows.App.Design;
 using ADHDWindows.App.Hud;
+using ADHDWindows.App.Shop;
 using ADHDWindows.Core.Data;
+using ADHDWindows.Core.Economy;
+using ADHDWindows.Core.Events;
+using ADHDWindows.Core.Upgrades;
+using ADHDWindows.Modules.Upgrades;
 
 namespace ADHDWindows.Tests;
 
@@ -78,6 +83,48 @@ public class PixelRenderTests
         var panel = new HudPanel(texts);
         panel.Show(123_456_789, 1250, "Сильная гравитация", null);
         AssertCrisp(panel, dpiScale, devicePixels, "hud-panel");
+    });
+
+    [Theory]
+    [InlineData(1.0, 2)]
+    [InlineData(1.5, 3)]
+    public void Shop_stays_on_the_pixel_grid(double dpiScale, int devicePixels) => WpfThread.Run(() =>
+    {
+        var log = new RecordingLog();
+        var data = new GameData(Path.Combine(RepositoryRoot.Find(), "data"), log);
+        data.Load();
+        var texts = new TextCatalog(data, "ru", log);
+        texts.Use("ru");
+        var bus = new EventBus(log);
+        var store = new MemoryStore();
+        var economy = new CoinEconomy(store, bus, TimeProvider.System);
+        var shop = new UpgradeShop(UpgradeCatalog.Load(data, log), economy, bus, store, TimeProvider.System, log);
+        economy.Earn("developer", 190);
+        shop.Buy("clicks.left.plus");
+
+        var window = new ShopWindow(texts, _ => { });
+        window.Update(shop.Snapshot(), economy.Balance);
+
+        // Второй уровень по карману, ПКМ открыт, но дорог, «Тяжёлая рука» закрыта требованием.
+        Assert.True(window.Rows["clicks.left.plus"].Buy.IsEnabled);
+        Assert.False(window.Rows["clicks.right"].Buy.IsEnabled);
+        Assert.False(window.Rows["clicks.power"].Buy.IsEnabled);
+        economy.Earn("developer", 1000);
+        window.ShowBalance(economy.Balance);
+        Assert.True(window.Rows["clicks.right"].Buy.IsEnabled);
+        Assert.False(window.Rows["clicks.power"].Buy.IsEnabled);
+
+        var content = (UIElement)window.Content;
+        window.Content = null;
+        for (var branch = 0; branch < window.BranchCount; branch++)
+        {
+            window.SelectBranch(branch);
+            var frame = new PixelFrame { Sprite = "window", Padding = new Thickness(5), Child = content };
+            AssertCrisp(frame, dpiScale, devicePixels, $"shop-{branch}");
+            frame.Child = null;
+        }
+
+        window.Close();
     });
 
     [Fact]

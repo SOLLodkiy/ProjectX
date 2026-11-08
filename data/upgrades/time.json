@@ -1,0 +1,51 @@
+{
+  // Улучшения хронометража. Формат записей описан в clicks.json.
+  "branch": { "id": "time", "name": "Хронометраж", "icon": "clock", "order": 2 },
+  "upgrades": [
+    {
+      "id": "time.video",
+      "name": "Киноман",
+      "description": "+20% к монеткам за видео за уровень.",
+      "icon": "clock",
+      "effect": "income.multiplier",
+      "params": { "source": "video", "percent": 20 },
+      "price": 200,
+      "growth": 1.8,
+      "maxLevel": 5
+    },
+    {
+      "id": "time.music",
+      "name": "Меломан",
+      "description": "+20% к монеткам за музыку за уровень.",
+      "icon": "clock",
+      "effect": "income.multiplier",
+      "params": { "source": "music", "percent": 20 },
+      "price": 150,
+      "growth": 1.8,
+      "maxLevel": 5
+    },
+    {
+      "id": "time.game",
+      "name": "Геймер",
+      "description": "+20% к монеткам за игры за уровень.",
+      "icon": "clock",
+      "effect": "income.multiplier",
+      "params": { "source": "game", "percent": 20 },
+      "price": 200,
+      "growth": 1.8,
+      "maxLevel": 5
+    },
+    {
+      "id": "time.completion",
+      "name": "До последнего кадра",
+      "description": "Бонус за досмотр больше на 5% от заработанного на ролике за уровень.",
+      "icon": "check",
+      "effect": "time.completionBonus",
+      "params": { "percent": 5 },
+      "price": 400,
+      "growth": 2,
+      "maxLevel": 4,
+      "requires": { "time.video": 1 }
+    }
+  ]
+}
