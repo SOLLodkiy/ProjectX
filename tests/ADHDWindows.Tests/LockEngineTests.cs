@@ -5,6 +5,7 @@ using ADHDWindows.Core.Locks;
 using ADHDWindows.Core.Safety;
 using ADHDWindows.Core.Storage;
 using ADHDWindows.Modules.Locks;
+using ADHDWindows.Modules.Locks.Games;
 using ADHDWindows.Platform;
 
 namespace ADHDWindows.Tests;
@@ -277,9 +278,62 @@ public sealed class LockEngineTests : IDisposable
     private static ProgramFile ToolFile() =>
         new(@"C:\tools\tool.exe", "Acme", "Tool", "tool.exe", "Tool", null, false, new Lazy<string>(() => "tool"));
 
+    [Fact]
+    public void Bought_launcher_does_not_open_its_games()
+    {
+        var steam = new ProcessStamp(30, 1);
+        var game = new ProcessStamp(31, 1);
+        _system.AddProcess(steam, SteamFile(@"D:\Steam\steam.exe"));
+        _system.AddProcess(game, SteamFile(@"D:\Steam\steamapps\common\Free Game\game.exe"));
+        _system.AddWindow(30, steam);
+        _system.AddWindow(31, game);
+        var library = NewLibrary(new FakeGameSource("steam", [new InstalledGame("steam", "999", "Free Game", @"D:\Steam\steamapps\common\Free Game", 1)]));
+        var catalog = new ProgramCatalog(Price, [], [new ProgramEntry("steam", "Steam", 3000, [new FileMatch(Company: "Valve*")])], []);
+        new UnlockLedger(_store).Add(new LockOffer("program:steam", "Steam", 3000, LockKind.Program), DateTimeOffset.UnixEpoch);
+        _engine = NewEngine(classifier: new ProgramClassifier(catalog, [], games: library));
+
+        _engine.Scan();
+
+        Assert.DoesNotContain("freeze 30", _system.Calls);
+        Assert.Contains("freeze 31", _system.Calls);
+        Assert.Equal(new LockOffer("game:steam:999", "Free Game", 1500, LockKind.Game), Assert.Single(Offers()));
+    }
+
+    [Fact]
+    public void Process_that_became_a_game_is_not_frozen_twice()
+    {
+        var process = new ProcessStamp(40, 1);
+        var source = new FakeGameSource("gog", []);
+        var library = NewLibrary(source);
+        _system.AddProcess(process, SteamFile(@"D:\Games\New\new.exe"));
+        _system.AddWindow(40, process);
+        _engine = NewEngine(classifier: new ProgramClassifier(new ProgramCatalog(Price, [], [], []), [], games: library));
+        _engine.Scan();
+        Assert.Single(_system.Calls, call => call == "freeze 40");
+
+        source.Games.Add(new InstalledGame("gog", "1", "New", @"D:\Games\New"));
+        Assert.True(library.Refresh());
+        _engine.ForgetVerdicts();
+        _engine.Scan();
+
+        Assert.Single(_system.Calls, call => call == "freeze 40");
+        _engine.ReleaseAll();
+        Assert.Single(_system.Calls, call => call == "thaw 40");
+    }
+
+    private GameLibrary NewLibrary(IGameSource source)
+    {
+        var library = new GameLibrary([source], new GameCatalog(2500, [new SizePrice(null, 1500)], [], []), _log, TimeProvider.System);
+        library.Refresh();
+        return library;
+    }
+
+    private static ProgramFile SteamFile(string path) =>
+        new(path, "Valve", "Steam", null, null, null, false, new Lazy<string>(() => path));
+
     private IReadOnlyList<LockOffer> Offers() => _events.OfType<LockOffersChanged>().Last().Offers;
 
-    private LockEngine NewEngine(ISystemChanges? changes = null)
+    private LockEngine NewEngine(ISystemChanges? changes = null, ProgramClassifier? classifier = null)
     {
         var catalog = new ProgramCatalog(
             Price,
@@ -289,7 +343,7 @@ public sealed class LockEngineTests : IDisposable
         var recovery = new RecoveryService(_journal, () => [], _log);
         return new LockEngine(
             _system,
-            new ProgramClassifier(catalog, []),
+            classifier ?? new ProgramClassifier(catalog, []),
             new UnlockLedger(_store),
             _economy,
             changes ?? new NotingChanges(recovery.For("locks"), _system.Calls),

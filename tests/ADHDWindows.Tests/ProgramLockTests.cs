@@ -261,6 +261,107 @@ public sealed class ProgramLockTests : IDisposable
         Assert.True(seen.Wait(Timeout));
     }
 
+    [Fact]
+    public void Game_installed_while_running_and_started_directly_is_locked_as_a_game()
+    {
+        // Steam установлен, но игры в нём ещё нет.
+        DeployProgram();
+        Directory.CreateDirectory(Path.Combine(SteamFolder, "steamapps", "common"));
+        StartApp();
+        WaitForLog("Найдено игр:");
+
+        // Установка появляется, когда программа уже работает, и игра запускается раньше планового перечитывания.
+        DeployGame();
+        StartGame(throughLauncher: false);
+
+        WaitUntilFrozen();
+        WaitForLog($"Заблокировано: {GameName}, цена 1500");
+        WaitForLog($"Новая игра: {GameName} (steam), цена 1500");
+    }
+
+    [Fact]
+    public void Game_started_through_a_launcher_is_locked_and_bought_separately()
+    {
+        DeployGame();
+        var app = StartApp(balance: 2000);
+        WaitForLog("Найдено игр:");
+
+        StartGame(throughLauncher: true);
+        var frozen = WaitUntilFrozen();
+        WaitForLog($"Заблокировано: {GameName}, цена 1500");
+
+        Invoke(WaitForBuyButton(app));
+        WaitUntil(() => ReadBeat() > frozen, "разморозка после покупки");
+        Exit(app);
+
+        var unlocked = ReadSave().Get<Dictionary<string, UnlockRecord>>($"modules/locks/{UnlockLedger.SaveKey}")!;
+        var record = unlocked[$"game:steam:{GameId}"];
+        Assert.Equal(Core.Locks.LockKind.Game, record.Kind);
+        Assert.Equal(1500, record.Price);
+    }
+
+    private const string GameId = "4242";
+    private const string GameName = "Fake Game";
+
+    private string SteamFolder => Path.Combine(Scope, "steam");
+
+    private string GameFolder => Path.Combine(SteamFolder, "steamapps", "common", GameName);
+
+    /// <summary>Тестовая программа под видом игры в библиотеке Steam внутри папки теста.</summary>
+    private void DeployGame()
+    {
+        DeployProgram();
+        Directory.CreateDirectory(GameFolder);
+        foreach (var file in Directory.GetFiles(Scope))
+        {
+            File.Copy(file, Path.Combine(GameFolder, Path.GetFileName(file)));
+        }
+
+        GameLibraryTests.WriteSteamGame(SteamFolder, GameId, GameName, GameName, 1024 * 1024);
+    }
+
+    /// <param name="throughLauncher">Запустить через другой процесс, как это делает лаунчер.</param>
+    private void StartGame(bool throughLauncher)
+    {
+        var game = Path.Combine(GameFolder, "ADHDWindows.TestApp.exe");
+        ProcessStartInfo info;
+        if (throughLauncher)
+        {
+            info = new ProcessStartInfo(Path.Combine(Environment.SystemDirectory, "cmd.exe"), $"/c start \"\" \"{game}\" \"{Beat}\"")
+            {
+                UseShellExecute = false,
+                CreateNoWindow = true,
+            };
+        }
+        else
+        {
+            info = new ProcessStartInfo(game) { UseShellExecute = false };
+            info.ArgumentList.Add(Beat);
+        }
+
+        _started.Add(Process.Start(info)!);
+        if (throughLauncher)
+        {
+            // Сама игра — не дочерний процесс теста, её нужно найти, чтобы закрыть в конце.
+            WaitUntil(() => FindGameProcess() is not null, "запуск игры через лаунчер");
+            _started.Add(FindGameProcess()!);
+        }
+    }
+
+    private Process? FindGameProcess() =>
+        Process.GetProcessesByName("ADHDWindows.TestApp")
+            .FirstOrDefault(process =>
+            {
+                try
+                {
+                    return process.MainModule?.FileName.StartsWith(GameFolder, StringComparison.OrdinalIgnoreCase) == true;
+                }
+                catch (System.ComponentModel.Win32Exception)
+                {
+                    return false;
+                }
+            });
+
     private string ProgramPath => Path.Combine(Scope, "ADHDWindows.TestApp.exe");
 
     private Process StartProgram(string? name = null)
@@ -303,6 +404,8 @@ public sealed class ProgramLockTests : IDisposable
         settings.Load();
         settings.Set(Hotkey.SettingKey, TestHotkey);
         settings.Set($"modules/locks/{LocksModule.OnlyUnderSetting}", Scope);
+        settings.Set($"modules/locks/{LocksModule.SteamPathSetting}", SteamFolder);
+        settings.Set($"modules/locks/{LocksModule.EpicManifestsSetting}", Path.Combine(Scope, "epic"));
         settings.Flush();
 
         var directory = Path.Combine(RepositoryRoot.Find(), "src", "ADHDWindows.App", "bin", Configuration, "net10.0-windows");

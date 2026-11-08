@@ -1,7 +1,9 @@
 using System.Windows;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
+using System.Windows.Interop;
 using ADHDWindows.Core.Pixels;
+using ADHDWindows.Platform;
 
 namespace ADHDWindows.App.Design;
 
@@ -18,6 +20,14 @@ public class PixelWindow : Window
     {
         SetResourceReference(StyleProperty, typeof(PixelWindow));
         WindowStartupLocation = WindowStartupLocation.CenterScreen;
+
+        // Окно ещё не показано: на основном экране оно не мелькнёт.
+        if (TestScreen.Corner() is { } corner)
+        {
+            WindowStartupLocation = WindowStartupLocation.Manual;
+            SourceInitialized += (_, _) => WindowTraits.Move(new WindowInteropHelper(this).Handle, corner);
+        }
+
         ContentRendered += (_, _) =>
         {
             if (GetVisualChild(0) is FrameworkElement root)

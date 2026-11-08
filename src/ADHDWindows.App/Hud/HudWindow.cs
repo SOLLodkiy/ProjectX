@@ -36,6 +36,7 @@ public sealed class HudWindow : Window, IDisposable
     private readonly ILog _log;
     private readonly TimeProvider _clock;
     private readonly Func<IReadOnlyList<ScreenArea>> _screens;
+    private readonly bool _realScreens;
     private readonly HudBar _bar = new();
     private readonly HudPanel _panel;
     private readonly Canvas _flights = new();
@@ -71,6 +72,7 @@ public sealed class HudWindow : Window, IDisposable
         _log = log;
         _clock = clock ?? TimeProvider.System;
         _screens = screens ?? Desktop.Screens;
+        _realScreens = screens is null;
         _panel = new HudPanel(texts);
 
         WindowStyle = WindowStyle.None;
@@ -191,11 +193,13 @@ public sealed class HudWindow : Window, IDisposable
     {
         var screens = _screens();
         _configuration = HudPlacement.ConfigurationKey(screens);
+        // На тестовом мониторе HUD встаёт туда же, куда на основном: в правый верхний угол.
+        var home = _realScreens && TestScreen.Find() is { } test ? [test with { IsPrimary = true }] : screens;
         var fallback = HudPlacement.Default(
             HudBar.BarWidth * ArtPixel,
             HudBar.BarHeight * ArtPixel,
             ScreenMargin * ArtPixel,
-            screens);
+            home);
         PlaceAt(_settings.Position(_configuration) ?? fallback, screens);
     }
 

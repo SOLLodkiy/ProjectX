@@ -1,4 +1,5 @@
 using ADHDWindows.Core.Locks;
+using ADHDWindows.Modules.Locks.Games;
 
 namespace ADHDWindows.Modules.Locks;
 
@@ -8,7 +9,12 @@ public sealed record ProgramVerdict(LockOffer? Offer, string Reason);
 /// <summary>Решает, бесплатна ли программа, и если нет, сколько стоит.</summary>
 /// <param name="ownFiles">Файлы самой программы.</param>
 /// <param name="onlyUnder">Если задано, блокируется только содержимое этой папки. Нужно для проверок.</param>
-public sealed class ProgramClassifier(ProgramCatalog catalog, IEnumerable<string> ownFiles, string? onlyUnder = null)
+/// <param name="games">Установленные игры. Игра опознаётся по папке раньше каталога программ.</param>
+public sealed class ProgramClassifier(
+    ProgramCatalog catalog,
+    IEnumerable<string> ownFiles,
+    string? onlyUnder = null,
+    GameLibrary? games = null)
 {
     private readonly HashSet<string> _ownFiles = new(ownFiles, StringComparer.OrdinalIgnoreCase);
     private readonly string? _onlyUnder = onlyUnder is null ? null : Path.GetFullPath(onlyUnder).TrimEnd('\\') + '\\';
@@ -33,6 +39,12 @@ public sealed class ProgramClassifier(ProgramCatalog catalog, IEnumerable<string
         if (catalog.Free.FirstOrDefault(entry => Matches(entry.Match, file)) is { } free)
         {
             return Free(free.Id);
+        }
+
+        // Установщик и деинсталлятор из папки игры остаются бесплатными, как и любые другие.
+        if (games?.Find(file.Path) is { } game && !IsInstaller(file))
+        {
+            return new ProgramVerdict(games.Offer(game), "игра");
         }
 
         if (catalog.Programs.FirstOrDefault(entry => Matches(entry.Match, file)) is { } program)

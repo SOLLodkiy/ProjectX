@@ -1,6 +1,7 @@
 using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Threading;
+using ADHDWindows.Core.Display;
 using ADHDWindows.Platform;
 
 namespace ADHDWindows.App.Design;
@@ -43,7 +44,15 @@ public static class ToastManager
             Content = root,
         };
 
-        window.SourceInitialized += (_, _) => WindowTraits.MakeNonActivating(new WindowInteropHelper(window).Handle);
+        window.SourceInitialized += (_, _) =>
+        {
+            var handle = new WindowInteropHelper(window).Handle;
+            WindowTraits.MakeNonActivating(handle);
+            if (TestScreen.Find() is { } screen)
+            {
+                WindowTraits.Move(handle, new ScreenPoint(screen.WorkArea.Right, screen.WorkArea.Bottom));
+            }
+        };
         window.MouseLeftButtonDown += (_, _) => Dismiss(window);
         window.ContentRendered += (_, _) =>
         {
@@ -76,6 +85,12 @@ public static class ToastManager
 
     private static void Arrange()
     {
+        if (TestScreen.Find() is { } screen)
+        {
+            ArrangeOn(screen);
+            return;
+        }
+
         var area = SystemParameters.WorkArea;
         var bottom = area.Bottom;
         for (var index = Visible.Count - 1; index >= 0; index--)
@@ -86,6 +101,21 @@ public static class ToastManager
             window.Left = area.Right - window.ActualWidth - margin;
             window.Top = bottom - window.ActualHeight - margin;
             bottom -= window.ActualHeight + (Gap * unit);
+        }
+    }
+
+    /// <summary>То же на тестовом мониторе, в пикселях экрана: масштаб у него может отличаться от основного.</summary>
+    private static void ArrangeOn(ScreenArea screen)
+    {
+        var bottom = screen.WorkArea.Bottom;
+        for (var index = Visible.Count - 1; index >= 0; index--)
+        {
+            var handle = new WindowInteropHelper(Visible[index]).Handle;
+            var bounds = WindowTraits.Bounds(handle);
+            var unit = bounds.Width / (double)ToastCard.CardWidth;
+            var margin = (int)(ScreenMargin * unit);
+            WindowTraits.Move(handle, new ScreenPoint(screen.WorkArea.Right - bounds.Width - margin, bottom - bounds.Height - margin));
+            bottom -= bounds.Height + (int)(Gap * unit);
         }
     }
 }

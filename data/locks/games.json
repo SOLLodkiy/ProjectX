@@ -1,0 +1,72 @@
+{
+  // Цены игр из библиотек лаунчеров. Бесплатных игр нет: бесплатная в магазине игра тоже стоит монетки.
+  // Ссылка на игру: launcher (steam, epic, gog, ubisoft) и id — код игры в этом лаунчере.
+  // Steam: appid. Epic Games: AppName из файла установки. GOG: gameID. Ubisoft Connect: код установки.
+
+  // Цена, если размер игры узнать не удалось.
+  "defaultPrice": 2500,
+
+  // Цена игры вне каталога по размеру на диске. Последняя ступень без границы.
+  "sizePrices": [
+    { "upToGb": 2, "price": 1500 },
+    { "upToGb": 30, "price": 2500 },
+    { "price": 4000 }
+  ],
+
+  // Записи лаунчеров, которые не являются играми. Их файлы оцениваются как обычные программы по programs.json.
+  "ignore": [
+    { "launcher": "steam", "id": "228980" },  // Steamworks Common Redistributables
+    { "launcher": "steam", "id": "250820" },  // SteamVR
+    { "launcher": "steam", "id": "431960" },  // Wallpaper Engine
+    { "launcher": "steam", "id": "1905180" }, // OBS Studio
+    { "launcher": "steam", "id": "365670" },  // Blender
+    { "launcher": "steam", "id": "280680" },  // Krita
+    { "launcher": "steam", "id": "431730" },  // Aseprite
+    { "launcher": "steam", "id": "629520" }   // Soundpad
+  ],
+
+  "games": [
+    { "id": "dota2", "name": "Dota 2", "price": 5500, "match": [ { "launcher": "steam", "id": "570" } ] },
+    { "id": "cs2", "name": "Counter-Strike 2", "price": 5500, "match": [ { "launcher": "steam", "id": "730" } ] },
+    { "id": "cyberpunk2077", "name": "Cyberpunk 2077", "price": 6000, "match": [
+      { "launcher": "steam", "id": "1091500" },
+      { "launcher": "gog", "id": "1423049311" } ] },
+    { "id": "baldurs-gate-3", "name": "Baldur's Gate 3", "price": 6000, "match": [
+      { "launcher": "steam", "id": "1086940" },
+      { "launcher": "gog", "id": "1456460669" } ] },
+    { "id": "elden-ring", "name": "Elden Ring", "price": 6000, "match": [ { "launcher": "steam", "id": "1245620" } ] },
+    { "id": "gta5", "name": "Grand Theft Auto V", "price": 5000, "match": [ { "launcher": "steam", "id": "271590" } ] },
+    { "id": "witcher3", "name": "The Witcher 3", "price": 5000, "match": [
+      { "launcher": "steam", "id": "292030" },
+      { "launcher": "gog", "id": "1207664663" },
+      { "launcher": "gog", "id": "1495134320" } ] },
+
+    { "id": "fortnite", "name": "Fortnite", "price": 4000, "match": [ { "launcher": "epic", "id": "Fortnite" } ] },
+    { "id": "pubg", "name": "PUBG: Battlegrounds", "price": 4000, "match": [ { "launcher": "steam", "id": "578080" } ] },
+    { "id": "apex", "name": "Apex Legends", "price": 4000, "match": [ { "launcher": "steam", "id": "1172470" } ] },
+    { "id": "rust", "name": "Rust", "price": 4000, "match": [ { "launcher": "steam", "id": "252490" } ] },
+    { "id": "rocket-league", "name": "Rocket League", "price": 3500, "match": [
+      { "launcher": "steam", "id": "252950" },
+      { "launcher": "epic", "id": "Sugar" } ] },
+    { "id": "tf2", "name": "Team Fortress 2", "price": 3000, "match": [ { "launcher": "steam", "id": "440" } ] },
+    { "id": "stardew-valley", "name": "Stardew Valley", "price": 3000, "match": [
+      { "launcher": "steam", "id": "413150" },
+      { "launcher": "gog", "id": "1453375253" } ] },
+
+    { "id": "terraria", "name": "Terraria", "price": 2500, "match": [
+      { "launcher": "steam", "id": "105600" },
+      { "launcher": "gog", "id": "1207665503" } ] },
+    { "id": "valheim", "name": "Valheim", "price": 2500, "match": [ { "launcher": "steam", "id": "892970" } ] },
+    { "id": "deep-rock-galactic", "name": "Deep Rock Galactic", "price": 2500, "match": [ { "launcher": "steam", "id": "548430" } ] },
+    { "id": "phasmophobia", "name": "Phasmophobia", "price": 2500, "match": [ { "launcher": "steam", "id": "739630" } ] },
+    { "id": "portal2", "name": "Portal 2", "price": 2000, "match": [ { "launcher": "steam", "id": "620" } ] },
+    { "id": "hollow-knight", "name": "Hollow Knight", "price": 2000, "match": [
+      { "launcher": "steam", "id": "367520" },
+      { "launcher": "gog", "id": "1308320804" } ] },
+    { "id": "hades", "name": "Hades", "price": 2000, "match": [ { "launcher": "steam", "id": "1145360" } ] },
+    { "id": "among-us", "name": "Among Us", "price": 1500, "match": [ { "launcher": "steam", "id": "945360" } ] },
+    { "id": "celeste", "name": "Celeste", "price": 1500, "match": [ { "launcher": "steam", "id": "504230" } ] },
+    { "id": "lethal-company", "name": "Lethal Company", "price": 1500, "match": [ { "launcher": "steam", "id": "1966720" } ] },
+    { "id": "slay-the-spire", "name": "Slay the Spire", "price": 1500, "match": [ { "launcher": "steam", "id": "646570" } ] }
+  ]
+}

@@ -4,6 +4,9 @@ namespace ADHDWindows.Core.Locks;
 public enum LockKind
 {
     Program,
+
+    /// <summary>Игра из библиотеки лаунчера. Покупается отдельно от лаунчера.</summary>
+    Game,
 }
 
 /// <summary>Заблокированное: <paramref name="Key"/> — постоянный код покупки.</summary>

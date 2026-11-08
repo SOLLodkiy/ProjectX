@@ -53,6 +53,9 @@ public sealed class LockEngine(
         }
     }
 
+    /// <summary>Забывает решения о процессах: например, появилась новая игра и уже открытый файл стал игрой.</summary>
+    public void ForgetVerdicts() => _verdicts.Clear();
+
     public void Unlock(string key)
     {
         if (_groups.Find(group => group.Offer.Key == key) is not { } group)
@@ -97,12 +100,14 @@ public sealed class LockEngine(
             return;
         }
 
-        var group = _groups.Find(item => item.Offer.Key == offer.Key);
-        if (group?.Processes.Contains(process) == true)
+        // Запись ищется по процессу: после появления новой игры код того же процесса мог смениться.
+        if (_groups.Find(item => item.Processes.Contains(process)) is { } owner)
         {
-            OnFrozenWindow(group, window, activated);
+            OnFrozenWindow(owner, window, activated);
             return;
         }
+
+        var group = _groups.Find(item => item.Offer.Key == offer.Key);
 
         var created = group is null;
         group ??= new LockGroup(offer);
@@ -139,7 +144,8 @@ public sealed class LockEngine(
     private bool Freeze(LockGroup group)
     {
         var fresh = system.Processes()
-            .Where(process => !group.Processes.Contains(process) && Classify(process).Offer?.Key == group.Offer.Key)
+            // Процесс из другой записи уже заморожен: повторная заморозка потребовала бы двух разморозок.
+            .Where(process => !_groups.Any(other => other.Processes.Contains(process)) && Classify(process).Offer?.Key == group.Offer.Key)
             .Where(HasAccess)
             .ToList();
         if (fresh.Count == 0)

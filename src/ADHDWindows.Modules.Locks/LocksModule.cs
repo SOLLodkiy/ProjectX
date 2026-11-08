@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using ADHDWindows.Core.Locks;
 using ADHDWindows.Core.Modules;
+using ADHDWindows.Modules.Locks.Games;
 using ADHDWindows.Platform;
 
 namespace ADHDWindows.Modules.Locks;
@@ -11,9 +12,16 @@ public sealed class LocksModule : IModule
     /// <summary>Настройка для проверок: блокировать только файлы из этой папки.</summary>
     public const string OnlyUnderSetting = "onlyUnder";
 
+    /// <summary>Настройка для проверок: папка Steam вместо найденной в реестре.</summary>
+    public const string SteamPathSetting = "steamPath";
+
+    /// <summary>Настройка для проверок: папка с файлами установок Epic Games.</summary>
+    public const string EpicManifestsSetting = "epicManifests";
+
     private const int QueueLimit = 512;
 
     private static readonly TimeSpan ScanInterval = TimeSpan.FromSeconds(3);
+    private static readonly TimeSpan LibraryInterval = TimeSpan.FromSeconds(30);
     private static readonly TimeSpan StopTimeout = TimeSpan.FromSeconds(2);
 
     private readonly ConcurrentQueue<Action<LockEngine>> _queue = new();
@@ -21,6 +29,7 @@ public sealed class LocksModule : IModule
     private readonly CancellationTokenSource _stop = new();
     private IModuleContext? _context;
     private LockEngine? _engine;
+    private GameLibrary? _games;
     private WindowWatcher? _watcher;
     private Thread? _worker;
 
@@ -49,7 +58,9 @@ public sealed class LocksModule : IModule
             context.Log.Info($"Блокировка ограничена папкой: {onlyUnder}");
         }
 
-        var classifier = new ProgramClassifier(ProgramCatalog.Load(context.Data), OwnFiles(), onlyUnder);
+        var gameCatalog = GameCatalog.Load(context.Data);
+        _games = new GameLibrary(GameSources(context), gameCatalog, context.Log, TimeProvider.System);
+        var classifier = new ProgramClassifier(ProgramCatalog.Load(context.Data), OwnFiles(), onlyUnder, _games);
         _engine = new LockEngine(
             new WindowsProgramSystem(),
             classifier,
@@ -81,6 +92,20 @@ public sealed class LocksModule : IModule
         _engine?.ReleaseAll();
     }
 
+    private static List<IGameSource> GameSources(IModuleContext context)
+    {
+        return
+        [
+            new SteamSource(Setting(context, SteamPathSetting), context.Log),
+            new EpicSource(Setting(context, EpicManifestsSetting), context.Log),
+            RegistrySource.Gog(context.Log),
+            RegistrySource.Ubisoft(context.Log),
+        ];
+    }
+
+    private static string? Setting(IModuleContext context, string name) =>
+        context.Settings.Get<string>(name) is { } value && !string.IsNullOrWhiteSpace(value) ? value : null;
+
     private static IEnumerable<string> OwnFiles()
     {
         if (Environment.ProcessPath is { } self)
@@ -109,8 +134,22 @@ public sealed class LocksModule : IModule
     private void Work()
     {
         var nextScan = DateTime.UtcNow;
+        var nextLibrary = DateTime.UtcNow;
         while (!_stop.IsCancellationRequested)
         {
+            // Новая установка получает цену сразу. Уже открытые процессы пересматриваются.
+            if (DateTime.UtcNow >= nextLibrary)
+            {
+                Execute(engine =>
+                {
+                    if (_games!.Refresh())
+                    {
+                        engine.ForgetVerdicts();
+                    }
+                });
+                nextLibrary = DateTime.UtcNow + LibraryInterval;
+            }
+
             if (DateTime.UtcNow >= nextScan)
             {
                 Execute(engine => engine.Scan(_stop.Token));
