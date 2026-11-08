@@ -38,6 +38,8 @@ public sealed class HudPanel : PixelFrame
         buttons.Children.Add(Shop);
         buttons.Children.Add(Logs);
         rows.Children.Add(buttons);
+        Quests = new PixelButton { Content = texts.Get("hud.quests"), IsEnabled = false, Margin = new Thickness(0, 3, 0, 0) };
+        rows.Children.Add(Quests);
         Child = rows;
     }
 
@@ -46,6 +48,9 @@ public sealed class HudPanel : PixelFrame
 
     /// <summary>Открывает окно логов, подключается через <see cref="HudWindow.ConnectLogs"/>.</summary>
     public PixelButton Logs { get; }
+
+    /// <summary>Открывает окно заданий, подключается через <see cref="HudWindow.ConnectQuests"/>.</summary>
+    public PixelButton Quests { get; }
 
     public void Show(long balance, long perMinute, string? hardship, string? quest)
     {

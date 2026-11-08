@@ -4,6 +4,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using ADHDWindows.App.Design;
 using ADHDWindows.App.Hud;
+using ADHDWindows.App.Quests;
+using ADHDWindows.Core.Quests;
 using ADHDWindows.App.Shop;
 using ADHDWindows.Core.Data;
 using ADHDWindows.Core.Economy;
@@ -179,6 +181,41 @@ public class PixelRenderTests
             frame.Child = null;
         }
 
+        window.Close();
+    });
+
+    [Theory]
+    [InlineData(1.0, 2)]
+    [InlineData(1.5, 3)]
+    public void Quests_window_stays_on_the_pixel_grid(double dpiScale, int devicePixels) => WpfThread.Run(() =>
+    {
+        var log = new RecordingLog();
+        var data = new GameData(Path.Combine(RepositoryRoot.Find(), "data"), log);
+        data.Load();
+        var texts = new TextCatalog(data, "ru", log);
+        texts.Use("ru");
+        var now = new DateTimeOffset(2026, 1, 1, 12, 0, 0, TimeSpan.Zero);
+        var window = new QuestsWindow(texts);
+        window.Update(
+            [
+                new QuestView("e", "easy.clicks.200", QuestTier.Easy, "Сделай 200 кликов", "cursor", 45, 200, QuestUnit.Count, 35, now, now.AddMinutes(12.5), false),
+                new QuestView("h", "hard.game.one", QuestTier.Hard, "Поиграй в Minecraft 30 минут", "trophy", 1800, 1800, QuestUnit.Seconds, 450, now, now.AddMinutes(61), true),
+            ],
+            now);
+
+        var easy = window.Rows[QuestTier.Easy];
+        Assert.Equal(["Сделай 200 кликов", "45/200", "Награда: 35", "Новое через 12:30"], easy.Texts);
+        Assert.Equal(0.225, easy.Share, 3);
+        Assert.Equal(["Поиграй в Minecraft 30 минут", "30:00/30:00", "Выполнено!", "Новое через 1:01:00"], window.Rows[QuestTier.Hard].Texts);
+        Assert.Equal("Нет выполнимых заданий. Новое появится позже.", window.Rows[QuestTier.Medium].Texts[0]);
+        window.Tick(now.AddMinutes(2));
+        Assert.Equal("Новое через 10:30", easy.Texts[3]);
+
+        var content = (UIElement)window.Content;
+        window.Content = null;
+        var frame = new PixelFrame { Sprite = "window", Padding = new Thickness(5), Child = content };
+        AssertCrisp(frame, dpiScale, devicePixels, "quests");
+        frame.Child = null;
         window.Close();
     });
 

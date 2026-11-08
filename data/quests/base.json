@@ -1,0 +1,40 @@
+{
+  // Шаблоны заданий. Любой файл в data/quests с массивом templates добавляет шаблоны, код id не должен повторяться.
+  // tier — easy, medium или hard. reward — награда [от, до], выпадает случайно и кратна пяти.
+  // type и goal:
+  //   clicks  — клики, goal штук; button — left, right или middle, без него — любая кнопка.
+  //   media   — хронометраж, goal минут; source — video, music или game, без него — любой.
+  //   game    — минуты в одной установленной и купленной игре; в title обязателен {game}.
+  //   spend   — потратить goal монеток.
+  //   upgrade — купить goal уровней улучшений; выдаётся, если в магазине есть что купить.
+  //   unlock  — купить goal программ, игр или сайтов; kind — program, game или site.
+  // В title подставляются {goal} и {game}. weight — как часто выпадает шаблон, по умолчанию 1.
+  "templates": [
+    { "id": "easy.clicks.200", "tier": "easy", "type": "clicks", "goal": 200, "reward": [20, 40], "title": "Сделай {goal} кликов", "icon": "cursor", "weight": 2 },
+    { "id": "easy.clicks.400", "tier": "easy", "type": "clicks", "goal": 400, "reward": [35, 50], "title": "Сделай {goal} кликов", "icon": "cursor" },
+    { "id": "easy.clicks.right", "tier": "easy", "type": "clicks", "button": "right", "goal": 30, "reward": [20, 35], "title": "Нажми ПКМ {goal} раз", "icon": "cursor" },
+    { "id": "easy.clicks.middle", "tier": "easy", "type": "clicks", "button": "middle", "goal": 10, "reward": [20, 30], "title": "Нажми колесо мыши {goal} раз", "icon": "cursor" },
+    { "id": "easy.video.5", "tier": "easy", "type": "media", "source": "video", "goal": 5, "reward": [25, 45], "title": "Посмотри видео {goal} минут", "icon": "clock", "weight": 2 },
+    { "id": "easy.music.10", "tier": "easy", "type": "media", "source": "music", "goal": 10, "reward": [25, 45], "title": "Послушай музыку {goal} минут", "icon": "clock" },
+    { "id": "easy.game.5", "tier": "easy", "type": "media", "source": "game", "goal": 5, "reward": [30, 50], "title": "Поиграй во что угодно {goal} минут", "icon": "trophy" },
+    { "id": "easy.spend.100", "tier": "easy", "type": "spend", "goal": 100, "reward": [20, 35], "title": "Потрать {goal} монеток", "icon": "coin" },
+
+    { "id": "medium.clicks.1000", "tier": "medium", "type": "clicks", "goal": 1000, "reward": [75, 120], "title": "Сделай {goal} кликов", "icon": "cursor", "weight": 2 },
+    { "id": "medium.clicks.right", "tier": "medium", "type": "clicks", "button": "right", "goal": 150, "reward": [75, 110], "title": "Нажми ПКМ {goal} раз", "icon": "cursor" },
+    { "id": "medium.video.15", "tier": "medium", "type": "media", "source": "video", "goal": 15, "reward": [90, 140], "title": "Посмотри видео {goal} минут", "icon": "clock", "weight": 2 },
+    { "id": "medium.music.20", "tier": "medium", "type": "media", "source": "music", "goal": 20, "reward": [80, 130], "title": "Не выключай музыку {goal} минут", "icon": "clock" },
+    { "id": "medium.media.25", "tier": "medium", "type": "media", "goal": 25, "reward": [90, 140], "title": "Набери {goal} минут видео, музыки или игр", "icon": "clock" },
+    { "id": "medium.game.15", "tier": "medium", "type": "media", "source": "game", "goal": 15, "reward": [100, 150], "title": "Поиграй {goal} минут", "icon": "trophy" },
+    { "id": "medium.game.one", "tier": "medium", "type": "game", "goal": 10, "reward": [110, 150], "title": "Поиграй в {game} {goal} минут", "icon": "trophy", "weight": 2 },
+    { "id": "medium.upgrade.1", "tier": "medium", "type": "upgrade", "goal": 1, "reward": [75, 110], "title": "Купи любое улучшение", "icon": "arrow_up" },
+    { "id": "medium.spend.400", "tier": "medium", "type": "spend", "goal": 400, "reward": [75, 120], "title": "Потрать {goal} монеток", "icon": "coin" },
+
+    { "id": "hard.clicks.3000", "tier": "hard", "type": "clicks", "goal": 3000, "reward": [200, 320], "title": "Сделай {goal} кликов", "icon": "cursor" },
+    { "id": "hard.video.40", "tier": "hard", "type": "media", "source": "video", "goal": 40, "reward": [250, 400], "title": "Посмотри видео {goal} минут", "icon": "clock", "weight": 2 },
+    { "id": "hard.music.45", "tier": "hard", "type": "media", "source": "music", "goal": 45, "reward": [220, 350], "title": "Послушай музыку {goal} минут", "icon": "clock" },
+    { "id": "hard.game.one", "tier": "hard", "type": "game", "goal": 30, "reward": [300, 500], "title": "Поиграй в {game} {goal} минут", "icon": "trophy", "weight": 3 },
+    { "id": "hard.spend.1000", "tier": "hard", "type": "spend", "goal": 1000, "reward": [200, 350], "title": "Потрать {goal} монеток", "icon": "coin" },
+    { "id": "hard.upgrade.3", "tier": "hard", "type": "upgrade", "goal": 3, "reward": [220, 350], "title": "Купи {goal} уровня улучшений", "icon": "arrow_up" },
+    { "id": "hard.unlock.1", "tier": "hard", "type": "unlock", "goal": 1, "reward": [200, 300], "title": "Открой навсегда любую программу, игру или сайт", "icon": "unlock" }
+  ]
+}

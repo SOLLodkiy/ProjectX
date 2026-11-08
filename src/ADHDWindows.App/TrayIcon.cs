@@ -26,6 +26,7 @@ internal sealed class TrayIcon : IDisposable
 
             menu.Items.Add(texts.Get("tray.grantCoins"), null, (_, _) => actions.OnGrantCoins());
             menu.Items.Add(texts.Get("tray.recoveryProbe"), null, (_, _) => actions.OnRecoveryProbe());
+            menu.Items.Add(texts.Get("tray.quests.refresh"), null, (_, _) => actions.OnRefreshQuests());
             menu.Items.Add(new ToolStripSeparator());
         }
 
@@ -36,6 +37,7 @@ internal sealed class TrayIcon : IDisposable
         }
 
         menu.Items.Add(texts.Get("tray.shop"), null, (_, _) => actions.OnShop());
+        menu.Items.Add(texts.Get("tray.quests"), null, (_, _) => actions.OnQuests());
         menu.Items.Add(texts.Get("tray.stats"), null, (_, _) => actions.OnStats());
         menu.Items.Add(texts.Get("tray.locks"), null, (_, _) => actions.OnLocks());
         menu.Items.Add(new ToolStripMenuItem(texts.Get("tray.emergency", actions.EmergencyHotkey)) { Enabled = false });
@@ -109,7 +111,9 @@ internal sealed record TrayActions(
     Action? OnShowcase,
     Action OnGrantCoins,
     Action OnRecoveryProbe,
+    Action OnRefreshQuests,
     Action OnShop,
+    Action OnQuests,
     Action OnStats,
     Action OnLocks,
     Action OnExit,
