@@ -476,6 +476,10 @@ public sealed class QuestsModuleTests : IDisposable
             quests = null;
             bus.Publish(new QuestsRequested());
             Assert.NotNull(quests);
+            QuestPagesChanged? pages = null;
+            bus.Subscribe<QuestPagesChanged>(change => pages = change);
+            bus.Publish(new QuestPagesRequested());
+            Assert.NotNull(pages);
             Assert.Contains(_log.Infos, line => line.Contains("Шаблонов заданий: ", StringComparison.Ordinal));
             Assert.Empty(_log.Errors);
         }

@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "ADHDWindows",
-  "version": "0.9.0",
+  "version": "0.10.0",
   "description": "Сайты открываются за монетки ADHDWindows, а видео и музыка приносят монетки. Работает вместе с программой.",
   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAo6UOpTV93NSUKuVg5W1WPuf4tupRp1jnwpQTrgGMyM7lo5ullpYUqoKHDKzMx8pusP30PY4yXakPXne1ACy2vFIOlIm69+dROimecM4mGLi+gCO4Fs+eL1nGsrP/vb9hwxEbHKQCVOesdKZgAFiI7ZPFw11hBCOP4hVn/eXbp/LbMGMeD5e9yXVY3KebPe3jlIWPe0KXqkKE6bPbShTpT4ZTdFTQLMvOPecHQBCWv9WxpmBy9rFGDy6n3dcjOTV1c2EdTn5ZpcrdL2mzqPtLOuyF6qmcHcEsOuiqfH/yCJS0i3zgY0kgydDW9cSjyEqNMPKqrlf1PJi0TPKO8ZQAtQIDAQAB",
   "minimum_chrome_version": "120",
@@ -11,7 +11,8 @@
   "incognito": "spanning",
   "content_scripts": [
     { "matches": ["<all_urls>"], "js": ["media-hook.js"], "all_frames": true, "match_about_blank": true, "run_at": "document_start", "world": "MAIN" },
-    { "matches": ["<all_urls>"], "js": ["media.js"], "all_frames": true, "match_about_blank": true, "run_at": "document_start" }
+    { "matches": ["<all_urls>"], "js": ["media.js"], "all_frames": true, "match_about_blank": true, "run_at": "document_start" },
+    { "matches": ["http://*/*", "https://*/*"], "js": ["page.js"], "run_at": "document_idle" }
   ],
   "web_accessible_resources": [ { "resources": ["blocked.html"], "matches": ["<all_urls>"] } ],
   "icons": { "16": "icons/16.png", "32": "icons/32.png", "48": "icons/48.png", "128": "icons/128.png" }

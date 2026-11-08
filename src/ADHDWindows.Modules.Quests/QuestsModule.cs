@@ -1,4 +1,7 @@
+using System.Text.Json;
+using ADHDWindows.Core.Data;
 using ADHDWindows.Core.Economy;
+using ADHDWindows.Core.Logging;
 using ADHDWindows.Core.Input;
 using ADHDWindows.Core.Locks;
 using ADHDWindows.Core.Media;
@@ -24,6 +27,9 @@ public sealed class QuestsModule : IModule
     /// <summary>Настройка: список отключённых типов заданий, например <c>["game", "spend"]</c>.</summary>
     public const string DisabledTypesSetting = "disabledTypes";
 
+    /// <summary>Настройка режима разработчика: массив шаблонов в формате data/quests, полностью заменяет пул.</summary>
+    public const string TestTemplatesSetting = "testTemplates";
+
     private static readonly TimeSpan TickInterval = TimeSpan.FromSeconds(1);
     private static readonly TimeSpan Warmup = TimeSpan.FromSeconds(5);
     private static readonly TimeSpan StopTimeout = TimeSpan.FromSeconds(2);
@@ -31,6 +37,7 @@ public sealed class QuestsModule : IModule
     private readonly CancellationTokenSource _stop = new();
     private IModuleContext? _context;
     private QuestBoard? _board;
+    private HttpLinkChecker? _links;
     private Thread? _worker;
 
     public string Id => "quests";
@@ -43,7 +50,8 @@ public sealed class QuestsModule : IModule
     public void Start(IModuleContext context)
     {
         _context = context;
-        var templates = QuestCatalog.Load(context.Data, context.Log);
+        var templates = LoadTemplates(context.Data, context.Settings, context.DeveloperMode, context.Log);
+        _links = new HttpLinkChecker();
         var board = _board = new QuestBoard(
             templates,
             ReadOptions(context.Settings),
@@ -53,7 +61,8 @@ public sealed class QuestsModule : IModule
             context.Texts,
             TimeProvider.System,
             Random.Shared,
-            context.Log);
+            context.Log,
+            _links);
 
         context.Events.Subscribe<ClickCounted>(board.OnClick);
         context.Events.Subscribe<MediaTimeCounted>(board.OnMedia);
@@ -64,6 +73,9 @@ public sealed class QuestsModule : IModule
         context.Events.Subscribe<CollectionChanged>(board.OnCollection);
         context.Events.Subscribe<UpgradeShopChanged>(board.OnShop);
         context.Events.Subscribe<QuestsRequested>(_ => board.Publish());
+        context.Events.Subscribe<QuestPagesRequested>(_ => board.PublishPages());
+        context.Events.Subscribe<BrowserPageReported>(board.OnPage);
+        context.Events.Subscribe<BrowserMediaReported>(board.OnBrowserMedia);
         if (context.DeveloperMode)
         {
             context.Events.Subscribe<QuestsRefreshRequested>(_ => board.RefreshAll());
@@ -88,6 +100,25 @@ public sealed class QuestsModule : IModule
         {
             _context?.Log.Warn("Поток заданий не закрылся вовремя");
         }
+
+        _board?.Dispose();
+        _links?.Dispose();
+    }
+
+    /// <summary>
+    /// Шаблоны из data/quests. В режиме разработчика настройка <see cref="TestTemplatesSetting"/> полностью заменяет пул:
+    /// так сквозная проверка получает только свои задания.
+    /// </summary>
+    internal static IReadOnlyList<QuestTemplate> LoadTemplates(GameData data, IKeyValueStore settings, bool developerMode, ILog log)
+    {
+        if (developerMode && settings.Get<JsonElement?>(TestTemplatesSetting) is { ValueKind: not JsonValueKind.Null and not JsonValueKind.Undefined } test)
+        {
+            var templates = QuestCatalog.Parse(test, "настройки " + TestTemplatesSetting, log);
+            log.Info($"Режим разработчика: пул заданий заменён настройкой {TestTemplatesSetting}");
+            return templates;
+        }
+
+        return QuestCatalog.Load(data, log);
     }
 
     internal static QuestOptions ReadOptions(IKeyValueStore settings)

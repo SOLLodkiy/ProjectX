@@ -1,0 +1,31 @@
+{
+  // Задания на страницы. Формат шаблона тот же, что в base.json, плюс обязательная ссылка url (http или https).
+  // type:
+  //   visit  — открыть страницу; goal не нужен.
+  //   read   — прочитать страницу: прокрутить до конца во вкладке в фокусе; goal не нужен.
+  //   select — выделить на странице слово word (без учёта регистра, ё = е); в title подставляется {word}.
+  //   listen — полностью прослушать трек: засчитывается только естественное воспроизведение, нужно 90% длины;
+  //            goal — примерная длина трека в минутах, пока плеер не сообщит точную.
+  // Ссылка проверяется перед выдачей: задание с неоткрывающейся ссылкой не выдаётся.
+  // Если сайт задания заблокирован, на время задания открывается бесплатно только эта страница.
+  // Слова проверены по тексту статей 2026-11-08.
+  "templates": [
+    { "id": "easy.visit.watermelon", "tier": "easy", "type": "visit", "url": "https://ru.wikipedia.org/wiki/Арбуз", "reward": [20, 30], "title": "Открой статью «Арбуз» в Википедии", "icon": "quest" },
+    { "id": "easy.visit.hedgehog", "tier": "easy", "type": "visit", "url": "https://ru.wikipedia.org/wiki/Ежовые", "reward": [20, 30], "title": "Открой статью про ежей в Википедии", "icon": "quest" },
+    { "id": "easy.read.penguins", "tier": "easy", "type": "read", "url": "https://ru.wikipedia.org/wiki/Пингвиновые", "reward": [30, 50], "title": "Дочитай до конца статью про пингвинов в Википедии", "icon": "quest" },
+    { "id": "easy.read.tea", "tier": "easy", "type": "read", "url": "https://ru.wikipedia.org/wiki/Чай", "reward": [30, 50], "title": "Дочитай до конца статью про чай в Википедии", "icon": "quest" },
+    { "id": "easy.listen.city-ports", "tier": "easy", "type": "listen", "goal": 2.4, "url": "https://soundcloud.com/forss/city-ports", "reward": [35, 50], "title": "Прослушай полностью трек Forss — City Ports на SoundCloud", "icon": "clock" },
+
+    { "id": "medium.select.cucumber", "tier": "medium", "type": "select", "url": "https://ru.wikipedia.org/wiki/Огурец_обыкновенный", "word": "зелёный", "reward": [90, 130], "title": "Прочитай на Википедии статью про огурцы и выдели там слово «{word}»", "icon": "star", "weight": 2 },
+    { "id": "medium.select.moon", "tier": "medium", "type": "select", "url": "https://ru.wikipedia.org/wiki/Луна", "word": "кратер", "reward": [75, 120], "title": "Найди в статье про Луну слово «{word}» и выдели его", "icon": "star" },
+    { "id": "medium.select.banana", "tier": "medium", "type": "select", "url": "https://ru.wikipedia.org/wiki/Банан", "word": "жёлтый", "reward": [75, 120], "title": "Найди в статье про банан слово «{word}» и выдели его", "icon": "star" },
+    { "id": "medium.select.rainbow", "tier": "medium", "type": "select", "url": "https://ru.wikipedia.org/wiki/Радуга", "word": "фиолетовый", "reward": [75, 120], "title": "Найди в статье про радугу слово «{word}» и выдели его", "icon": "star" },
+    { "id": "medium.select.cat", "tier": "medium", "type": "select", "url": "https://ru.wikipedia.org/wiki/Кошка", "word": "мурлыканье", "reward": [75, 120], "title": "Найди в статье про кошек слово «{word}» и выдели его", "icon": "star" },
+    { "id": "medium.select.coffee", "tier": "medium", "type": "select", "url": "https://ru.wikipedia.org/wiki/Кофе", "word": "арабика", "reward": [75, 120], "title": "Найди в статье про кофе слово «{word}» и выдели его", "icon": "star" },
+    { "id": "medium.listen.flickermood", "tier": "medium", "type": "listen", "goal": 3.6, "url": "https://soundcloud.com/forss/flickermood", "reward": [90, 130], "title": "Прослушай полностью трек Forss — Flickermood на SoundCloud", "icon": "clock", "weight": 2 },
+    { "id": "medium.listen.soulhack", "tier": "medium", "type": "listen", "goal": 4.6, "url": "https://soundcloud.com/forss/soulhack", "reward": [100, 140], "title": "Прослушай полностью трек Forss — Soulhack на SoundCloud", "icon": "clock" },
+    { "id": "medium.listen.using-splashes", "tier": "medium", "type": "listen", "goal": 4.9, "url": "https://soundcloud.com/forss/using-splashes", "reward": [100, 140], "title": "Прослушай полностью трек Forss — Using Splashes на SoundCloud", "icon": "clock" },
+
+    { "id": "hard.listen.funk-for-nerds", "tier": "hard", "type": "listen", "goal": 7.7, "url": "https://soundcloud.com/forss/funk-for-nerds", "reward": [200, 280], "title": "Прослушай полностью длинный трек Forss — Funk for Nerds на SoundCloud", "icon": "clock" }
+  ]
+}

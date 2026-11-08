@@ -21,7 +21,7 @@ internal sealed class QuestScreen : IDisposable
     private readonly Dispatcher _dispatcher;
     private readonly List<IDisposable> _subscriptions;
     private readonly DispatcherTimer _timer;
-    private volatile IReadOnlyList<QuestView>? _latest;
+    private volatile QuestsChanged? _latest;
     private QuestsWindow? _window;
 
     public QuestScreen(IEventBus events, TextCatalog texts, Func<bool> designReady, Dispatcher dispatcher)
@@ -35,8 +35,8 @@ internal sealed class QuestScreen : IDisposable
         [
             events.Subscribe<QuestsChanged>(change =>
             {
-                _latest = change.Quests;
-                OnUi(() => _window?.Update(change.Quests, DateTimeOffset.UtcNow));
+                _latest = change;
+                OnUi(() => _window?.Update(change.Quests, DateTimeOffset.UtcNow, change.Chain, change.ChainGoal));
             }),
             events.Subscribe<QuestIssued>(issued => OnUi(() => Notify(
                 issued.Notify,
@@ -67,7 +67,7 @@ internal sealed class QuestScreen : IDisposable
 
     public void Open()
     {
-        if (!_designReady() || _latest is not { } quests)
+        if (!_designReady() || _latest is not { } latest)
         {
             return;
         }
@@ -80,7 +80,7 @@ internal sealed class QuestScreen : IDisposable
                 _window = null;
                 _timer.Stop();
             };
-            _window.Update(quests, DateTimeOffset.UtcNow);
+            _window.Update(latest.Quests, DateTimeOffset.UtcNow, latest.Chain, latest.ChainGoal);
             _window.Show();
             _timer.Start();
         }
