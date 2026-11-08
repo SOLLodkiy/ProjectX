@@ -44,6 +44,7 @@ public sealed class MouseHook(Action<MouseButtonChanged> handler, ILog log) : ID
         });
 
     private HookCallback? _callback;
+    private volatile bool _unswap;
     private Thread? _thread;
     private Task? _dispatcher;
     private uint _threadId;
@@ -97,10 +98,35 @@ public sealed class MouseHook(Action<MouseButtonChanged> handler, ILog log) : ID
         _dispatcher?.GetAwaiter().GetResult();
     }
 
-    /// <summary>Переводит сообщение хука в событие. Возвращает null для сообщений без смены кнопки.</summary>
-    public static MouseButtonChanged? Translate(int message, uint flags, TimeSpan time)
+    /// <summary>
+    /// Кнопки поменяны механикой (<see cref="MouseButtonsSwapped"/>): хук видит их поменянными и переводит обратно,
+    /// чтобы событие называло физическую кнопку.
+    /// </summary>
+    public bool Unswap
+    {
+        get => _unswap;
+        set => _unswap = value;
+    }
+
+    /// <summary>
+    /// Переводит сообщение хука в событие. Возвращает null для сообщений без смены кнопки.
+    /// <paramref name="unswap"/> меняет левую и правую кнопки местами.
+    /// </summary>
+    public static MouseButtonChanged? Translate(int message, uint flags, TimeSpan time, bool unswap = false)
     {
         var injected = (flags & (InjectedFlag | LowerIntegrityInjectedFlag)) != 0;
+        if (unswap)
+        {
+            message = message switch
+            {
+                LeftDown => RightDown,
+                LeftUp => RightUp,
+                RightDown => LeftDown,
+                RightUp => LeftUp,
+                _ => message,
+            };
+        }
+
         return message switch
         {
             LeftDown => new MouseButtonChanged(MouseButton.Left, Pressed: true, injected, time),
@@ -152,7 +178,7 @@ public sealed class MouseHook(Action<MouseButtonChanged> handler, ILog log) : ID
             if (kind is >= LeftDown and <= MiddleUp)
             {
                 var flags = (uint)Marshal.ReadInt32(data, FlagsOffset);
-                if (Translate(kind, flags, Stopwatch.GetElapsedTime(0)) is { } change)
+                if (Translate(kind, flags, Stopwatch.GetElapsedTime(0), _unswap) is { } change)
                 {
                     _queue.Writer.TryWrite(change);
                 }

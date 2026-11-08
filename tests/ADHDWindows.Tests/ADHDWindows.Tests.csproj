@@ -30,6 +30,8 @@
     <ProjectReference Include="..\..\src\ADHDWindows.Modules.Quests\ADHDWindows.Modules.Quests.csproj" />
     <ProjectReference Include="..\..\src\ADHDWindows.Modules.Hardships\ADHDWindows.Modules.Hardships.csproj" />
     <ProjectReference Include="..\..\src\ADHDWindows.Modules.Hardships.Basic\ADHDWindows.Modules.Hardships.Basic.csproj" />
+    <ProjectReference Include="..\..\src\ADHDWindows.Modules.Hardships.Cursor\ADHDWindows.Modules.Hardships.Cursor.csproj" />
+    <ProjectReference Include="..\..\src\ADHDWindows.Modules.Hardships.Screen\ADHDWindows.Modules.Hardships.Screen.csproj" />
     <!-- Отдельная программа: тесты запускают и замораживают её как процесс. -->
     <ProjectReference Include="..\ADHDWindows.TestApp\ADHDWindows.TestApp.csproj"
                       ReferenceOutputAssembly="false"

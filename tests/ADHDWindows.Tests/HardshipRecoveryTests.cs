@@ -5,6 +5,8 @@ using ADHDWindows.Core.Safety;
 using ADHDWindows.Core.Storage;
 using ADHDWindows.Modules.Hardships;
 using ADHDWindows.Modules.Hardships.Basic;
+using ADHDWindows.Modules.Hardships.Cursor;
+using ADHDWindows.Modules.Hardships.Screen;
 using ADHDWindows.Platform;
 
 namespace ADHDWindows.Tests;
@@ -109,6 +111,55 @@ public sealed class HardshipRecoveryTests : IDisposable
     }
 
     [Fact]
+    public void Killed_app_gives_the_mouse_buttons_back()
+    {
+        var swapped = MouseButtons.IsSwapped();
+        try
+        {
+            var app = StartApp("swapButtons");
+            WaitUntil(() => AppLog().Contains("Усложнение включено: swapButtons"), "смена кнопок");
+            Assert.NotEqual(swapped, MouseButtons.IsSwapped());
+            var watchdog = FindWatchdog();
+
+            app.Kill();
+
+            WaitUntil(() => MouseButtons.IsSwapped() == swapped, "возврат кнопок");
+            WaitUntil(() => watchdog.HasExited, "завершение сторожа");
+            Assert.Contains($"Откачено: {MouseButtonsRestorer.ChangeKind}", WatchdogLog());
+        }
+        finally
+        {
+            MouseButtons.SetSwapped(swapped);
+        }
+    }
+
+    [Fact]
+    public void Killed_app_puts_wandering_windows_back()
+    {
+        var window = StartWindow();
+        WaitUntil(
+            () =>
+            {
+                // Система разрешает сменить активное окно процессу, от которого пришёл последний ввод: F24 ничего не делает.
+                SendInput(2, [Key(0x87, 0), Key(0x87, 0x0002)], Marshal.SizeOf<NativeInput>());
+                WindowControl.TryActivate(window);
+                return WindowControl.Foreground() == window;
+            },
+            "активное тестовое окно");
+        var origin = WindowTraits.Bounds(window);
+        var app = StartApp("wanderingWindows");
+        WaitUntil(() => AppLog().Contains("Усложнение включено: wanderingWindows"), "бродячие окна");
+        WaitUntil(() => WindowTraits.Bounds(window) != origin, "окно поползло");
+        var watchdog = FindWatchdog();
+
+        app.Kill();
+
+        WaitUntil(() => WindowTraits.Bounds(window) == origin, "окно вернулось");
+        WaitUntil(() => watchdog.HasExited, "завершение сторожа");
+        Assert.Contains($"Откачено: {WindowPositionsRestorer.ChangeKind}", WatchdogLog());
+    }
+
+    [Fact]
     public void Emergency_hotkey_removes_the_hardship_and_quits()
     {
         var visible = CursorControl.VisiblePixelsOfArrow();
@@ -163,6 +214,7 @@ public sealed class HardshipRecoveryTests : IDisposable
         settings.Set("modules/locks/onlyUnder", _temp.Combine("locked"));
         settings.Set($"modules/hardships/{HardshipsModule.IgnoreSafetySetting}", true);
         settings.Set($"modules/hardship.oneWindow/{OneWindowHardship.OnlyUnderSetting}", Apps);
+        settings.Set($"modules/hardship.wanderingWindows/{WanderingWindowsHardship.OnlyUnderSetting}", Apps);
         settings.Flush();
 
         var directory = Path.Combine(RepositoryRoot.Find(), "src", "ADHDWindows.App", "bin", Configuration, "net10.0-windows");

@@ -19,3 +19,9 @@ public sealed record MouseButtonChanged(MouseButton Button, bool Pressed, bool I
 /// Приходит не в потоке интерфейса. <paramref name="Time"/> — монотонное время нажатия.
 /// </summary>
 public sealed record ClickCounted(MouseButton Button, TimeSpan Time);
+
+/// <summary>
+/// Механика поменяла левую и правую кнопки мыши местами (<paramref name="Swapped"/> = true) или вернула их.
+/// Хук мыши после этого видит кнопки поменянными, поэтому переводит их обратно: клик считается по физической кнопке.
+/// </summary>
+public sealed record MouseButtonsSwapped(bool Swapped);

@@ -7,7 +7,7 @@ using ADHDWindows.Platform;
 namespace ADHDWindows.Modules.Hardships.Basic;
 
 /// <summary>Фоновый поток, который вызывает действие примерно 60 раз в секунду и передаёт прошедшие секунды.</summary>
-internal sealed class Ticker : IDisposable
+public sealed class Ticker : IDisposable
 {
     private static readonly TimeSpan StopTimeout = TimeSpan.FromSeconds(2);
 

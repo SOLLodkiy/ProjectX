@@ -12,6 +12,7 @@ using ADHDWindows.App.Stats;
 using ADHDWindows.App.Time;
 using ADHDWindows.Core.Hardships;
 using ADHDWindows.Core.Hosting;
+using ADHDWindows.Core.Input;
 using ADHDWindows.Core.Hud;
 using ADHDWindows.Core.Logging;
 using ADHDWindows.Core.Quests;
@@ -86,6 +87,8 @@ public partial class App : Application
         _questScreen.Request();
         _hardshipScreen.Request();
         _mouseHook = new MouseHook(_host.Events.Publish, log);
+        var mouseHook = _mouseHook;
+        _host.Events.Subscribe<MouseButtonsSwapped>(swap => mouseHook.Unswap = swap.Swapped);
         _mouseHook.Start();
 
         _designReady = InstallDesignSystem(paths, log);

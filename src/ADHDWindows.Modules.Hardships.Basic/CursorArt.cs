@@ -10,7 +10,7 @@ public static class CursorArt
     private static readonly uint[] DirtColors = [0xFF5A3A22, 0xFF8A5A2E, 0xFF3E2716];
 
     // Классическая стрелка 12×19: B — контур, W — заливка.
-    private static readonly string[] Arrow =
+    private static readonly string[] ArrowRows =
     [
         "B",
         "BB",
@@ -45,11 +45,11 @@ public static class CursorArt
         var scale = Math.Max(1, size / 32);
         var pixels = new uint[size * size];
         dirt = Math.Clamp(dirt, 0, 1);
-        for (var row = 0; row < Arrow.Length; row++)
+        for (var row = 0; row < ArrowRows.Length; row++)
         {
-            for (var column = 0; column < Arrow[row].Length; column++)
+            for (var column = 0; column < ArrowRows[row].Length; column++)
             {
-                var color = Arrow[row][column] switch
+                var color = ArrowRows[row][column] switch
                 {
                     'B' => Black,
                     'W' => White,
@@ -67,7 +67,7 @@ public static class CursorArt
         // Комья прилипают снаружи у контура.
         if (dirt > 0.4)
         {
-            for (var row = 1; row < Arrow.Length + 1; row++)
+            for (var row = 1; row < ArrowRows.Length + 1; row++)
             {
                 for (var column = 1; column < 14; column++)
                 {
@@ -82,11 +82,62 @@ public static class CursorArt
         return pixels;
     }
 
+    // Крошечная стрелка 4×6.
+    private static readonly string[] TinyArrow =
+    [
+        "B",
+        "BB",
+        "BWB",
+        "BWWB",
+        "BBB",
+        "B",
+    ];
+
+    /// <summary>Высота обычной стрелки в пикселях арта.</summary>
+    public const int ArrowHeight = 19;
+
+    /// <summary>
+    /// Обычная стрелка, увеличенная в <paramref name="scale"/> раз, на холсте <paramref name="size"/>×<paramref name="size"/>.
+    /// <paramref name="flipped"/> поворачивает её на 180°: остриё в правом нижнем углу картинки.
+    /// Возвращает картинку и точку острия — горячую точку курсора.
+    /// </summary>
+    public static (uint[] Pixels, int HotX, int HotY) Arrow(int size, int scale, bool flipped = false) =>
+        Draw(ArrowRows, size, scale, flipped);
+
+    /// <summary>Крошечная стрелка 4×6 без увеличения: её почти не видно.</summary>
+    public static (uint[] Pixels, int HotX, int HotY) Tiny(int size) => Draw(TinyArrow, size, 1, flipped: false);
+
+    private static (uint[] Pixels, int HotX, int HotY) Draw(string[] pattern, int size, int scale, bool flipped)
+    {
+        var pixels = new uint[size * size];
+        var width = pattern.Max(row => row.Length);
+        var height = pattern.Length;
+        for (var row = 0; row < height; row++)
+        {
+            for (var column = 0; column < pattern[row].Length; column++)
+            {
+                var color = pattern[row][column] switch
+                {
+                    'B' => Black,
+                    'W' => White,
+                    _ => 0u,
+                };
+                var x = flipped ? width - 1 - column : column;
+                var y = flipped ? height - 1 - row : row;
+                Fill(pixels, size, scale, x, y, color);
+            }
+        }
+
+        return flipped
+            ? (pixels, Math.Min(size - 1, (width * scale) - 1), Math.Min(size - 1, (height * scale) - 1))
+            : (pixels, 0, 0);
+    }
+
     /// <summary>Сколько точек картинки видно, для проверок.</summary>
     public static int Visible(uint[] pixels) => pixels.Count(pixel => (pixel >> 24) != 0);
 
     private static char At(int column, int row) =>
-        row >= 0 && row < Arrow.Length && column >= 0 && column < Arrow[row].Length ? Arrow[row][column] : ' ';
+        row >= 0 && row < ArrowRows.Length && column >= 0 && column < ArrowRows[row].Length ? ArrowRows[row][column] : ' ';
 
     private static bool Touches(int column, int row) =>
         At(column - 1, row) == 'B' || At(column + 1, row) == 'B' || At(column, row - 1) == 'B' || At(column, row + 1) == 'B';

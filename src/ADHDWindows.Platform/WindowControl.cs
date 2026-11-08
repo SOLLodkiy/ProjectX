@@ -21,6 +21,9 @@ public static class WindowControl
     private const int ShowMaximized = 3;
     private const int RestoreToMaximized = 2;
 
+    // SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE | SWP_ASYNCWINDOWPOS.
+    private const uint MoveFlags = 0x0001 | 0x0004 | 0x0010 | 0x4000;
+
     // Рамка приложений Магазина принадлежит общему системному процессу, а настоящий владелец — у вложенного окна.
     private const string FrameClass = "ApplicationFrameWindow";
     private const string CoreClass = "Windows.UI.Core.CoreWindow";
@@ -127,6 +130,15 @@ public static class WindowControl
         }
     }
 
+    /// <summary>Развёрнуто ли окно на весь экран.</summary>
+    public static bool IsMaximized(IntPtr window) => IsZoomed(window);
+
+    /// <summary>
+    /// Двигает окно в точку экрана, не меняя размер, порядок и фокус. Не ждёт программу окна: годится и для зависшей.
+    /// </summary>
+    public static void MoveInBackground(IntPtr window, Core.Display.ScreenPoint position) =>
+        SetWindowPos(window, IntPtr.Zero, position.X, position.Y, 0, 0, MoveFlags);
+
     public static void RestoreWindow(IntPtr window)
     {
         if (IsIconic(window))
@@ -192,6 +204,14 @@ public static class WindowControl
 
     [DllImport("user32.dll")]
     private static extern IntPtr GetForegroundWindow();
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool IsZoomed(IntPtr window);
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool SetWindowPos(IntPtr window, IntPtr insertAfter, int x, int y, int width, int height, uint flags);
 
     [DllImport("user32.dll")]
     private static extern IntPtr GetAncestor(IntPtr window, uint flags);
