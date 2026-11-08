@@ -28,7 +28,9 @@ internal static class RepositoryRoot
     /// <summary>Копирует собранный модуль в папку modules, как при установке.</summary>
     public static void DeployModule(string name, string modulesDirectory)
     {
-        var output = Path.Combine(Find(), "src", name, "bin", Configuration, "net10.0");
+        // Модулю, который работает с Windows напрямую, нужна цель net10.0-windows.
+        var bin = Path.Combine(Find(), "src", name, "bin", Configuration);
+        var output = Directory.Exists(Path.Combine(bin, "net10.0")) ? Path.Combine(bin, "net10.0") : Path.Combine(bin, "net10.0-windows");
         var target = Path.Combine(modulesDirectory, name);
         Directory.CreateDirectory(target);
         foreach (var file in Directory.GetFiles(output))

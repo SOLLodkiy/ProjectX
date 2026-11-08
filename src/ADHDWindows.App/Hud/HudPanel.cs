@@ -44,7 +44,7 @@ public sealed class HudPanel : PixelFrame
     /// <summary>Открывает окно магазина, подключается через <see cref="HudWindow.ConnectShop"/>.</summary>
     public PixelButton Shop { get; }
 
-    /// <summary>Откроется в окне логов. Подключается вместе с ним.</summary>
+    /// <summary>Открывает окно логов, подключается через <see cref="HudWindow.ConnectLogs"/>.</summary>
     public PixelButton Logs { get; }
 
     public void Show(long balance, long perMinute, string? hardship, string? quest)

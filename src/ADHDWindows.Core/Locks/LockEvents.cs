@@ -29,3 +29,18 @@ public sealed record UnlockDenied(string Key, long Price);
 
 /// <summary>Покупка совершена и действует навсегда.</summary>
 public sealed record ItemUnlocked(LockOffer Offer, DateTimeOffset When);
+
+/// <summary>Купленное навсегда: <paramref name="Key"/> — код покупки, дата и цена — как в момент покупки.</summary>
+public sealed record CollectionItem(string Key, string Name, LockKind Kind, long Price, DateTimeOffset When);
+
+/// <summary>Сколько всего в каталоге одного вида и сколько из этого куплено.</summary>
+public sealed record CollectionCatalog(LockKind Kind, int Total, int Unlocked);
+
+/// <summary>
+/// Коллекция купленного и размер каталога. Владелец покупок рассылает её после каждой покупки,
+/// при изменении каталога и по запросу <see cref="CollectionRequested"/>.
+/// </summary>
+public sealed record CollectionChanged(IReadOnlyList<CollectionItem> Items, IReadOnlyList<CollectionCatalog> Catalog);
+
+/// <summary>Модулю нужна коллекция купленного.</summary>
+public sealed record CollectionRequested;

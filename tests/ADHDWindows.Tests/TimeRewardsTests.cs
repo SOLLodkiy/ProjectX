@@ -574,7 +574,7 @@ public sealed class TimeRewardsTests
         Assert.InRange(_economy.Calls.Count, 2, 3);
     }
 
-    private sealed class RecordingEconomy : IEconomy
+    internal sealed class RecordingEconomy : IEconomy
     {
         public List<(string Source, decimal Amount)> Calls { get; } = [];
 

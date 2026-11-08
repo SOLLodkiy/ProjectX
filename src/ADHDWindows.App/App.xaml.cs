@@ -6,6 +6,7 @@ using ADHDWindows.App.Design;
 using ADHDWindows.App.Hud;
 using ADHDWindows.App.Locks;
 using ADHDWindows.App.Shop;
+using ADHDWindows.App.Stats;
 using ADHDWindows.App.Time;
 using ADHDWindows.Core.Hosting;
 using ADHDWindows.Core.Hud;
@@ -21,6 +22,11 @@ public partial class App : Application
     private const int DeveloperGrant = 1000;
     private const string ManualProbeToken = "tray";
 
+    /// <summary>Настройка: сочетание клавиш окна «Логи».</summary>
+    private const string StatsHotkeySetting = "stats/hotkey";
+
+    private static readonly Hotkey DefaultStatsHotkey = new(HotkeyModifiers.Control | HotkeyModifiers.Alt | HotkeyModifiers.Shift, 'L');
+
     private FileLog? _log;
     private SingleInstanceGuard? _instanceGuard;
     private GameHost? _host;
@@ -35,6 +41,8 @@ public partial class App : Application
     private ExtensionScreen? _extensionScreen;
     private PresenceScreen? _presenceScreen;
     private ShopScreen? _shopScreen;
+    private StatsScreen? _statsScreen;
+    private GlobalHotkey? _statsHotkey;
     private ShowcaseWindow? _showcase;
     private bool _designReady;
 
@@ -64,7 +72,9 @@ public partial class App : Application
         _extensionScreen = new ExtensionScreen(_host.Events, _host.Texts, () => _designReady, Dispatcher);
         _presenceScreen = new PresenceScreen(_host.Events, _host.Texts, () => _designReady, Dispatcher);
         _shopScreen = new ShopScreen(_host.Events, _host.Economy, _host.Texts, () => _designReady, Dispatcher);
+        _statsScreen = new StatsScreen(_host.Events, _host.Texts, () => _designReady, Dispatcher, _host.ResetProgress, log);
         _host.Start(() => StartWatchdog(paths, log));
+        _statsScreen.Request();
         _mouseHook = new MouseHook(_host.Events.Publish, log);
         _mouseHook.Start();
 
@@ -80,6 +90,7 @@ public partial class App : Application
                 () => _host.Economy.Earn(DeveloperGrantSource, DeveloperGrant),
                 () => _host.Events.Publish(new RecoveryProbeRequested(ManualProbeToken)),
                 () => _shopScreen.Open(),
+                () => _statsScreen.Open(),
                 () => _lockScreen.Open(),
                 () => Shutdown(),
                 _hotkey.ToString()));
@@ -88,8 +99,11 @@ public partial class App : Application
         {
             _hud = new HudWindow(_host.Economy, _host.Events, _host.Texts, hudSettings, log);
             _hud.ConnectShop(_shopScreen.Open, () => _shopScreen.Available);
+            _hud.ConnectLogs(_statsScreen.Open, () => _statsScreen.Available);
             _hud.Start();
         }
+
+        StartStatsHotkey(log);
 
         // Модуль мог заблокировать уже открытые программы раньше, чем загрузилась дизайн-система.
         _lockScreen.Open();
@@ -103,6 +117,34 @@ public partial class App : Application
         if (options.RecoveryProbe is { } token)
         {
             _host.Events.Publish(new RecoveryProbeRequested(token));
+        }
+    }
+
+    /// <summary>Горячая клавиша окна «Логи». Занятое сочетание не мешает работе: окно открывается из HUD и трея.</summary>
+    private void StartStatsHotkey(FileLog log)
+    {
+        var text = _host!.Settings.Get<string>(StatsHotkeySetting);
+        if (!Hotkey.TryParse(text, out var hotkey))
+        {
+            if (text is not null)
+            {
+                log.Warn($"Неверное сочетание клавиш в настройке {StatsHotkeySetting}: {text}");
+            }
+
+            hotkey = DefaultStatsHotkey;
+        }
+
+        if (hotkey == _hotkey)
+        {
+            log.Warn($"Клавиша логов совпадает с аварийной остановкой и не подключена: {hotkey}");
+            return;
+        }
+
+        _statsHotkey = new GlobalHotkey(hotkey, () => Dispatcher.BeginInvoke(() => _statsScreen?.Open()), log);
+        if (!_statsHotkey.Start())
+        {
+            log.Warn($"Клавиша логов занята: {hotkey}");
+            ShowSafetyWarning("stats.hotkeyBusy", hotkey);
         }
     }
 
@@ -181,6 +223,8 @@ public partial class App : Application
         _extensionScreen?.Dispose();
         _presenceScreen?.Dispose();
         _shopScreen?.Dispose();
+        _statsHotkey?.Dispose();
+        _statsScreen?.Dispose();
         _hud?.Dispose();
         _tray?.Dispose();
         _watchdog?.Dispose();

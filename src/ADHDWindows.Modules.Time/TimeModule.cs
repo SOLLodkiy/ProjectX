@@ -51,7 +51,7 @@ public sealed class TimeModule : IModule
             context.Log.Info($"Режим разработчика: сайты для проверки хронометража: {testSites}");
         }
 
-        _rewards = new TimeRewards(rules, context.Economy, context.Events, context.Log, TimeProvider.System, verbose: !string.IsNullOrWhiteSpace(testSites));
+        _rewards = new TimeRewards(rules, context.Economy, context.Events, context.Log, TimeProvider.System, verbose: !string.IsNullOrWhiteSpace(testSites), texts: context.Texts);
         _desktop = new DesktopMedia(appId => rules.FindApp(appId) is not null, context.Log);
 
         context.Events.Subscribe<BrowserMediaReported>(report => Enqueue(() => _rewards.OnBrowserMedia(report)));

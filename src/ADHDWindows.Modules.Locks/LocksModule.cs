@@ -41,6 +41,9 @@ public sealed class LocksModule : IModule
     private IModuleContext? _context;
     private LockEngine? _engine;
     private GameLibrary? _games;
+    private UnlockLedger? _ledger;
+    private ProgramCatalog? _programCatalog;
+    private SiteCatalog? _siteCatalog;
     private SiteLocks? _sites;
     private BrowserWatch? _browsers;
     private BrowserBridge? _bridge;
@@ -76,12 +79,15 @@ public sealed class LocksModule : IModule
 
         var gameCatalog = GameCatalog.Load(context.Data);
         _games = new GameLibrary(GameSources(context), gameCatalog, context.Log, TimeProvider.System);
-        var classifier = new ProgramClassifier(ProgramCatalog.Load(context.Data), OwnFiles(), onlyUnder, _games);
+        _programCatalog = ProgramCatalog.Load(context.Data);
+        var classifier = new ProgramClassifier(_programCatalog, OwnFiles(), onlyUnder, _games);
         var siteCatalog = SiteCatalog.Load(context.Data);
+        _siteCatalog = siteCatalog;
         var system = new WindowsProgramSystem();
 
         // Одна книга покупок на программы и сайты: обе части пишут в одно сохранение из одного потока.
         var ledger = new UnlockLedger(context.Saves);
+        _ledger = ledger;
         _engine = new LockEngine(
             system,
             classifier,
@@ -111,6 +117,8 @@ public sealed class LocksModule : IModule
         _bridge.Start();
 
         context.Events.Subscribe<InstalledGamesRequested>(_ => Enqueue(PublishGames));
+        context.Events.Subscribe<CollectionRequested>(_ => Enqueue(PublishCollection));
+        context.Events.Subscribe<ItemUnlocked>(_ => Enqueue(PublishCollection));
         context.Events.Subscribe<UnlockRequested>(request => Enqueue(() => _engine.Unlock(request.Key)));
         context.Events.Subscribe<ExtensionPageRequested>(request => Enqueue(() => _browsers?.OpenExtensionsPage(request.BrowserId)));
         _watcher = new WindowWatcher(OnWindow, context.Log);
@@ -184,7 +192,16 @@ public sealed class LocksModule : IModule
     {
         _gamesPublished = true;
         _context!.Events.Publish(new InstalledGamesChanged([.. _games!.Games.Select(game => new GameInstall(game.Key, game.Name, game.Folder))]));
+        PublishCollection();
     }
+
+    /// <summary>Коллекция купленного для статистики: меняется после покупки и при новых установках игр.</summary>
+    private void PublishCollection() =>
+        _context!.Events.Publish(CollectionReport.Build(
+            _ledger!.Records,
+            _programCatalog!,
+            _siteCatalog!,
+            _games!.Games.Select(game => game.Key)));
 
     private void CheckBrowsers()
     {

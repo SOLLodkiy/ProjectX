@@ -64,6 +64,11 @@ public sealed class ClicksModule : IModule
 
         // Фильтр видит и неоплаченные нажатия: после покупки автокликер не получит чистую историю.
         var verdict = filter.Process(change);
+        if (verdict == ClickVerdict.Counted)
+        {
+            context.Events.Publish(new ClickCounted(change.Button, change.Time));
+        }
+
         switch (verdict)
         {
             case ClickVerdict.Counted when _paid.Contains(change.Button):

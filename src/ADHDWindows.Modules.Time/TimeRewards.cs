@@ -1,7 +1,9 @@
+using ADHDWindows.Core.Data;
 using ADHDWindows.Core.Economy;
 using ADHDWindows.Core.Events;
 using ADHDWindows.Core.Logging;
 using ADHDWindows.Core.Media;
+using ADHDWindows.Core.Stats;
 
 namespace ADHDWindows.Modules.Time;
 
@@ -60,10 +62,14 @@ public sealed class TimeRewards
     private DateTimeOffset _gameSeenAt;
     private readonly bool _verbose;
     private readonly Dictionary<Activity, decimal> _totals = [];
+    private readonly Dictionary<(Activity Activity, string Subject), double> _pendingSeconds = [];
+    private readonly TextCatalog? _texts;
 
     /// <param name="verbose">Писать в журнал итоги каждого зачисления: по ним сквозная проверка сверяет начисления.</param>
-    public TimeRewards(TimeRules rules, IEconomy economy, IEventBus events, ILog log, TimeProvider clock, bool verbose = false)
+    /// <param name="texts">Тексты для ленты событий. Без них досмотр в ленту не пишется.</param>
+    public TimeRewards(TimeRules rules, IEconomy economy, IEventBus events, ILog log, TimeProvider clock, bool verbose = false, TextCatalog? texts = null)
     {
+        _texts = texts;
         _verbose = verbose;
         _rules = rules;
         _economy = economy;
@@ -120,6 +126,7 @@ public sealed class TimeRewards
             }
 
             var host = Uri.TryCreate(tab.Url, UriKind.Absolute, out var uri) ? uri.Host : tab.Url;
+            var site = host.StartsWith("www.", StringComparison.OrdinalIgnoreCase) ? host[4..] : host;
             var visible = activity == Activity.Music || (tab.Focused && browserInFront);
             foreach (var media in tab.Media)
             {
@@ -130,7 +137,7 @@ public sealed class TimeRewards
                     media.Playing && media.Audible,
                     media.Rate,
                     $"{host}|{media.Title}|{duration}");
-                Feed($"{prefix}{tab.TabId}:{media.Id}", activity, sample, visible, now);
+                Feed($"{prefix}{tab.TabId}:{media.Id}", activity, sample, visible, now, site);
             }
         }
     }
@@ -140,7 +147,7 @@ public sealed class TimeRewards
         var now = _clock.GetUtcNow();
         foreach (var session in sessions)
         {
-            if (_rules.FindApp(session.AppId) is null)
+            if (_rules.FindApp(session.AppId) is not { } app)
             {
                 continue;
             }
@@ -151,7 +158,7 @@ public sealed class TimeRewards
                 session.Playing,
                 session.Rate,
                 $"{session.AppId}|{session.Artist}|{session.Title}");
-            Feed($"d:{session.AppId}", Activity.Music, sample, visible: true, now);
+            Feed($"d:{session.AppId}", Activity.Music, sample, visible: true, now, app.Name);
         }
     }
 
@@ -167,7 +174,7 @@ public sealed class TimeRewards
             if (_gameKey == game.Key && now - _gameSeenAt is var gap && gap > TimeSpan.Zero && gap <= MaxGameGap && !WaitingForPresence)
             {
                 var paid = Pay(ref _foregroundPaidUntil, now, gap.TotalSeconds);
-                Add(Activity.Game, paid, 1);
+                Add(Activity.Game, paid, 1, game.Name);
             }
 
             _gameKey = game.Key;
@@ -227,6 +234,13 @@ public sealed class TimeRewards
             _pending[activity] = 0;
         }
 
+        foreach (var ((activity, subject), seconds) in _pendingSeconds)
+        {
+            _events.Publish(new MediaTimeCounted(TimeRules.SourceOf(activity), subject, seconds));
+        }
+
+        _pendingSeconds.Clear();
+
         if (_verbose)
         {
             var totals = string.Join(' ', Enum.GetValues<Activity>().Select(activity =>
@@ -235,7 +249,8 @@ public sealed class TimeRewards
         }
     }
 
-    private void Feed(string key, Activity activity, PlaybackSample sample, bool visible, DateTimeOffset now)
+    /// <param name="subject">Сайт или приложение: так время попадает в статистику.</param>
+    private void Feed(string key, Activity activity, PlaybackSample sample, bool visible, DateTimeOffset now, string subject)
     {
         if (!_streams.TryGetValue(key, out var stream))
         {
@@ -269,7 +284,7 @@ public sealed class TimeRewards
                 var paid = activity == Activity.Music
                     ? Pay(ref _musicPaidUntil, now, step.Credit)
                     : Pay(ref _foregroundPaidUntil, now, step.Credit);
-                var earned = Add(activity, paid, stream.Factor);
+                var earned = Add(activity, paid, stream.Factor, subject);
                 stream.Earned += earned;
 
                 // Последние секунды досмотренного ролика тоже получают бонус.
@@ -285,6 +300,10 @@ public sealed class TimeRewards
             var bonus = stream.Earned * CompletionBonus;
             _pending[activity] = Pending(activity) + bonus;
             _log.Info($"Досмотрено ({TimeRules.SourceOf(activity)}): бонус {bonus:0.##}");
+            if (_texts is not null)
+            {
+                _events.Publish(new FeedPosted("star", _texts.Get("feed.completion", subject, bonus.ToString("0.#", System.Globalization.CultureInfo.CurrentCulture))));
+            }
         }
     }
 
@@ -303,12 +322,15 @@ public sealed class TimeRewards
         return factor;
     }
 
-    private decimal Add(Activity activity, double seconds, decimal factor)
+    private decimal Add(Activity activity, double seconds, decimal factor, string subject)
     {
         if (seconds <= 0)
         {
             return 0;
         }
+
+        var key = (activity, subject);
+        _pendingSeconds[key] = _pendingSeconds.GetValueOrDefault(key) + seconds;
 
         var amount = (decimal)seconds / 60m * _rules.RateOf(activity) * factor;
         _pending[activity] = Pending(activity) + amount;

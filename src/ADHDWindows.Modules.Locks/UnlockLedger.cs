@@ -18,6 +18,8 @@ public sealed class UnlockLedger(IKeyValueStore saves)
 
     public IReadOnlyCollection<string> Keys => _records.Keys;
 
+    public IReadOnlyDictionary<string, UnlockRecord> Records => _records;
+
     public void Add(LockOffer offer, DateTimeOffset when)
     {
         _records[offer.Key] = new UnlockRecord(offer.Name, offer.Price, offer.Kind, when);

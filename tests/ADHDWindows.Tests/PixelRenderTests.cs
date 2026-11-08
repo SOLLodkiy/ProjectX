@@ -127,6 +127,96 @@ public class PixelRenderTests
         window.Close();
     });
 
+    [Theory]
+    [InlineData(1.0, 2)]
+    [InlineData(1.5, 3)]
+    public void Stats_window_stays_on_the_pixel_grid(double dpiScale, int devicePixels) => WpfThread.Run(() =>
+    {
+        var log = new RecordingLog();
+        var data = new GameData(Path.Combine(RepositoryRoot.Find(), "data"), log);
+        data.Load();
+        var texts = new TextCatalog(data, "ru", log);
+        texts.Use("ru");
+        var clock = new ManualClock();
+        var recorder = new ADHDWindows.Modules.Stats.StatsRecorder(new MemoryStore(), clock);
+        var when = clock.GetUtcNow();
+        recorder.OnEarned(new CoinsEarned("click", 1234, 1234));
+        recorder.OnEarned(new CoinsEarned("video", 400, 1634));
+        recorder.OnClick(new ADHDWindows.Core.Input.ClickCounted(ADHDWindows.Core.Input.MouseButton.Left, TimeSpan.Zero));
+        recorder.OnMedia(new ADHDWindows.Core.Media.MediaTimeCounted("video", "youtube.com", 4000));
+        recorder.OnCollection(new ADHDWindows.Core.Locks.CollectionChanged(
+            [new ADHDWindows.Core.Locks.CollectionItem("site:youtube.com", "YouTube", ADHDWindows.Core.Locks.LockKind.Site, 800, when)],
+            [new ADHDWindows.Core.Locks.CollectionCatalog(ADHDWindows.Core.Locks.LockKind.Site, 10, 1)]));
+        recorder.OnUpgrade(new UpgradePurchased("clicks.left.plus", "Крепкий палец", 1, 60, when), "Улучшение «Крепкий палец»");
+        recorder.OnCounter(new ADHDWindows.Core.Stats.StatCounted("quests.completed.easy", 2));
+        clock.Advance(TimeSpan.FromDays(1));
+        recorder.OnEarned(new CoinsEarned("click", 300, 1934));
+
+        var window = new ADHDWindows.App.Stats.StatsWindow(texts, () => { }, () => { });
+        window.Update(recorder.Snapshot(1934));
+
+        // Счётчики окна совпадают со статистикой, разблокированное — с датой и ценой.
+        Assert.Contains("1934", window.TextsOf("summary"));
+        Assert.Contains($"1634 ({when.ToLocalTime():dd.MM.yyyy})", window.TextsOf("summary"));
+        Assert.Contains("1 ч 6 мин", window.TextsOf("summary"));
+        Assert.Contains($"{when.ToLocalTime():dd.MM.yyyy} — 800", window.TextsOf("collection"));
+        Assert.Contains("Открыто 10% каталога", window.TextsOf("collection"));
+        Assert.Contains("2", window.TextsOf("quests"));
+        Assert.Equal(ADHDWindows.App.Stats.StatsWindow.DayCount, window.ChartValues.Count);
+        Assert.Equal([1634L, 300L], window.ChartValues.TakeLast(2));
+        window.ShowWeeks(true);
+        Assert.Equal(ADHDWindows.App.Stats.StatsWindow.WeekCount, window.ChartValues.Count);
+        Assert.Equal(1934, window.ChartValues.Sum());
+        window.ShowWeeks(false);
+
+        var content = (UIElement)window.Content;
+        window.Content = null;
+        for (var tab = 0; tab < window.TabCount; tab++)
+        {
+            window.SelectTab(tab);
+            var frame = new PixelFrame { Sprite = "window", Padding = new Thickness(5), Child = content };
+            AssertCrisp(frame, dpiScale, devicePixels, $"stats-{tab}");
+            frame.Child = null;
+        }
+
+        window.Close();
+    });
+
+    [Fact]
+    public void Reset_button_waits_before_it_works() => WpfThread.Run(() =>
+    {
+        var data = new GameData(Path.Combine(RepositoryRoot.Find(), "data"), new RecordingLog());
+        data.Load();
+        var texts = new TextCatalog(data, "ru", new RecordingLog());
+        texts.Use("ru");
+        var window = new ADHDWindows.App.Stats.ResetWindow(texts);
+        for (var second = 0; second < ADHDWindows.App.Stats.ResetWindow.DelaySeconds; second++)
+        {
+            Assert.False(window.Confirm.IsEnabled);
+            window.Tick();
+        }
+
+        Assert.True(window.Confirm.IsEnabled);
+        Assert.Equal("Сбросить всё", window.Confirm.Content);
+
+        var content = (UIElement)window.Content;
+        window.Content = null;
+        AssertCrisp(new PixelFrame { Sprite = "window", Padding = new Thickness(5), Child = content }, 1.5, 3, "reset");
+        window.Close();
+    });
+
+    [Fact]
+    public void Chart_bars_have_whole_heights()
+    {
+        Assert.Equal(0, PixelBarChart.BarHeight(0, 100, 40));
+        Assert.Equal(1, PixelBarChart.BarHeight(1, 1_000_000, 40));
+        Assert.Equal(40, PixelBarChart.BarHeight(100, 100, 40));
+        Assert.Equal(20, PixelBarChart.BarHeight(50, 100, 40));
+        Assert.Equal(1, PixelMeter.Filled(0.0001, 300));
+        Assert.Equal(300, PixelMeter.Filled(1, 300));
+        Assert.Equal(0, PixelMeter.Filled(0, 300));
+    }
+
     [Fact]
     public void Root_follows_monitor_scale() => WpfThread.Run(() =>
     {

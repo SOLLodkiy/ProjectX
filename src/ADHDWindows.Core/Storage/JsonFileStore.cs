@@ -92,6 +92,16 @@ public sealed class JsonFileStore(string path, ILog log) : IKeyValueStore
         }
     }
 
+    /// <summary>Удаляет все значения. На диск изменения попадут при следующей записи.</summary>
+    public void Clear()
+    {
+        lock (_lock)
+        {
+            _dirty |= _values.Count > 0;
+            _values = [];
+        }
+    }
+
     /// <summary>Записывает изменения на диск. При ошибке изменения остаются и попадут в следующую запись.</summary>
     public void Flush()
     {

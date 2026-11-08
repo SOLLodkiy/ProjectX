@@ -11,6 +11,7 @@ using ADHDWindows.Core.Events;
 using ADHDWindows.Core.Hud;
 using ADHDWindows.Core.Logging;
 using ADHDWindows.Core.Pixels;
+using ADHDWindows.Core.Stats;
 using ADHDWindows.Platform;
 
 namespace ADHDWindows.App.Hud;
@@ -47,6 +48,7 @@ public sealed class HudWindow : Window, IDisposable
     private readonly List<IDisposable> _subscriptions = [];
     private HudPanelWindow? _panelWindow;
     private Func<bool>? _shopAvailable;
+    private Func<bool>? _logsAvailable;
     private string? _configuration;
     private ScreenPoint _position;
     private ScreenPoint? _grab;
@@ -111,6 +113,7 @@ public sealed class HudWindow : Window, IDisposable
         _subscriptions.Add(events.Subscribe<CoinsEarned>(OnEarned));
         _subscriptions.Add(events.Subscribe<CoinsSpent>(_ => QueueRefresh()));
         _subscriptions.Add(events.Subscribe<HudStatusChanged>(OnStatusChanged));
+        _subscriptions.Add(events.Subscribe<ProgressReset>(_ => QueueRefresh()));
     }
 
     /// <summary>Положение полоски на экране.</summary>
@@ -133,6 +136,17 @@ public sealed class HudWindow : Window, IDisposable
     {
         _shopAvailable = available;
         _panel.Shop.Click += (_, _) =>
+        {
+            CloseMiniPanel();
+            open();
+        };
+    }
+
+    /// <summary>Подключает кнопку «Логи» мини-панели. Без модуля статистики кнопка выключена.</summary>
+    public void ConnectLogs(Action open, Func<bool> available)
+    {
+        _logsAvailable = available;
+        _panel.Logs.Click += (_, _) =>
         {
             CloseMiniPanel();
             open();
@@ -345,6 +359,7 @@ public sealed class HudWindow : Window, IDisposable
     private void UpdatePanel()
     {
         _panel.Shop.IsEnabled = _shopAvailable?.Invoke() == true;
+        _panel.Logs.IsEnabled = _logsAvailable?.Invoke() == true;
         _panel.Show(_economy.Balance, _economy.IncomePerMinute, _hardship, _quest);
     }
 

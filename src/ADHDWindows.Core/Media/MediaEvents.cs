@@ -42,3 +42,9 @@ public sealed record PresenceCheckChanged(bool Waiting, string Activity);
 
 /// <summary>Игрок ответил «Я тут».</summary>
 public sealed record PresenceConfirmed;
+
+/// <summary>
+/// Засчитанное реальное время хронометража. <paramref name="Source"/> — источник дохода (video, music, game),
+/// <paramref name="Subject"/> — сайт, приложение или игра. Приходит не в потоке интерфейса, пачками раз в несколько секунд.
+/// </summary>
+public sealed record MediaTimeCounted(string Source, string Subject, double Seconds);

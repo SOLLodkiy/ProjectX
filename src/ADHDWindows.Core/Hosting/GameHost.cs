@@ -5,6 +5,7 @@ using ADHDWindows.Core.Locks;
 using ADHDWindows.Core.Logging;
 using ADHDWindows.Core.Modules;
 using ADHDWindows.Core.Safety;
+using ADHDWindows.Core.Stats;
 using ADHDWindows.Core.Storage;
 
 namespace ADHDWindows.Core.Hosting;
@@ -93,6 +94,47 @@ public sealed class GameHost : IDisposable
     {
         Flush(_saves);
         Flush(_settings);
+    }
+
+    /// <summary>
+    /// Сбрасывает весь игровой прогресс: монетки, покупки, улучшения и статистику. Настройки не меняются.
+    /// Модули останавливаются, снимают свои эффекты и запускаются заново с пустым сохранением.
+    /// Прежнее сохранение остаётся копией рядом, путь к ней возвращается. Вызывается из потока интерфейса.
+    /// </summary>
+    public string? ResetProgress()
+    {
+        if (!_started)
+        {
+            return null;
+        }
+
+        _modules.StopAll();
+        _recovery.RestoreSession(_recovery.Session);
+        Save();
+
+        // Сброс необратим для игры, но не для человека: прошлое сохранение можно вернуть руками.
+        string? backup = null;
+        if (File.Exists(_paths.SavePath))
+        {
+            backup = Path.Combine(_paths.UserDir, $"save.before-reset-{DateTime.Now:yyyyMMdd-HHmmss}.json");
+            try
+            {
+                File.Copy(_paths.SavePath, backup, overwrite: true);
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                _log.Error("Не удалось сохранить копию перед сбросом", ex);
+                backup = null;
+            }
+        }
+
+        _saves.Clear();
+        _economy.Load();
+        Save();
+        _modules.Start(ModuleLoader.Load(_paths.ModulesDir, _log));
+        _log.Warn($"Прогресс сброшен, копия прежнего сохранения: {backup ?? "нет"}");
+        _events.Publish(new ProgressReset());
+        return backup;
     }
 
     public void Stop()
