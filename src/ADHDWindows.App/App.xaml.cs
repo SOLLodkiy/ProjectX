@@ -3,12 +3,14 @@ using System.IO;
 using System.Windows;
 using System.Windows.Threading;
 using ADHDWindows.App.Design;
+using ADHDWindows.App.Hardships;
 using ADHDWindows.App.Hud;
 using ADHDWindows.App.Locks;
 using ADHDWindows.App.Quests;
 using ADHDWindows.App.Shop;
 using ADHDWindows.App.Stats;
 using ADHDWindows.App.Time;
+using ADHDWindows.Core.Hardships;
 using ADHDWindows.Core.Hosting;
 using ADHDWindows.Core.Hud;
 using ADHDWindows.Core.Logging;
@@ -45,6 +47,7 @@ public partial class App : Application
     private ShopScreen? _shopScreen;
     private StatsScreen? _statsScreen;
     private QuestScreen? _questScreen;
+    private HardshipScreen? _hardshipScreen;
     private GlobalHotkey? _statsHotkey;
     private ShowcaseWindow? _showcase;
     private bool _designReady;
@@ -77,9 +80,11 @@ public partial class App : Application
         _shopScreen = new ShopScreen(_host.Events, _host.Economy, _host.Texts, () => _designReady, Dispatcher);
         _statsScreen = new StatsScreen(_host.Events, _host.Texts, () => _designReady, Dispatcher, _host.ResetProgress, log);
         _questScreen = new QuestScreen(_host.Events, _host.Texts, () => _designReady, Dispatcher);
+        _hardshipScreen = new HardshipScreen(_host.Events, _host.Texts, () => _designReady, Dispatcher, options.DeveloperMode);
         _host.Start(() => StartWatchdog(paths, log));
         _statsScreen.Request();
         _questScreen.Request();
+        _hardshipScreen.Request();
         _mouseHook = new MouseHook(_host.Events.Publish, log);
         _mouseHook.Start();
 
@@ -100,7 +105,8 @@ public partial class App : Application
                 () => _statsScreen.Open(),
                 () => _lockScreen.Open(),
                 () => Shutdown(),
-                _hotkey.ToString()));
+                _hotkey.ToString(),
+                _hardshipScreen.Fill));
 
         if (hudSettings is not null)
         {
@@ -125,6 +131,12 @@ public partial class App : Application
         if (options.RecoveryProbe is { } token)
         {
             _host.Events.Publish(new RecoveryProbeRequested(token));
+        }
+
+        if (options.Hardship is { } hardship)
+        {
+            // Модули усложнений отвечают из потока планировщика, поэтому запуск не задерживает интерфейс.
+            Task.Run(() => _host.Events.Publish(new HardshipTestRequested(hardship == "random" ? null : hardship)));
         }
     }
 
@@ -234,6 +246,7 @@ public partial class App : Application
         _statsHotkey?.Dispose();
         _statsScreen?.Dispose();
         _questScreen?.Dispose();
+        _hardshipScreen?.Dispose();
         _hud?.Dispose();
         _tray?.Dispose();
         _watchdog?.Dispose();

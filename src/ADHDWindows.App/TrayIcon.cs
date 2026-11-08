@@ -36,6 +36,15 @@ internal sealed class TrayIcon : IDisposable
             menu.Items.Add(new ToolStripSeparator());
         }
 
+        if (actions.FillHardships is { } fillHardships)
+        {
+            // Состояние усложнений меняется, поэтому подменю строится заново при каждом открытии.
+            var hardships = new ToolStripMenuItem(texts.Get("tray.hardships"));
+            hardships.DropDownItems.Add(new ToolStripMenuItem("…") { Enabled = false });
+            hardships.DropDownOpening += (_, _) => fillHardships(hardships);
+            menu.Items.Add(hardships);
+        }
+
         menu.Items.Add(texts.Get("tray.shop"), null, (_, _) => actions.OnShop());
         menu.Items.Add(texts.Get("tray.quests"), null, (_, _) => actions.OnQuests());
         menu.Items.Add(texts.Get("tray.stats"), null, (_, _) => actions.OnStats());
@@ -117,4 +126,5 @@ internal sealed record TrayActions(
     Action OnStats,
     Action OnLocks,
     Action OnExit,
-    string EmergencyHotkey);
+    string EmergencyHotkey,
+    Action<ToolStripMenuItem>? FillHardships = null);

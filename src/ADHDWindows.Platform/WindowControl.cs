@@ -17,6 +17,9 @@ public static class WindowControl
     private const int Minimize = 6;
     private const int Restore = 9;
     private const int ForceMinimizeCommand = 11;
+    private const int ShowNoActivate = 4;
+    private const int ShowMaximized = 3;
+    private const int RestoreToMaximized = 2;
 
     // Рамка приложений Магазина принадлежит общему системному процессу, а настоящий владелец — у вложенного окна.
     private const string FrameClass = "ApplicationFrameWindow";
@@ -92,6 +95,37 @@ public static class WindowControl
 
     /// <summary>Сворачивает окно без участия его программы: годится для зависшей или замороженной.</summary>
     public static void ForceMinimize(IntPtr window) => ShowWindowAsync(window, ForceMinimizeCommand);
+
+    /// <summary>Активное окно или ноль.</summary>
+    public static IntPtr Foreground() => GetForegroundWindow();
+
+    /// <summary>Окно самого рабочего стола: его нельзя сворачивать.</summary>
+    public static bool IsDesktop(WindowInfo window) => window.ClassName is "Progman" or "WorkerW";
+
+    /// <summary>
+    /// Разворачивает свёрнутое окно, не отнимая фокус у текущего. Окно, свёрнутое из развёрнутого, снова разворачивается:
+    /// система так не умеет без активации, поэтому оно получает фокус.
+    /// </summary>
+    public static void RestoreInBackground(IntPtr window)
+    {
+        if (!IsIconic(window))
+        {
+            return;
+        }
+
+        var placement = new WindowPlacement { Length = Marshal.SizeOf<WindowPlacement>() };
+        var maximized = GetWindowPlacement(window, ref placement) && (placement.Flags & RestoreToMaximized) != 0;
+        ShowWindowAsync(window, maximized ? ShowMaximized : ShowNoActivate);
+    }
+
+    /// <summary>Пытается вернуть фокус окну. Система может отказать, тогда окно просто мигает на панели задач.</summary>
+    public static void TryActivate(IntPtr window)
+    {
+        if (IsWindow(window) && !IsIconic(window))
+        {
+            SetForegroundWindow(window);
+        }
+    }
 
     public static void RestoreWindow(IntPtr window)
     {
@@ -184,8 +218,32 @@ public static class WindowControl
     [return: MarshalAs(UnmanagedType.Bool)]
     private static extern bool ShowWindowAsync(IntPtr window, int command);
 
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool GetWindowPlacement(IntPtr window, ref WindowPlacement placement);
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool SetForegroundWindow(IntPtr window);
+
     [DllImport("dwmapi.dll")]
     private static extern int DwmGetWindowAttribute(IntPtr window, int attribute, out int value, int size);
 
     private delegate bool EnumCallback(IntPtr window, IntPtr data);
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct WindowPlacement
+    {
+        public int Length;
+        public int Flags;
+        public int ShowCommand;
+        public int MinX;
+        public int MinY;
+        public int MaxX;
+        public int MaxY;
+        public int Left;
+        public int Top;
+        public int Right;
+        public int Bottom;
+    }
 }

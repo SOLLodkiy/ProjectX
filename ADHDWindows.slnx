@@ -4,6 +4,8 @@
     <Project Path="src/ADHDWindows.BrowserHost/ADHDWindows.BrowserHost.csproj" />
     <Project Path="src/ADHDWindows.Core/ADHDWindows.Core.csproj" />
     <Project Path="src/ADHDWindows.Modules.Clicks/ADHDWindows.Modules.Clicks.csproj" />
+    <Project Path="src/ADHDWindows.Modules.Hardships/ADHDWindows.Modules.Hardships.csproj" />
+    <Project Path="src/ADHDWindows.Modules.Hardships.Basic/ADHDWindows.Modules.Hardships.Basic.csproj" />
     <Project Path="src/ADHDWindows.Modules.Locks/ADHDWindows.Modules.Locks.csproj" />
     <Project Path="src/ADHDWindows.Modules.Quests/ADHDWindows.Modules.Quests.csproj" />
     <Project Path="src/ADHDWindows.Modules.Sample/ADHDWindows.Modules.Sample.csproj" />
