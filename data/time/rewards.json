@@ -1,0 +1,83 @@
+{
+  // Монетки за хронометраж. Начисляется реальное время, а не время ролика: ускорение не даёт больше монет.
+  // Расценки сгенерированы агентом по идее 006 и уточняются при балансировке.
+  "rates": { "video": 6, "music": 2, "game": 5 },
+
+  // Ролик или трек, просмотренный почти полностью, приносит ещё 10% от заработанного на нём.
+  "completionBonus": 0.1,
+  // Какая доля длительности должна быть просмотрена без перемотки.
+  "completionShare": 0.9,
+  // Короче этого бонус за досмотр не даётся: реклама и заставки.
+  "minCompletionSeconds": 20,
+
+  // Множитель за повтор одного и того же подряд: 1-й, 2-й, 3-й раз — полностью, дальше меньше. Последнее значение действует для всех следующих повторов.
+  "repeatFactors": [1, 1, 1, 0.5, 0.25, 0.1],
+
+  // Через сколько минут без ввода появляется вопрос «Ты тут?». Музыка играет фоном и не проверяется.
+  "presenceMinutes": { "video": 30, "game": 3 },
+
+  // Сайты. Запись действует на домен и его поддомены, побеждает самая точная: music.youtube.com — музыка, youtube.com — видео.
+  // path ограничивает запись началом пути страницы: у vk.com видео и музыка живут на одном домене.
+  // Сайт вне списка монеток не приносит. Определяет адрес вкладки, а не плеера внутри неё: сначала нужно купить сам сайт.
+  "sites": [
+    { "domain": "youtube.com", "kind": "video" },
+    { "domain": "youtu.be", "kind": "video" },
+    { "domain": "tiktok.com", "kind": "video" },
+    { "domain": "twitch.tv", "kind": "video" },
+    { "domain": "kick.com", "kind": "video" },
+    { "domain": "vimeo.com", "kind": "video" },
+    { "domain": "dailymotion.com", "kind": "video" },
+    { "domain": "rutube.ru", "kind": "video" },
+    { "domain": "vkvideo.ru", "kind": "video" },
+    { "domain": "vk.com", "path": "/video", "kind": "video" },
+    { "domain": "vk.com", "path": "/clip", "kind": "video" },
+    { "domain": "dzen.ru", "kind": "video" },
+    { "domain": "kinopoisk.ru", "kind": "video" },
+    { "domain": "hd.kinopoisk.ru", "kind": "video" },
+    { "domain": "ivi.ru", "kind": "video" },
+    { "domain": "okko.tv", "kind": "video" },
+    { "domain": "start.ru", "kind": "video" },
+    { "domain": "kion.ru", "kind": "video" },
+    { "domain": "wink.ru", "kind": "video" },
+    { "domain": "premier.one", "kind": "video" },
+    { "domain": "netflix.com", "kind": "video" },
+    { "domain": "primevideo.com", "kind": "video" },
+    { "domain": "disneyplus.com", "kind": "video" },
+    { "domain": "max.com", "kind": "video" },
+    { "domain": "hulu.com", "kind": "video" },
+    { "domain": "crunchyroll.com", "kind": "video" },
+    { "domain": "anilibria.tv", "kind": "video" },
+    { "domain": "bilibili.com", "kind": "video" },
+    { "domain": "coub.com", "kind": "video" },
+
+    { "domain": "music.youtube.com", "kind": "music" },
+    { "domain": "music.yandex.ru", "kind": "music" },
+    { "domain": "music.yandex.com", "kind": "music" },
+    { "domain": "open.spotify.com", "kind": "music" },
+    { "domain": "soundcloud.com", "kind": "music" },
+    { "domain": "music.apple.com", "kind": "music" },
+    { "domain": "deezer.com", "kind": "music" },
+    { "domain": "tidal.com", "kind": "music" },
+    { "domain": "listen.tidal.com", "kind": "music" },
+    { "domain": "bandcamp.com", "kind": "music" },
+    { "domain": "zvuk.com", "kind": "music" },
+    { "domain": "music.amazon.com", "kind": "music" },
+    { "domain": "mixcloud.com", "kind": "music" },
+    { "domain": "vk.com", "path": "/audio", "kind": "music" },
+    { "domain": "vk.com", "path": "/music", "kind": "music" }
+  ],
+
+  // Настольные клиенты: системные сессии мультимедиа Windows. Опознаются по коду приложения без учёта регистра.
+  // Локальные плееры вроде VLC и браузеры сюда не входят: браузеры считает расширение.
+  "apps": [
+    { "match": "spotify", "name": "Spotify", "kind": "music" },
+    { "match": "yandex.music", "name": "Яндекс Музыка", "kind": "music" },
+    { "match": "yandexmusic", "name": "Яндекс Музыка", "kind": "music" },
+    { "match": "ru.yandex.desktop.music", "name": "Яндекс Музыка", "kind": "music" },
+    { "match": "applemusic", "name": "Apple Music", "kind": "music" },
+    { "match": "deezer", "name": "Deezer", "kind": "music" },
+    { "match": "tidal", "name": "TIDAL", "kind": "music" },
+    { "match": "amazonmusic", "name": "Amazon Music", "kind": "music" },
+    { "match": "soundcloud", "name": "SoundCloud", "kind": "music" }
+  ]
+}

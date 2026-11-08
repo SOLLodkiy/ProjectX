@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using ADHDWindows.Core.Locks;
+using ADHDWindows.Core.Media;
 using ADHDWindows.Core.Safety;
 using ADHDWindows.Core.Modules;
 using ADHDWindows.Modules.Locks.Games;
@@ -44,6 +45,7 @@ public sealed class LocksModule : IModule
     private BrowserWatch? _browsers;
     private BrowserBridge? _bridge;
     private DateTime _nextBrowserCheck;
+    private bool _gamesPublished;
     private WindowWatcher? _watcher;
     private Thread? _worker;
 
@@ -108,6 +110,7 @@ public sealed class LocksModule : IModule
             context.Log);
         _bridge.Start();
 
+        context.Events.Subscribe<InstalledGamesRequested>(_ => Enqueue(PublishGames));
         context.Events.Subscribe<UnlockRequested>(request => Enqueue(() => _engine.Unlock(request.Key)));
         context.Events.Subscribe<ExtensionPageRequested>(request => Enqueue(() => _browsers?.OpenExtensionsPage(request.BrowserId)));
         _watcher = new WindowWatcher(OnWindow, context.Log);
@@ -176,6 +179,13 @@ public sealed class LocksModule : IModule
         }
     }
 
+    /// <summary>Список игр нужен и другим модулям, например хронометражу.</summary>
+    private void PublishGames()
+    {
+        _gamesPublished = true;
+        _context!.Events.Publish(new InstalledGamesChanged([.. _games!.Games.Select(game => new GameInstall(game.Key, game.Name, game.Folder))]));
+    }
+
     private void CheckBrowsers()
     {
         _browsers?.Check(_sites!.Sessions);
@@ -199,9 +209,10 @@ public sealed class LocksModule : IModule
             {
                 Execute(() =>
                 {
-                    if (_games!.Refresh())
+                    if (_games!.Refresh() || !_gamesPublished)
                     {
                         _engine!.ForgetVerdicts();
+                        PublishGames();
                     }
                 });
                 nextLibrary = DateTime.UtcNow + LibraryInterval;

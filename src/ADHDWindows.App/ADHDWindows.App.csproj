@@ -31,9 +31,11 @@
     <ProjectReference Include="..\ADHDWindows.BrowserHost\ADHDWindows.BrowserHost.csproj"
                       ReferenceOutputAssembly="false"
                       Private="false" />
-    <!-- Только порядок сборки: приложение не знает о модулях, новый проект подхватывается по имени. -->
+    <!-- Только порядок сборки: приложение не знает о модулях, новый проект подхватывается по имени.
+         Модуль может требовать более новую версию Windows, чем приложение, поэтому совместимость целей не проверяется. -->
     <ProjectReference Include="..\ADHDWindows.Modules.*\*.csproj"
                       ReferenceOutputAssembly="false"
+                      SkipGetTargetFrameworkProperties="true"
                       Private="false" />
   </ItemGroup>
 

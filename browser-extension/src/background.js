@@ -8,6 +8,8 @@ const BlockedPage = api.runtime.getURL("blocked.html");
 const RequestTimeout = 10000;
 const ReconnectDelay = 5000;
 const ReportDelay = 250;
+const MediaDelay = 150;
+const MediaLifetime = 6000;
 
 let port = null;
 let online = false;
@@ -16,6 +18,11 @@ let nextId = 1;
 let reportTimer = null;
 let reconnectTimer = null;
 const pending = new Map();
+
+// Плееры во вкладках: вкладка → фрейм → последний снимок. Время просмотра считает программа.
+const media = new Map();
+let mediaTimer = null;
+let focusedWindow = api.windows.WINDOW_ID_NONE;
 
 // Сообщения обрабатываются по одному: ответ о покупке не должен обогнать новые правила.
 let queue = Promise.resolve();
@@ -69,6 +76,7 @@ async function handle(message) {
       await applyRules();
       await enforceTabs();
       reportWindows();
+      reportMedia();
       break;
     case "reply": {
       const request = pending.get(message.id);
@@ -191,6 +199,73 @@ function reportWindows() {
   }, ReportDelay);
 }
 
+/** Снимки плееров всех вкладок. Видео засчитывается, только если вкладка выбрана в окне, которое в фокусе. */
+function reportMedia() {
+  clearTimeout(mediaTimer);
+  mediaTimer = setTimeout(async () => {
+    if (!port || !online) {
+      return;
+    }
+
+    const now = Date.now();
+    const tabs = [];
+    for (const [tabId, frames] of media) {
+      for (const [frameId, frame] of frames) {
+        if (now - frame.at > MediaLifetime) {
+          frames.delete(frameId);
+        }
+      }
+
+      if (frames.size === 0) {
+        media.delete(tabId);
+        continue;
+      }
+
+      let tab;
+      try {
+        tab = await api.tabs.get(tabId);
+      } catch {
+        media.delete(tabId);
+        continue;
+      }
+
+      tabs.push({
+        tabId,
+        url: tab.url ?? "",
+        focused: tab.active && tab.windowId === focusedWindow,
+        media: [...frames.values()].flatMap((frame) => frame.media),
+      });
+    }
+
+    post({ type: "media", tabs });
+  }, MediaDelay);
+}
+
+async function trackFocus() {
+  try {
+    const window = await api.windows.getLastFocused();
+    focusedWindow = window?.focused ? window.id : api.windows.WINDOW_ID_NONE;
+  } catch {
+    focusedWindow = api.windows.WINDOW_ID_NONE;
+  }
+}
+
+/** Вкладки, открытые до установки расширения, получают отслеживание плееров без перезагрузки. */
+async function injectMediaScripts() {
+  if (!api.scripting) {
+    return;
+  }
+
+  for (const tab of await api.tabs.query({ url: ["http://*/*", "https://*/*"] })) {
+    try {
+      await api.scripting.executeScript({ target: { tabId: tab.id, allFrames: true }, files: ["media-hook.js"], world: "MAIN" });
+      await api.scripting.executeScript({ target: { tabId: tab.id, allFrames: true }, files: ["media.js"] });
+    } catch {
+      // Служебные страницы и магазин расширений недоступны.
+    }
+  }
+}
+
 function browserName() {
   const brands = navigator.userAgentData?.brands?.map((brand) => brand.brand) ?? [];
   for (const [brand, name] of [["Microsoft Edge", "edge"], ["YaBrowser", "yandex"], ["Yandex", "yandex"], ["Google Chrome", "chrome"]]) {
@@ -213,6 +288,37 @@ api.runtime.onMessage.addListener((message, sender, sendResponse) => {
   return true;
 });
 
+// Снимки плееров от контент-скриптов.
+api.runtime.onMessage.addListener((message, sender) => {
+  if (message?.type !== "media" || !sender.tab || sender.id !== api.runtime.id) {
+    return false;
+  }
+
+  const items = Array.isArray(message.media) ? message.media.slice(0, 16) : [];
+  let frames = media.get(sender.tab.id);
+  if (!frames) {
+    frames = new Map();
+    media.set(sender.tab.id, frames);
+  }
+
+  // Номера элементов уникальны только внутри фрейма.
+  const frameId = sender.frameId ?? 0;
+  frames.set(frameId, { at: Date.now(), media: items.map((item) => ({ ...item, id: `${frameId}:${item.id}` })) });
+  reportMedia();
+  return false;
+});
+
+api.windows.onFocusChanged.addListener((windowId) => {
+  focusedWindow = windowId;
+  reportMedia();
+});
+api.tabs.onActivated.addListener(reportMedia);
+api.tabs.onRemoved.addListener((tabId) => {
+  if (media.delete(tabId)) {
+    reportMedia();
+  }
+});
+
 api.tabs.onUpdated.addListener((tabId, change) => {
   if (change.title !== undefined || change.status === "complete") {
     reportWindows();
@@ -229,4 +335,6 @@ api.alarms.create("reconnect", { periodInMinutes: 0.5 });
 api.alarms.onAlarm.addListener(connect);
 api.runtime.onStartup.addListener(connect);
 api.runtime.onInstalled.addListener(connect);
+api.runtime.onInstalled.addListener(injectMediaScripts);
+trackFocus();
 connect();

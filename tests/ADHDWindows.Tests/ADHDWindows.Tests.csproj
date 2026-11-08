@@ -1,7 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net10.0-windows</TargetFramework>
+    <!-- Версия Windows нужна, чтобы подключить модуль хронометража: он читает системные сессии мультимедиа. -->
+    <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
     <IsPackable>false</IsPackable>
     <UseWPF>true</UseWPF>
   </PropertyGroup>
@@ -23,6 +24,7 @@
     <ProjectReference Include="..\..\src\ADHDWindows.App\ADHDWindows.App.csproj" />
     <ProjectReference Include="..\..\src\ADHDWindows.Modules.Clicks\ADHDWindows.Modules.Clicks.csproj" />
     <ProjectReference Include="..\..\src\ADHDWindows.Modules.Locks\ADHDWindows.Modules.Locks.csproj" />
+    <ProjectReference Include="..\..\src\ADHDWindows.Modules.Time\ADHDWindows.Modules.Time.csproj" />
     <!-- Отдельная программа: тесты запускают и замораживают её как процесс. -->
     <ProjectReference Include="..\ADHDWindows.TestApp\ADHDWindows.TestApp.csproj"
                       ReferenceOutputAssembly="false"

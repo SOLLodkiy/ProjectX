@@ -67,6 +67,13 @@ public static class WindowControl
 
     public static bool IsMinimized(IntPtr window) => IsIconic(window);
 
+    /// <summary>Процесс активного окна, в том числе у приложений Магазина. Null — активного окна нет.</summary>
+    public static int? ForegroundProcessId()
+    {
+        var window = GetForegroundWindow();
+        return window == IntPtr.Zero ? null : OwnerOf(window, ClassName(window));
+    }
+
     /// <summary>Заголовок окна. Для зависшего окна система отвечает сама, не дожидаясь программы.</summary>
     public static string Title(IntPtr window)
     {
@@ -148,6 +155,9 @@ public static class WindowControl
     [DllImport("user32.dll")]
     [return: MarshalAs(UnmanagedType.Bool)]
     private static extern bool IsIconic(IntPtr window);
+
+    [DllImport("user32.dll")]
+    private static extern IntPtr GetForegroundWindow();
 
     [DllImport("user32.dll")]
     private static extern IntPtr GetAncestor(IntPtr window, uint flags);

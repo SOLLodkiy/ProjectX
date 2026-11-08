@@ -3,6 +3,7 @@ using ADHDWindows.Core.Economy;
 using ADHDWindows.Core.Events;
 using ADHDWindows.Core.Locks;
 using ADHDWindows.Core.Logging;
+using ADHDWindows.Core.Media;
 using ADHDWindows.Platform;
 
 namespace ADHDWindows.Modules.Locks.Sites;
@@ -26,7 +27,7 @@ public sealed class BrowserSession(IBrowserPeer peer)
 
 /// <summary>
 /// Блокировка сайтов: отвечает расширениям браузеров. Все методы вызываются из рабочего потока модуля.
-/// Сообщения расширения: hello, windows, offer, unlock. Ответ на запрос несёт тот же id.
+/// Сообщения расширения: hello, windows, media, offer, unlock. Отчёт media уходит в шину для хронометража. Ответ на запрос несёт тот же id.
 /// </summary>
 public sealed class SiteLocks(
     SiteClassifier classifier,
@@ -48,9 +49,10 @@ public sealed class SiteLocks(
     {
         if (message is null)
         {
-            if (_sessions.Remove(peer.Id))
+            if (_sessions.Remove(peer.Id, out var gone))
             {
                 log.Info($"Расширение браузера отключилось: {peer.Id}");
+                events.Publish(new BrowserMediaReported(peer.Id, gone.Browser?.Id, [], Disconnected: true));
             }
 
             return;
@@ -82,6 +84,9 @@ public sealed class SiteLocks(
                 session.Titles = message["titles"] is JsonArray titles
                     ? [.. titles.Select(Text).OfType<string>().Take(MaxTitles).Select(title => title.Length > MaxTitleLength ? title[..MaxTitleLength] : title)]
                     : [];
+                break;
+            case "media":
+                events.Publish(MediaReport.Parse(peer.Id, session.Browser?.Id, message));
                 break;
             case "offer":
                 peer.Send(Reply(message, Offer(Text(message["url"]))));

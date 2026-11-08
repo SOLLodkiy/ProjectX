@@ -5,6 +5,7 @@ using System.Windows.Threading;
 using ADHDWindows.App.Design;
 using ADHDWindows.App.Hud;
 using ADHDWindows.App.Locks;
+using ADHDWindows.App.Time;
 using ADHDWindows.Core.Hosting;
 using ADHDWindows.Core.Hud;
 using ADHDWindows.Core.Logging;
@@ -31,6 +32,7 @@ public partial class App : Application
     private HudWindow? _hud;
     private LockScreen? _lockScreen;
     private ExtensionScreen? _extensionScreen;
+    private PresenceScreen? _presenceScreen;
     private ShowcaseWindow? _showcase;
     private bool _designReady;
 
@@ -58,6 +60,7 @@ public partial class App : Application
         _host = new GameHost(paths, options, log);
         _lockScreen = new LockScreen(_host.Events, _host.Economy, _host.Texts, () => _designReady, Dispatcher);
         _extensionScreen = new ExtensionScreen(_host.Events, _host.Texts, () => _designReady, Dispatcher);
+        _presenceScreen = new PresenceScreen(_host.Events, _host.Texts, () => _designReady, Dispatcher);
         _host.Start(() => StartWatchdog(paths, log));
         _mouseHook = new MouseHook(_host.Events.Publish, log);
         _mouseHook.Start();
@@ -171,6 +174,7 @@ public partial class App : Application
         _mouseHook?.Dispose();
         _lockScreen?.Dispose();
         _extensionScreen?.Dispose();
+        _presenceScreen?.Dispose();
         _hud?.Dispose();
         _tray?.Dispose();
         _watchdog?.Dispose();
