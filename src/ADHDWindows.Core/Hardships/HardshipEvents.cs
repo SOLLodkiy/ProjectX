@@ -47,6 +47,12 @@ public enum HardshipResources
 
     /// <summary>Кнопки мыши.</summary>
     MouseButtons = 16,
+
+    /// <summary>Ввод с клавиатуры.</summary>
+    Keyboard = 32,
+
+    /// <summary>Проигрывает звуки.</summary>
+    Sound = 64,
 }
 
 /// <summary>

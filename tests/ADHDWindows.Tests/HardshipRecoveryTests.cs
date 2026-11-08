@@ -1,11 +1,13 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using ADHDWindows.Core.Display;
 using ADHDWindows.Core.Hosting;
 using ADHDWindows.Core.Safety;
 using ADHDWindows.Core.Storage;
 using ADHDWindows.Modules.Hardships;
 using ADHDWindows.Modules.Hardships.Basic;
 using ADHDWindows.Modules.Hardships.Cursor;
+using ADHDWindows.Modules.Hardships.Physics;
 using ADHDWindows.Modules.Hardships.Screen;
 using ADHDWindows.Platform;
 
@@ -160,6 +162,26 @@ public sealed class HardshipRecoveryTests : IDisposable
     }
 
     [Fact]
+    public void Killed_app_puts_windows_pushed_by_rocks_back()
+    {
+        // Окно во всю ширину монитора: каждый валун пролетает через его заголовок.
+        var window = StartWindow();
+        var area = TestScreen.Find()?.WorkArea ?? new ScreenRect(0, 0, 1280, 720);
+        MoveWindow(window, area.Left, area.Top + 40, area.Width, 240, true);
+        var origin = WindowTraits.Bounds(window);
+        var app = StartApp("rockfall");
+        WaitUntil(() => AppLog().Contains("Усложнение включено: rockfall"), "камнепад");
+        WaitUntil(() => WindowTraits.Bounds(window).Top > origin.Top, "валун сдвинул окно");
+        var watchdog = FindWatchdog();
+
+        app.Kill();
+
+        WaitUntil(() => WindowTraits.Bounds(window) == origin, "окно вернулось");
+        WaitUntil(() => watchdog.HasExited, "завершение сторожа");
+        Assert.Contains($"Откачено: {WindowPositionsRestorer.ChangeKind}", WatchdogLog());
+    }
+
+    [Fact]
     public void Emergency_hotkey_removes_the_hardship_and_quits()
     {
         var visible = CursorControl.VisiblePixelsOfArrow();
@@ -215,6 +237,7 @@ public sealed class HardshipRecoveryTests : IDisposable
         settings.Set($"modules/hardships/{HardshipsModule.IgnoreSafetySetting}", true);
         settings.Set($"modules/hardship.oneWindow/{OneWindowHardship.OnlyUnderSetting}", Apps);
         settings.Set($"modules/hardship.wanderingWindows/{WanderingWindowsHardship.OnlyUnderSetting}", Apps);
+        settings.Set($"modules/hardship.rockfall/{RockfallHardship.OnlyUnderSetting}", Apps);
         settings.Flush();
 
         var directory = Path.Combine(RepositoryRoot.Find(), "src", "ADHDWindows.App", "bin", Configuration, "net10.0-windows");
@@ -308,6 +331,10 @@ public sealed class HardshipRecoveryTests : IDisposable
     }
 
     private static NativeInput Key(ushort key, uint flags) => new() { Type = 1, VirtualKey = key, Flags = flags };
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool MoveWindow(IntPtr window, int x, int y, int width, int height, [MarshalAs(UnmanagedType.Bool)] bool repaint);
 
     [DllImport("user32.dll", SetLastError = true)]
     private static extern uint SendInput(uint count, NativeInput[] inputs, int size);

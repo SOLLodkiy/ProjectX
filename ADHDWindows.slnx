@@ -7,7 +7,10 @@
     <Project Path="src/ADHDWindows.Modules.Hardships/ADHDWindows.Modules.Hardships.csproj" />
     <Project Path="src/ADHDWindows.Modules.Hardships.Basic/ADHDWindows.Modules.Hardships.Basic.csproj" />
     <Project Path="src/ADHDWindows.Modules.Hardships.Cursor/ADHDWindows.Modules.Hardships.Cursor.csproj" />
+    <Project Path="src/ADHDWindows.Modules.Hardships.Keyboard/ADHDWindows.Modules.Hardships.Keyboard.csproj" />
+    <Project Path="src/ADHDWindows.Modules.Hardships.Physics/ADHDWindows.Modules.Hardships.Physics.csproj" />
     <Project Path="src/ADHDWindows.Modules.Hardships.Screen/ADHDWindows.Modules.Hardships.Screen.csproj" />
+    <Project Path="src/ADHDWindows.Modules.Hardships.Sounds/ADHDWindows.Modules.Hardships.Sounds.csproj" />
     <Project Path="src/ADHDWindows.Modules.Locks/ADHDWindows.Modules.Locks.csproj" />
     <Project Path="src/ADHDWindows.Modules.Quests/ADHDWindows.Modules.Quests.csproj" />
     <Project Path="src/ADHDWindows.Modules.Sample/ADHDWindows.Modules.Sample.csproj" />

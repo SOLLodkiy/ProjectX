@@ -22,10 +22,21 @@ public sealed class MouseMoveFilter(Func<ScreenPoint, ScreenPoint, ScreenPoint?>
     private const uint InjectedFlags = 0x01 | 0x02;
     private const int FlagsOffset = 12;
 
+    // Нажатия и отпускания левой, правой и средней кнопок.
+    private const int FirstButtonMessage = 0x0201;
+    private const int LastButtonMessage = 0x0208;
+
     private HookCallback? _callback;
     private Thread? _thread;
     private uint _threadId;
     private bool _stopped;
+
+    /// <summary>
+    /// Необязательный фильтр кнопок: получает сообщение кнопки (WM_LBUTTONDOWN и другие) и положение курсора и решает,
+    /// проглотить ли его (true). Действует и на клики от программ: так клик сквозь препятствие не пройдёт никак.
+    /// Хуки, поставленные раньше (например, подсчёт кликов), проглоченное нажатие не увидят.
+    /// </summary>
+    public Func<int, ScreenPoint, bool>? Buttons { get; init; }
 
     /// <summary>Ставит хук. Возвращает false и пишет в журнал, если система отказала.</summary>
     public bool Start()
@@ -97,6 +108,23 @@ public sealed class MouseMoveFilter(Func<ScreenPoint, ScreenPoint, ScreenPoint?>
 
     private IntPtr OnHook(int code, IntPtr message, IntPtr data)
     {
+        if (code >= 0 && Buttons is { } buttons && (int)message is >= FirstButtonMessage and <= LastButtonMessage)
+        {
+            try
+            {
+                // Точка из хука всегда в физических пикселях, а курсор у процесса без учёта масштаба — в своих.
+                // Положение курсора в момент нажатия совпадает с точкой нажатия, поэтому берётся оно.
+                if (buttons((int)message, Desktop.CursorPosition()))
+                {
+                    return new IntPtr(1);
+                }
+            }
+            catch (Exception exception)
+            {
+                log.Error("Ошибка фильтра кнопок мыши", exception);
+            }
+        }
+
         if (code >= 0 && (int)message == MouseMove && ((uint)Marshal.ReadInt32(data, FlagsOffset) & InjectedFlags) == 0)
         {
             try

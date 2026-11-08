@@ -1,0 +1,36 @@
+{
+  // Усложнения клавиатуры (идея 014): шифр Цезаря и виртуальная клавиатура.
+  // Где клавиатура всегда работает как обычно: процессы (имя файла без .exe), классы окон и издатели программ.
+  // Ещё всегда защищены поля паролей, сама ADHDWindows и случаи, когда активное окно не определяется (экраны Windows).
+  "protected": {
+    "processes": [
+      "claude", "Claude",
+      "WindowsTerminal", "wt", "OpenConsole", "conhost", "cmd", "powershell", "pwsh", "powershell_ise",
+      "mintty", "bash", "wsl", "wslhost", "alacritty", "wezterm-gui", "Hyper", "Tabby", "kitty", "putty", "kitty-portable",
+      "consent", "LogonUI", "LockApp", "CredentialUIBroker", "SecHealthUI", "UserAccountControlSettings"
+    ],
+    "classes": [
+      "ConsoleWindowClass", "CASCADIA_HOSTING_WINDOW_CLASS", "PseudoConsoleWindow", "Credential Dialog Xaml Host",
+      "mintty", "PuTTY", "VirtualConsoleClass"
+    ],
+    "companies": [ "Anthropic*" ]
+  },
+  // Шифр Цезаря: буквы рядов раскладки. Буква заменяется соседней справа, последняя в ряду — первой.
+  "caesar": {
+    "ru": [ "йцукенгшщзхъ", "фывапролджэ", "ячсмитьбю" ],
+    "en": [ "qwertyuiop", "asdfghjkl", "zxcvbnm" ]
+  },
+  // Виртуальная клавиатура: ряды клавиш без Shift и с Shift. Ряды одной раскладки одинаковой длины по символам.
+  "layouts": {
+    "ru": {
+      "name": "РУ",
+      "rows": [ "1234567890-=", "йцукенгшщзхъ", "фывапролджэ", "ячсмитьбю." ],
+      "shifted": [ "!\"№;%:?*()_+", "ЙЦУКЕНГШЩЗХЪ", "ФЫВАПРОЛДЖЭ", "ЯЧСМИТЬБЮ," ]
+    },
+    "en": {
+      "name": "EN",
+      "rows": [ "1234567890-=", "qwertyuiop[]", "asdfghjkl;'", "zxcvbnm,./" ],
+      "shifted": [ "!@#$%^&*()_+", "QWERTYUIOP{}", "ASDFGHJKL:\"", "ZXCVBNM<>?" ]
+    }
+  }
+}

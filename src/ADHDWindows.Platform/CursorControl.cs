@@ -123,6 +123,112 @@ public static class CursorControl
         }
     }
 
+    /// <summary>
+    /// Картинка системной стрелки, как её сейчас видит человек (с его схемой и размером): 0xAARRGGBB, строки сверху вниз.
+    /// Null — картинку прочитать не удалось.
+    /// </summary>
+    public static CursorImage? ArrowImage()
+    {
+        var arrow = LoadCursorW(IntPtr.Zero, new IntPtr(ArrowCursor));
+        if (arrow == IntPtr.Zero || !GetIconInfo(arrow, out var icon))
+        {
+            return null;
+        }
+
+        try
+        {
+            return icon.Color != IntPtr.Zero
+                ? ReadColor(icon.Color, icon.Mask, icon.HotX, icon.HotY)
+                : ReadMonochrome(icon.Mask, icon.HotX, icon.HotY);
+        }
+        finally
+        {
+            if (icon.Mask != IntPtr.Zero)
+            {
+                DeleteObject(icon.Mask);
+            }
+
+            if (icon.Color != IntPtr.Zero)
+            {
+                DeleteObject(icon.Color);
+            }
+        }
+    }
+
+    private static CursorImage? ReadColor(IntPtr color, IntPtr mask, int hotX, int hotY)
+    {
+        if (ReadBits(color, out var width, out var height) is not { } pixels)
+        {
+            return null;
+        }
+
+        // Старые цветные курсоры без альфа-канала: прозрачность берётся из маски.
+        if (pixels.All(pixel => (pixel >> 24) == 0))
+        {
+            var maskBits = ReadBits(mask, out _, out var maskHeight);
+            for (var i = 0; i < pixels.Length; i++)
+            {
+                var transparent = maskBits is not null && maskHeight >= height && (maskBits[i] & 0x00FFFFFF) != 0;
+                pixels[i] = transparent ? 0 : pixels[i] | 0xFF000000;
+            }
+        }
+
+        return new CursorImage(pixels, width, height, hotX, hotY);
+    }
+
+    private static CursorImage? ReadMonochrome(IntPtr mask, int hotX, int hotY)
+    {
+        if (ReadBits(mask, out var width, out var doubled) is not { } bits)
+        {
+            return null;
+        }
+
+        // Верхняя половина маски — AND, нижняя — XOR. Инвертирующие точки рисуются чёрными.
+        var height = doubled / 2;
+        var pixels = new uint[width * height];
+        for (var i = 0; i < pixels.Length; i++)
+        {
+            var and = (bits[i] & 0x00FFFFFF) != 0;
+            var xor = (bits[i + pixels.Length] & 0x00FFFFFF) != 0;
+            pixels[i] = (and, xor) switch
+            {
+                (false, true) => 0xFFFFFFFF,
+                (false, false) => 0xFF000000,
+                (true, true) => 0xFF000000,
+                _ => 0,
+            };
+        }
+
+        return new CursorImage(pixels, width, height, hotX, hotY);
+    }
+
+    private static uint[]? ReadBits(IntPtr bitmap, out int width, out int height)
+    {
+        width = 0;
+        height = 0;
+        var header = new BitmapHeader { Size = HeaderSize };
+        var screen = GetDC(IntPtr.Zero);
+        try
+        {
+            if (GetDIBits(screen, bitmap, 0, 0, null, ref header, 0) == 0)
+            {
+                return null;
+            }
+
+            width = header.Width;
+            height = Math.Abs(header.Height);
+            header.BitCount = 32;
+            header.Compression = 0;
+            header.Height = -height;
+            var pixels = new uint[width * height];
+            return GetDIBits(screen, bitmap, 0, (uint)height, pixels, ref header, 0) == 0 ? null : pixels;
+        }
+        finally
+        {
+            ReleaseDC(IntPtr.Zero, screen);
+        }
+    }
+
     private static IntPtr CreateCursor(uint[] argb, int size, int hotX, int hotY)
     {
         var maskStride = ((size + 15) / 16) * 2;
@@ -313,3 +419,6 @@ public static class CursorControl
         public uint Color1;
     }
 }
+
+/// <summary>Картинка курсора: точки 0xAARRGGBB строками сверху вниз и горячая точка.</summary>
+public sealed record CursorImage(uint[] Pixels, int Width, int Height, int HotX, int HotY);

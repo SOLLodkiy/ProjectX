@@ -1,0 +1,17 @@
+{
+  // «Случайные звуки» (идея 014). Пауза между звуками в секундах.
+  "minSeconds": 20,
+  "maxSeconds": 60,
+  // Звуки Windows из папки C:\Windows\Media этого компьютера. Отсутствующие файлы пропускаются.
+  "system": [
+    "Windows Critical Stop.wav",
+    "Windows Error.wav",
+    "Windows Shutdown.wav",
+    "Windows Hardware Insert.wav",
+    "Windows Hardware Remove.wav",
+    "Windows Notify System Generic.wav",
+    "Windows Background.wav"
+  ],
+  // Свои звуки: все файлы .wav из этой папки внутри assets. Новый звук добавляется файлом.
+  "folder": "sounds/random"
+}

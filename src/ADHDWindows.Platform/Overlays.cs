@@ -96,6 +96,13 @@ public sealed class OverlayThread : IDisposable
     /// <summary>Картинка с прозрачностью. Клик по видимой точке вызывает <paramref name="click"/>, если он задан.</summary>
     public SpriteOverlay CreateSprite(Action<int, int>? click) => Invoke(() => Track(new SpriteOverlay(this, click)));
 
+    /// <summary>
+    /// Картинка, которую можно нажимать и тянуть: <paramref name="pointer"/> получает нажатие, движение с нажатой
+    /// кнопкой и отпускание левой кнопки в точках картинки (до увеличения). Пока кнопка нажата, мышь захвачена окном.
+    /// </summary>
+    public SpriteOverlay CreatePointerSprite(Action<SpritePointer, int, int> pointer) =>
+        Invoke(() => Track(new SpriteOverlay(this, null, pointer)));
+
     public void Dispose()
     {
         if (_stopping)
@@ -604,18 +611,24 @@ public sealed class RegionOverlay : OverlayWindow
 public sealed class SpriteOverlay : OverlayWindow
 {
     private const int LeftButtonDown = 0x0201;
+    private const int LeftButtonUp = 0x0202;
+    private const int MouseMoveMessage = 0x0200;
+    private const int CaptureChanged = 0x0215;
     private const uint UpdateAlpha = 0x00000002;
     private const uint NoSize = 0x0001;
     private const uint NoZOrder = 0x0004;
     private const uint NoActivateFlag = 0x0010;
 
     private readonly Action<int, int>? _click;
+    private readonly Action<SpritePointer, int, int>? _pointer;
     private int _scale = 1;
+    private bool _captured;
 
-    internal SpriteOverlay(OverlayThread owner, Action<int, int>? click)
-        : base(owner, clickThrough: click is null)
+    internal SpriteOverlay(OverlayThread owner, Action<int, int>? click, Action<SpritePointer, int, int>? pointer = null)
+        : base(owner, clickThrough: click is null && pointer is null)
     {
         _click = click;
+        _pointer = pointer;
     }
 
     /// <summary>Левый верхний угол в пикселях экрана.</summary>
@@ -695,16 +708,46 @@ public sealed class SpriteOverlay : OverlayWindow
     private protected override bool OnMessage(uint message, IntPtr wParam, IntPtr lParam, out IntPtr result)
     {
         result = IntPtr.Zero;
+        var value = lParam.ToInt64();
+        var x = (short)(value & 0xFFFF);
+        var y = (short)((value >> 16) & 0xFFFF);
         if (message == LeftButtonDown && _click is not null)
         {
-            var value = lParam.ToInt64();
-            var x = (short)(value & 0xFFFF);
-            var y = (short)((value >> 16) & 0xFFFF);
             _click(x / _scale, y / _scale);
             return true;
         }
 
-        return false;
+        if (_pointer is null)
+        {
+            return false;
+        }
+
+        // Округление вниз и для отрицательных точек: окно захватило мышь, и она может уйти левее картинки.
+        var px = (int)Math.Floor(x / (double)_scale);
+        var py = (int)Math.Floor(y / (double)_scale);
+        switch (message)
+        {
+            case LeftButtonDown:
+                _captured = true;
+                SetCapture(Handle);
+                _pointer(SpritePointer.Down, px, py);
+                return true;
+            case MouseMoveMessage when _captured:
+                _pointer(SpritePointer.Move, px, py);
+                return true;
+            case LeftButtonUp when _captured:
+                _captured = false;
+                ReleaseCapture();
+                _pointer(SpritePointer.Up, px, py);
+                return true;
+            case CaptureChanged when _captured:
+                // Захват забрала система (например, Alt+Tab): кнопка считается отпущенной.
+                _captured = false;
+                _pointer(SpritePointer.Up, px, py);
+                return true;
+            default:
+                return false;
+        }
     }
 
     private static uint Premultiply(uint argb)
@@ -726,6 +769,13 @@ public sealed class SpriteOverlay : OverlayWindow
 
     [DllImport("user32.dll")]
     private static extern int ReleaseDC(IntPtr window, IntPtr dc);
+
+    [DllImport("user32.dll")]
+    private static extern IntPtr SetCapture(IntPtr window);
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool ReleaseCapture();
 
     [DllImport("gdi32.dll")]
     private static extern IntPtr CreateCompatibleDC(IntPtr dc);
@@ -786,4 +836,12 @@ public sealed class SpriteOverlay : OverlayWindow
         public uint ClrUsed;
         public uint ClrImportant;
     }
+}
+
+/// <summary>Что сделала левая кнопка над картинкой с <see cref="OverlayThread.CreatePointerSprite"/>.</summary>
+public enum SpritePointer
+{
+    Down,
+    Move,
+    Up,
 }

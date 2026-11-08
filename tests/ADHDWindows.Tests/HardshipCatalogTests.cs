@@ -13,6 +13,7 @@ using ADHDWindows.Core.Storage;
 using ADHDWindows.Modules.Hardships;
 using ADHDWindows.Modules.Hardships.Basic;
 using ADHDWindows.Modules.Hardships.Cursor;
+using ADHDWindows.Modules.Hardships.Physics;
 using ADHDWindows.Modules.Hardships.Screen;
 using ADHDWindows.Platform;
 
@@ -338,7 +339,7 @@ public sealed class HardshipCatalogTests : IDisposable
     public void Every_hardship_loads_from_the_modules_folder_starts_by_hand_and_is_fully_removed()
     {
         var modules = _temp.Combine("modules");
-        foreach (var name in new[] { "ADHDWindows.Modules.Hardships", "ADHDWindows.Modules.Hardships.Basic", "ADHDWindows.Modules.Hardships.Cursor", "ADHDWindows.Modules.Hardships.Screen" })
+        foreach (var name in new[] { "ADHDWindows.Modules.Hardships", "ADHDWindows.Modules.Hardships.Basic", "ADHDWindows.Modules.Hardships.Cursor", "ADHDWindows.Modules.Hardships.Screen", "ADHDWindows.Modules.Hardships.Physics", "ADHDWindows.Modules.Hardships.Keyboard", "ADHDWindows.Modules.Hardships.Sounds" })
         {
             RepositoryRoot.DeployModule(name, modules);
         }
@@ -353,6 +354,7 @@ public sealed class HardshipCatalogTests : IDisposable
         // «Одно окно» и «Бродячие окна» не трогают окна человека.
         store.Set($"modules/hardship.oneWindow/{OneWindowHardship.OnlyUnderSetting}", _temp.Combine("nothing"));
         store.Set($"modules/hardship.wanderingWindows/{WanderingWindowsHardship.OnlyUnderSetting}", _temp.Combine("nothing"));
+        store.Set($"modules/hardship.rockfall/{RockfallHardship.OnlyUnderSetting}", _temp.Combine("nothing"));
         var economy = new CoinEconomy(store, bus, TimeProvider.System);
         var texts = new TextCatalog(data, "ru", _log);
         texts.Use("ru");
@@ -380,7 +382,7 @@ public sealed class HardshipCatalogTests : IDisposable
         {
             Assert.NotNull(status);
             var catalog = status.Hardships.Select(entry => entry.Hardship).ToList();
-            Assert.True(catalog.Count >= 30, $"усложнений {catalog.Count}");
+            Assert.Equal(39, catalog.Count);
             Assert.Equal(catalog.Count, catalog.Select(info => info.Id).Distinct().Count());
             Assert.All(catalog, info =>
             {
@@ -417,7 +419,7 @@ public sealed class HardshipCatalogTests : IDisposable
                 {
                     Assert.NotEqual(arrow, CursorControl.VisiblePixelsOfArrow());
                 }
-                else if (info.Resources == HardshipResources.Screen)
+                else if (info.Resources.HasFlag(HardshipResources.Screen))
                 {
                     Assert.True(OverlayWindowCount() > 0, $"окна оверлея {info.Id}");
                 }

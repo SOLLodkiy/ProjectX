@@ -32,6 +32,9 @@
     <ProjectReference Include="..\..\src\ADHDWindows.Modules.Hardships.Basic\ADHDWindows.Modules.Hardships.Basic.csproj" />
     <ProjectReference Include="..\..\src\ADHDWindows.Modules.Hardships.Cursor\ADHDWindows.Modules.Hardships.Cursor.csproj" />
     <ProjectReference Include="..\..\src\ADHDWindows.Modules.Hardships.Screen\ADHDWindows.Modules.Hardships.Screen.csproj" />
+    <ProjectReference Include="..\..\src\ADHDWindows.Modules.Hardships.Physics\ADHDWindows.Modules.Hardships.Physics.csproj" />
+    <ProjectReference Include="..\..\src\ADHDWindows.Modules.Hardships.Keyboard\ADHDWindows.Modules.Hardships.Keyboard.csproj" />
+    <ProjectReference Include="..\..\src\ADHDWindows.Modules.Hardships.Sounds\ADHDWindows.Modules.Hardships.Sounds.csproj" />
     <!-- Отдельная программа: тесты запускают и замораживают её как процесс. -->
     <ProjectReference Include="..\ADHDWindows.TestApp\ADHDWindows.TestApp.csproj"
                       ReferenceOutputAssembly="false"

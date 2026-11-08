@@ -10,6 +10,8 @@
 | `app.ico` | Значок программы, собирается из спрайта `app_icon`. |
 | `fonts/*.json` | Растровые шрифты: `body` для текста, `title` для заголовков. |
 | `fonts/licenses/` | Лицензии шрифтов. |
+| `sounds/sniper-shot.wav` | 8-битный выстрел снайпера. |
+| `sounds/random/*.wav` | Свои звуки «Случайных звуков»: стук в дверь, шаги, капающая вода. Новый звук добавляется файлом в эту папку. |
 
 ## Спрайты
 
@@ -33,3 +35,13 @@ dotnet run --project tools/ADHDWindows.AssetTool -- sprites assets
 | `fonts/title.json` | Press Start 2P, <https://github.com/google/fonts/tree/main/ofl/pressstart2p> | `font PressStart2P-Regular.ttf 8 title assets/fonts/title.json` |
 
 Команды выполняются через `dotnet run --project tools/ADHDWindows.AssetTool -- <команда>`. Название Press Start 2P зарезервировано лицензией, поэтому изменённая версия называется `title`.
+
+## Звуки
+
+Звуки 8 бит, моно, 22 050 Гц. Свои звуки синтезирует инструмент ресурсов с постоянным зерном случайности, поэтому повторный запуск даёт те же файлы:
+
+```bash
+dotnet run --project tools/ADHDWindows.AssetTool -- sounds assets
+```
+
+Звуки Windows для «Случайных звуков» берутся из `C:\Windows\Media` компьютера пользователя, их список — в `data/hardships/sounds.json`.
