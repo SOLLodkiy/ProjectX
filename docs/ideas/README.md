@@ -11,7 +11,8 @@
 | 007 | Улучшения | [007-upgrades.md](007-upgrades.md) | 10 |
 | 008 | Задания | [008-quests.md](008-quests.md) | 12, 13 |
 | 009 | Усложнения | [009-hardships.md](009-hardships.md) | 14, 15 |
-| 010 | Прогресс: уровни, достижения и серии | [010-progression.md](010-progression.md) | 16 |
-| 011 | Случайные события и сундуки | [011-random-events.md](011-random-events.md) | 17 |
-| 012 | Косметика, питомец и звук | [012-cosmetics-and-pet.md](012-cosmetics-and-pet.md) | 18 |
-| 013 | Разброс цен | [013-price-spread.md](013-price-spread.md) | 20 |
+| 010 | Прогресс: уровни, достижения и серии | [010-progression.md](010-progression.md) | 17 |
+| 011 | Случайные события и сундуки | [011-random-events.md](011-random-events.md) | 18 |
+| 012 | Косметика, питомец и звук | [012-cosmetics-and-pet.md](012-cosmetics-and-pet.md) | 19 |
+| 013 | Разброс цен | [013-price-spread.md](013-price-spread.md) | 21 |
+| 014 | Новые усложнения от пользователя | [014-more-hardships.md](014-more-hardships.md) | 16 |
