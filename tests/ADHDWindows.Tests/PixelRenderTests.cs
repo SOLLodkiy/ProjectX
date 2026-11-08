@@ -198,13 +198,23 @@ public class PixelRenderTests
         var window = new QuestsWindow(texts);
         window.Update(
             [
-                new QuestView("e", "easy.clicks.200", QuestTier.Easy, "Сделай 200 кликов", "cursor", 45, 200, QuestUnit.Count, 35, now, now.AddMinutes(12.5), false),
+                new QuestView("e", "easy.listen", QuestTier.Easy, "Прослушай трек полностью", "clock", 45, 200, QuestUnit.Count, 35, now, now.AddMinutes(12.5), false, "https://soundcloud.com/forss/flickermood"),
                 new QuestView("h", "hard.game.one", QuestTier.Hard, "Поиграй в Minecraft 30 минут", "trophy", 1800, 1800, QuestUnit.Seconds, 450, now, now.AddMinutes(61), true),
             ],
-            now);
+            now,
+            chain: 1,
+            chainGoal: 3);
 
         var easy = window.Rows[QuestTier.Easy];
-        Assert.Equal(["Сделай 200 кликов", "45/200", "Награда: 35", "Новое через 12:30"], easy.Texts);
+        Assert.Equal(["Прослушай трек полностью", "45/200", "Награда: 35", "Новое через 12:30"], easy.Texts);
+        Assert.Equal(Visibility.Visible, easy.OpenButton.Visibility);
+        Assert.Equal("Открыть", easy.OpenButton.Content);
+        Assert.Equal(Visibility.Collapsed, window.Rows[QuestTier.Hard].OpenButton.Visibility);
+        Assert.Equal(Visibility.Collapsed, window.Rows[QuestTier.Medium].OpenButton.Visibility);
+        Assert.Equal("Цепочка: 1/3", window.ChainText);
+        Assert.True(QuestRow.IsWebLink("https://ru.wikipedia.org/wiki/Огурец"));
+        Assert.False(QuestRow.IsWebLink("file:///C:/Windows/notepad.exe"));
+        Assert.False(QuestRow.OpenLink("calc.exe"));
         Assert.Equal(0.225, easy.Share, 3);
         Assert.Equal(["Поиграй в Minecraft 30 минут", "30:00/30:00", "Выполнено!", "Новое через 1:01:00"], window.Rows[QuestTier.Hard].Texts);
         Assert.Equal("Нет выполнимых заданий. Новое появится позже.", window.Rows[QuestTier.Medium].Texts[0]);

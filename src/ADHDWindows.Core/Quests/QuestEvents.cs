@@ -24,6 +24,7 @@ public enum QuestUnit
 /// <summary>
 /// Задание для показа. <paramref name="Id"/> уникален для каждой выдачи, <paramref name="Template"/> — код шаблона из данных.
 /// <paramref name="Refresh"/> — когда задание сменится новым, выполнено оно или нет.
+/// <paramref name="Url"/> — ссылка задания на страницу, которую нужно открыть; null у заданий без страницы.
 /// </summary>
 public sealed record QuestView(
     string Id,
@@ -37,14 +38,18 @@ public sealed record QuestView(
     long Reward,
     DateTimeOffset Issued,
     DateTimeOffset Refresh,
-    bool Completed)
+    bool Completed,
+    string? Url = null)
 {
     /// <summary>Доля выполнения от 0 до 1.</summary>
     public double Share => Completed ? 1 : Goal <= 0 ? 0 : Math.Clamp(Progress / Goal, 0, 1);
 }
 
-/// <summary>Текущие задания всех сложностей, по порядку сложности. Приходит при изменениях и по запросу.</summary>
-public sealed record QuestsChanged(IReadOnlyList<QuestView> Quests);
+/// <summary>
+/// Текущие задания всех сложностей, по порядку сложности. Приходит при изменениях и по запросу.
+/// <paramref name="Chain"/> — сколько заданий выполнено подряд в текущей цепочке, <paramref name="ChainGoal"/> — длина цепочки.
+/// </summary>
+public sealed record QuestsChanged(IReadOnlyList<QuestView> Quests, int Chain = 0, int ChainGoal = 3);
 
 /// <summary>Окну нужны текущие задания. Владелец заданий отвечает <see cref="QuestsChanged"/>.</summary>
 public sealed record QuestsRequested;

@@ -1,0 +1,25 @@
+{
+  "comment": "Код страницы: PageAddress.Normalize в Core и pageOf в rules.js дают одинаковый результат. null — адрес не страница сайта.",
+  "cases": [
+    { "url": "https://ru.wikipedia.org/wiki/Огурец", "page": "ru.wikipedia.org/wiki/Огурец" },
+    { "url": "https://ru.wikipedia.org/wiki/%D0%9E%D0%B3%D1%83%D1%80%D0%B5%D1%86", "page": "ru.wikipedia.org/wiki/Огурец" },
+    { "url": "https://ru.wikipedia.org/wiki/%d0%9e%d0%b3%d1%83%d1%80%d0%b5%d1%86", "page": "ru.wikipedia.org/wiki/Огурец" },
+    { "url": "https://www.Ru.Wikipedia.org/wiki/Огурец/?oldid=1#История", "page": "ru.wikipedia.org/wiki/Огурец" },
+    { "url": "http://ru.wikipedia.org/wiki/Огурец", "page": "ru.wikipedia.org/wiki/Огурец" },
+    { "url": "https://soundcloud.com/artist/track-name?in=artist/sets/x", "page": "soundcloud.com/artist/track-name" },
+    { "url": "https://soundcloud.com/artist/Track-Name", "page": "soundcloud.com/artist/Track-Name" },
+    { "url": "https://soundcloud.com/", "page": "soundcloud.com" },
+    { "url": "https://soundcloud.com", "page": "soundcloud.com" },
+    { "url": "https://example.com/a//", "page": "example.com/a" },
+    { "url": "https://example.com/a/../b", "page": "example.com/b" },
+    { "url": "https://example.com/a%20b", "page": "example.com/a b" },
+    { "url": "https://example.com.:8443/x", "page": "example.com/x" },
+    { "url": "http://127.0.0.1:5000/article.html", "page": "127.0.0.1/article.html" },
+    { "url": "https://www.com/x", "page": "www.com/x" },
+    { "url": "https://пример.рф/статья", "page": "xn--e1afmkfd.xn--p1ai/статья" },
+    { "url": "ftp://example.com/x", "page": null },
+    { "url": "chrome-extension://abc/blocked.html#https://example.com/", "page": null },
+    { "url": "not a url", "page": null },
+    { "url": "", "page": null }
+  ]
+}

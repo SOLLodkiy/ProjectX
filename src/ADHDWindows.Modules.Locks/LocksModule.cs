@@ -3,6 +3,7 @@ using ADHDWindows.Core.Locks;
 using ADHDWindows.Core.Media;
 using ADHDWindows.Core.Safety;
 using ADHDWindows.Core.Modules;
+using ADHDWindows.Core.Quests;
 using ADHDWindows.Modules.Locks.Games;
 using ADHDWindows.Modules.Locks.Sites;
 using ADHDWindows.Platform;
@@ -121,10 +122,14 @@ public sealed class LocksModule : IModule
         context.Events.Subscribe<ItemUnlocked>(_ => Enqueue(PublishCollection));
         context.Events.Subscribe<UnlockRequested>(request => Enqueue(() => _engine.Unlock(request.Key)));
         context.Events.Subscribe<ExtensionPageRequested>(request => Enqueue(() => _browsers?.OpenExtensionsPage(request.BrowserId)));
+        context.Events.Subscribe<QuestPagesChanged>(changed => Enqueue(() => _sites.SetQuestPages(changed.Pages)));
         _watcher = new WindowWatcher(OnWindow, context.Log);
         _watcher.Start();
         _worker = new Thread(Work) { IsBackground = true, Name = "Locks" };
         _worker.Start();
+
+        // Задания могли смениться раньше, чем блокировка подписалась: пропуски нужны сразу.
+        context.Events.Publish(new QuestPagesRequested());
     }
 
     public void Stop()

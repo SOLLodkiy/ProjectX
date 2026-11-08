@@ -514,13 +514,26 @@ public sealed class ProgramLockTests : IDisposable
 
     private static AutomationElement? FindBuyButton(Process app) => FindByName(app, BuyButton);
 
+    /// <summary>
+    /// Окна программы перебираются через Win32, а не через корень UI Automation: тот опрашивает все окна верхнего уровня,
+    /// включая окна замороженных процессов, и каждый такой опрос ждёт таймаута. Один поиск тогда длился дольше
+    /// всего ожидания, и тест падал, хотя экран покупки уже был открыт.
+    /// </summary>
     private static AutomationElement? FindByName(Process app, string name)
     {
-        var windows = AutomationElement.RootElement.FindAll(
-            TreeScope.Children,
-            new PropertyCondition(AutomationElement.ProcessIdProperty, app.Id));
-        foreach (AutomationElement window in windows)
+        foreach (var handle in VisibleWindowsOf(app.Id))
         {
+            AutomationElement window;
+            try
+            {
+                window = AutomationElement.FromHandle(handle);
+            }
+            catch (ElementNotAvailableException)
+            {
+                // Окно закрылось между перебором и запросом.
+                continue;
+            }
+
             if (window.FindFirst(TreeScope.Descendants, new PropertyCondition(AutomationElement.NameProperty, name)) is { } button)
             {
                 return button;
@@ -528,6 +541,24 @@ public sealed class ProgramLockTests : IDisposable
         }
 
         return null;
+    }
+
+    private static List<IntPtr> VisibleWindowsOf(int processId)
+    {
+        var windows = new List<IntPtr>();
+        EnumWindows(
+            (window, _) =>
+            {
+                GetWindowThreadProcessId(window, out var owner);
+                if (owner == processId && IsWindowVisible(window))
+                {
+                    windows.Add(window);
+                }
+
+                return true;
+            },
+            IntPtr.Zero);
+        return windows;
     }
 
     private static void Invoke(AutomationElement button) =>
@@ -608,6 +639,19 @@ public sealed class ProgramLockTests : IDisposable
 
     [DllImport("user32.dll", SetLastError = true)]
     private static extern uint SendInput(uint count, NativeInput[] inputs, int size);
+
+    private delegate bool EnumWindowsCallback(IntPtr window, IntPtr data);
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool EnumWindows(EnumWindowsCallback callback, IntPtr data);
+
+    [DllImport("user32.dll")]
+    private static extern uint GetWindowThreadProcessId(IntPtr window, out int processId);
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool IsWindowVisible(IntPtr window);
 
     [StructLayout(LayoutKind.Explicit, Size = 40)]
     private struct NativeInput

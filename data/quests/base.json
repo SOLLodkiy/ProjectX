@@ -8,7 +8,8 @@
   //   spend   — потратить goal монеток.
   //   upgrade — купить goal уровней улучшений; выдаётся, если в магазине есть что купить.
   //   unlock  — купить goal программ, игр или сайтов; kind — program, game или site.
-  // В title подставляются {goal} и {game}. weight — как часто выпадает шаблон, по умолчанию 1.
+  //   visit, read, select, listen — задания на страницу по ссылке url, описаны в pages.json.
+  // В title подставляются {goal}, {game} и {word}. weight — как часто выпадает шаблон, по умолчанию 1.
   "templates": [
     { "id": "easy.clicks.200", "tier": "easy", "type": "clicks", "goal": 200, "reward": [20, 40], "title": "Сделай {goal} кликов", "icon": "cursor", "weight": 2 },
     { "id": "easy.clicks.400", "tier": "easy", "type": "clicks", "goal": 400, "reward": [35, 50], "title": "Сделай {goal} кликов", "icon": "cursor" },

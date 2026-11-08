@@ -1,6 +1,6 @@
 // Фоновая часть расширения. Связь с программой идёт через мост native messaging.
 // Пока программа не запущена, ничего не блокируется: так же, как после выхода из неё размораживаются программы.
-import { blockedTarget, buildDnrRules, hostOf, isAllowed } from "./rules.js";
+import { blockedTarget, buildDnrRules, hostOf, isPageAllowed, pageOf } from "./rules.js";
 
 const api = globalThis.browser ?? globalThis.chrome;
 const HostName = "com.adhdwindows.bridge";
@@ -14,6 +14,9 @@ const MediaLifetime = 6000;
 let port = null;
 let online = false;
 let rules = [];
+// Пропуски заданий: коды страниц, открытых бесплатно. Страницы заданий: код → { select, scroll }.
+let passes = [];
+let watch = new Map();
 let nextId = 1;
 let reportTimer = null;
 let reconnectTimer = null;
@@ -73,8 +76,11 @@ async function handle(message) {
     case "state":
       online = true;
       rules = Array.isArray(message.rules) ? message.rules : [];
+      passes = Array.isArray(message.passes) ? message.passes.filter((page) => typeof page === "string" && page.length > 0) : [];
+      watch = readWatch(message.watch);
       await applyRules();
       await enforceTabs();
+      await updateWatchers();
       reportWindows();
       reportMedia();
       break;
@@ -99,6 +105,8 @@ async function sendHello() {
 async function goOffline() {
   online = false;
   rules = [];
+  passes = [];
+  watch = new Map();
   for (const request of pending.values()) {
     clearTimeout(request.timer);
     request.resolve({ offline: true });
@@ -107,6 +115,7 @@ async function goOffline() {
   pending.clear();
   await setDnrRules([]);
   await releaseTabs();
+  await updateWatchers();
 }
 
 function post(message) {
@@ -134,7 +143,7 @@ function request(payload) {
 }
 
 async function applyRules() {
-  await setDnrRules(buildDnrRules(rules, BlockedPage));
+  await setDnrRules(buildDnrRules(rules, BlockedPage, passes));
 }
 
 async function setDnrRules(addRules) {
@@ -145,24 +154,88 @@ async function setDnrRules(addRules) {
   });
 }
 
-/** Уже открытые вкладки закрытых сайтов закрываются экраном покупки, купленные открываются. */
+/**
+ * Уже открытые вкладки закрытых сайтов закрываются экраном покупки, купленные и открытые пропуском открываются.
+ * Снятый пропуск закрывает свою страницу.
+ */
 async function enforceTabs() {
   for (const tab of await api.tabs.query({})) {
-    const target = blockedTarget(tab.url, BlockedPage);
-    if (target) {
-      const host = hostOf(target);
-      if (host && isAllowed(rules, host)) {
-        await updateTab(tab.id, target);
-      }
+    await enforceTab(tab.id, tab.url);
+  }
+}
 
-      continue;
+async function enforceTab(tabId, url) {
+  if (!online || !url) {
+    return;
+  }
+
+  const target = blockedTarget(url, BlockedPage);
+  if (target) {
+    if (hostOf(target) && isPageAllowed(rules, passes, target)) {
+      await updateTab(tabId, target);
     }
 
-    const host = hostOf(tab.url);
-    if (host && !isAllowed(rules, host)) {
-      await updateTab(tab.id, BlockedPage + "#" + tab.url);
+    return;
+  }
+
+  if (!isPageAllowed(rules, passes, url)) {
+    await updateTab(tabId, BlockedPage + "#" + url);
+  }
+}
+
+function readWatch(items) {
+  const result = new Map();
+  for (const item of Array.isArray(items) ? items : []) {
+    if (typeof item?.page === "string" && item.page.length > 0) {
+      const old = result.get(item.page);
+      result.set(item.page, { select: Boolean(item.select || old?.select), scroll: Boolean(item.scroll || old?.scroll) });
     }
   }
+
+  return result;
+}
+
+/** Что читать на странице: { select, scroll } для страниц заданий, null для остальных. */
+function watchOf(url) {
+  const page = online ? pageOf(url) : null;
+  return page === null ? null : watch.get(page) ?? null;
+}
+
+/** Скрипт страницы в верхнем фрейме узнаёт, следить ли за выделением и прокруткой. */
+async function tellWatcher(tabId, url) {
+  try {
+    await api.tabs.sendMessage(tabId, { type: "page-watch", watch: watchOf(url) }, { frameId: 0 });
+  } catch {
+    // Скрипта во вкладке нет: служебная страница или страница ещё грузится, тогда он спросит сам.
+  }
+}
+
+/** Задания сменились: вкладки узнают новые настройки, а уже открытые страницы заданий засчитываются как посещённые. */
+async function updateWatchers() {
+  for (const tab of await api.tabs.query({ url: ["http://*/*", "https://*/*"] })) {
+    await tellWatcher(tab.id, tab.url);
+    if (tab.status === "complete") {
+      reportPage(tab, { event: "visit" });
+    }
+  }
+}
+
+/** Сообщение программе о странице задания. О других страницах ничего не отправляется. */
+async function reportPage(tab, details, url = tab.url) {
+  if (!port || !online || !watchOf(url) || !isPageAllowed(rules, passes, url)) {
+    return;
+  }
+
+  // Фокус проверяется в момент отправки: события смены фокуса приходят не во всех браузерах вовремя.
+  let focused = false;
+  try {
+    const current = await api.tabs.get(tab.id);
+    focused = Boolean(current.active) && Boolean((await api.windows.get(current.windowId)).focused);
+  } catch {
+    // Вкладку уже закрыли.
+  }
+
+  post({ type: "page", tabId: tab.id, url, focused, ...details });
 }
 
 /** Программа закрылась: закрытые вкладки снова показывают свои сайты. */
@@ -260,6 +333,7 @@ async function injectMediaScripts() {
     try {
       await api.scripting.executeScript({ target: { tabId: tab.id, allFrames: true }, files: ["media-hook.js"], world: "MAIN" });
       await api.scripting.executeScript({ target: { tabId: tab.id, allFrames: true }, files: ["media.js"] });
+      await api.scripting.executeScript({ target: { tabId: tab.id }, files: ["page.js"] });
     } catch {
       // Служебные страницы и магазин расширений недоступны.
     }
@@ -308,6 +382,39 @@ api.runtime.onMessage.addListener((message, sender) => {
   return false;
 });
 
+// Скрипт страницы: вопрос о слежении и сообщения о выделении и прокрутке. Принимаются только из верхнего фрейма.
+api.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if ((message?.type !== "page-watch" && message?.type !== "page") || !sender.tab || sender.id !== api.runtime.id || (sender.frameId ?? 0) !== 0) {
+    return false;
+  }
+
+  if (message.type === "page-watch") {
+    sendResponse({ watch: watchOf(sender.tab.url) });
+    return false;
+  }
+
+  // Адрес из сообщения должен быть страницей вкладки: страница могла уже смениться.
+  const url = String(message.url ?? "");
+  const config = watchOf(url);
+  if (!config || pageOf(url) !== pageOf(sender.tab.url)) {
+    return false;
+  }
+
+  if (message.event === "select" && config.select) {
+    const text = String(message.text ?? "").trim().slice(0, 200);
+    if (text.length > 0) {
+      reportPage(sender.tab, { event: "select", text }, url);
+    }
+  } else if (message.event === "scroll" && config.scroll) {
+    const share = Number(message.share);
+    if (Number.isFinite(share)) {
+      reportPage(sender.tab, { event: "scroll", share: Math.min(1, Math.max(0, share)) }, url);
+    }
+  }
+
+  return false;
+});
+
 api.windows.onFocusChanged.addListener((windowId) => {
   focusedWindow = windowId;
   reportMedia();
@@ -324,6 +431,28 @@ api.tabs.onUpdated.addListener((tabId, change) => {
     reportWindows();
   }
 });
+
+// Смена адреса вкладки, в том числе внутри одностраничного сайта без загрузки (SoundCloud). Правила браузера
+// такие переходы не видят, поэтому закрытая страница сразу показывает экран покупки: пропуск не уводит дальше своей страницы.
+// Посещение сообщается после загрузки и после смены адреса без загрузки. Повтор того же адреса
+// (одностраничные сайты часто переписывают его на тот же) не сообщается.
+const visited = new Map();
+api.tabs.onUpdated.addListener((tabId, change, tab) => {
+  if (change.url !== undefined) {
+    queue = queue.then(() => enforceTab(tabId, change.url)).catch((error) => console.error("ADHDWindows", error));
+    if (visited.get(tabId) !== change.url) {
+      tellWatcher(tabId, change.url);
+      if (tab.status === "complete") {
+        visited.set(tabId, change.url);
+        reportPage(tab, { event: "visit" }, change.url);
+      }
+    }
+  } else if (change.status === "complete" && visited.get(tabId) !== tab.url) {
+    visited.set(tabId, tab.url);
+    reportPage(tab, { event: "visit" });
+  }
+});
+api.tabs.onRemoved.addListener((tabId) => visited.delete(tabId));
 api.tabs.onActivated.addListener(reportWindows);
 api.tabs.onRemoved.addListener(reportWindows);
 api.windows.onCreated.addListener(reportWindows);

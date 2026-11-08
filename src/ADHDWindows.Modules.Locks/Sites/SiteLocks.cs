@@ -4,6 +4,7 @@ using ADHDWindows.Core.Events;
 using ADHDWindows.Core.Locks;
 using ADHDWindows.Core.Logging;
 using ADHDWindows.Core.Media;
+using ADHDWindows.Core.Quests;
 using ADHDWindows.Platform;
 
 namespace ADHDWindows.Modules.Locks.Sites;
@@ -27,7 +28,8 @@ public sealed class BrowserSession(IBrowserPeer peer)
 
 /// <summary>
 /// Блокировка сайтов: отвечает расширениям браузеров. Все методы вызываются из рабочего потока модуля.
-/// Сообщения расширения: hello, windows, media, offer, unlock. Отчёт media уходит в шину для хронометража. Ответ на запрос несёт тот же id.
+/// Сообщения расширения: hello, windows, media, page, offer, unlock. Отчёты media и page уходят в шину для хронометража и заданий.
+/// Ответ на запрос несёт тот же id. Страницы заданий дают пропуски (passes) и наблюдение (watch) в сообщении state.
 /// </summary>
 public sealed class SiteLocks(
     SiteClassifier classifier,
@@ -40,9 +42,42 @@ public sealed class SiteLocks(
     private const int MaxTitles = 200;
     private const int MaxTitleLength = 1024;
 
+    /// <summary>Длина выделенного текста в отчёте page.</summary>
+    public const int MaxSelection = 200;
+
     private readonly Dictionary<int, BrowserSession> _sessions = [];
+    private Dictionary<string, PageWatch> _pages = new(StringComparer.Ordinal);
 
     public IReadOnlyCollection<BrowserSession> Sessions => _sessions.Values;
+
+    /// <summary>
+    /// Страницы текущих заданий. Несколько заданий на одной странице объединяются.
+    /// Если пропуски или наблюдение изменились, новое state уходит всем готовым браузерам.
+    /// </summary>
+    public void SetQuestPages(IReadOnlyList<QuestPage> pages)
+    {
+        var merged = new Dictionary<string, PageWatch>(StringComparer.Ordinal);
+        foreach (var page in pages)
+        {
+            if (string.IsNullOrEmpty(page.Page))
+            {
+                continue;
+            }
+
+            merged[page.Page] = merged.TryGetValue(page.Page, out var known)
+                ? new PageWatch(known.Pass || page.Pass, known.Select || page.WatchSelection, known.Scroll || page.WatchScroll)
+                : new PageWatch(page.Pass, page.WatchSelection, page.WatchScroll);
+        }
+
+        if (merged.Count == _pages.Count && merged.All(pair => _pages.TryGetValue(pair.Key, out var old) && old == pair.Value))
+        {
+            return;
+        }
+
+        _pages = merged;
+        log.Info($"Страницы заданий: {merged.Count}, пропусков {merged.Values.Count(watch => watch.Pass)}");
+        Broadcast();
+    }
 
     /// <param name="message">Null — браузер отключился.</param>
     public void OnMessage(IBrowserPeer peer, JsonObject? message)
@@ -88,6 +123,13 @@ public sealed class SiteLocks(
             case "media":
                 events.Publish(MediaReport.Parse(peer.Id, session.Browser?.Id, message));
                 break;
+            case "page":
+                if (Page(peer.Id, message) is { } report)
+                {
+                    events.Publish(report);
+                }
+
+                break;
             case "offer":
                 peer.Send(Reply(message, Offer(Text(message["url"]))));
                 break;
@@ -106,10 +148,49 @@ public sealed class SiteLocks(
             ["domain"] = rule.Domain,
             ["allow"] = rule.Allow,
         })]),
+        ["passes"] = new JsonArray([.. _pages.Where(pair => pair.Value.Pass).Select(pair => (JsonNode?)JsonValue.Create(pair.Key))]),
+        ["watch"] = new JsonArray([.. _pages.Select(pair => new JsonObject
+        {
+            ["page"] = pair.Key,
+            ["select"] = pair.Value.Select,
+            ["scroll"] = pair.Value.Scroll,
+        })]),
     };
+
+    /// <summary>
+    /// Отчёт о странице задания. Код страницы считается заново из адреса: браузеру не доверяем.
+    /// Неверное сообщение и страницы вне наблюдения дают null.
+    /// </summary>
+    private BrowserPageReported? Page(int peerId, JsonObject message)
+    {
+        if (Number(message["tabId"]) is not { } tabId || tabId is < int.MinValue or > int.MaxValue
+            || Text(message["url"]) is not { } url
+            || PageAddress.Normalize(url) is not { } page
+            || !_pages.TryGetValue(page, out var watch)
+            || message["focused"] is not JsonValue focusedValue || !focusedValue.TryGetValue<bool>(out var focused))
+        {
+            return null;
+        }
+
+        return Text(message["event"]) switch
+        {
+            "visit" => new BrowserPageReported(peerId, (int)tabId, page, url, PageActivityKind.Visit, focused),
+            "select" when watch.Select && Text(message["text"]) is { } text =>
+                new BrowserPageReported(peerId, (int)tabId, page, url, PageActivityKind.Selection, focused, Cut(text, MaxSelection)),
+            "scroll" when watch.Scroll && Fraction(message["share"]) is { } share =>
+                new BrowserPageReported(peerId, (int)tabId, page, url, PageActivityKind.Scroll, focused, Share: Math.Clamp(share, 0, 1)),
+            _ => null,
+        };
+    }
 
     private JsonObject Offer(string? url)
     {
+        // Пропуск задания открывает только свою страницу. Остальные страницы сайта продаются как раньше.
+        if (PageAddress.Normalize(url) is { } page && _pages.TryGetValue(page, out var watch) && watch.Pass)
+        {
+            return new JsonObject { ["free"] = true };
+        }
+
         if (Domain.FromUrl(url) is not { } host
             || classifier.Classify(host).Offer is not { } offer
             || ledger.Contains(offer.Key))
@@ -150,14 +231,38 @@ public sealed class SiteLocks(
         events.Publish(new ItemUnlocked(offer, when));
 
         // Новые правила уходят раньше ответа: страница покупки откроет сайт, когда браузер уже знает о покупке.
+        Broadcast();
+        return new JsonObject { ["unlocked"] = true };
+    }
+
+    private void Broadcast()
+    {
         var state = State();
         foreach (var other in _sessions.Values.Where(other => other.Ready))
         {
             other.Peer.Send(state.DeepClone().AsObject());
         }
-
-        return new JsonObject { ["unlocked"] = true };
     }
+
+    private static string Cut(string text, int length)
+    {
+        if (text.Length <= length)
+        {
+            return text;
+        }
+
+        // Половина суррогатной пары на конце дала бы неверную строку.
+        return char.IsHighSurrogate(text[length - 1]) ? text[..(length - 1)] : text[..length];
+    }
+
+    private static double? Fraction(JsonNode? node) =>
+        node is JsonValue value && value.GetValueKind() == System.Text.Json.JsonValueKind.Number
+        && double.TryParse(value.ToJsonString(), System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var number)
+        && double.IsFinite(number)
+            ? number
+            : null;
+
+    private sealed record PageWatch(bool Pass, bool Select, bool Scroll);
 
     private static JsonObject Reply(JsonObject request, JsonObject answer)
     {
