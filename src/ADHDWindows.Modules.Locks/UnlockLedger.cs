@@ -16,6 +16,8 @@ public sealed class UnlockLedger(IKeyValueStore saves)
 
     public bool Contains(string key) => _records.ContainsKey(key);
 
+    public IReadOnlyCollection<string> Keys => _records.Keys;
+
     public void Add(LockOffer offer, DateTimeOffset when)
     {
         _records[offer.Key] = new UnlockRecord(offer.Name, offer.Price, offer.Kind, when);

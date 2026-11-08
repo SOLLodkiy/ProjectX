@@ -1,0 +1,14 @@
+{
+  "manifest_version": 3,
+  "name": "ADHDWindows",
+  "version": "0.8.0",
+  "description": "Сайты открываются за монетки ADHDWindows. Работает вместе с программой.",
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAo6UOpTV93NSUKuVg5W1WPuf4tupRp1jnwpQTrgGMyM7lo5ullpYUqoKHDKzMx8pusP30PY4yXakPXne1ACy2vFIOlIm69+dROimecM4mGLi+gCO4Fs+eL1nGsrP/vb9hwxEbHKQCVOesdKZgAFiI7ZPFw11hBCOP4hVn/eXbp/LbMGMeD5e9yXVY3KebPe3jlIWPe0KXqkKE6bPbShTpT4ZTdFTQLMvOPecHQBCWv9WxpmBy9rFGDy6n3dcjOTV1c2EdTn5ZpcrdL2mzqPtLOuyF6qmcHcEsOuiqfH/yCJS0i3zgY0kgydDW9cSjyEqNMPKqrlf1PJi0TPKO8ZQAtQIDAQAB",
+  "minimum_chrome_version": "120",
+  "permissions": ["nativeMessaging", "declarativeNetRequestWithHostAccess", "tabs", "alarms"],
+  "host_permissions": ["<all_urls>"],
+  "background": { "service_worker": "background.js", "type": "module" },
+  "incognito": "spanning",
+  "web_accessible_resources": [ { "resources": ["blocked.html"], "matches": ["<all_urls>"] } ],
+  "icons": { "16": "icons/16.png", "32": "icons/32.png", "48": "icons/48.png", "128": "icons/128.png" }
+}

@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ADHDWindows</title>
+  <style>
+    html, body { margin: 0; height: 100%; background: #14121F; overflow: hidden; }
+    canvas { display: block; image-rendering: pixelated; image-rendering: crisp-edges; }
+    #buy { position: absolute; margin: 0; padding: 0; border: 0; background: transparent; cursor: pointer; }
+    #buy:disabled { cursor: default; }
+    #status { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  </style>
+</head>
+<body>
+  <canvas id="screen"></canvas>
+  <!-- Невидимая кнопка над нарисованной: работает только от мыши, клавиатура покупку не совершает. -->
+  <button id="buy" type="button" tabindex="-1" disabled></button>
+  <div id="status" role="status" aria-live="polite"></div>
+  <script type="module" src="blocked.js"></script>
+</body>
+</html>

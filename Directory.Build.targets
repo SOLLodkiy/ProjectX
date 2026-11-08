@@ -28,4 +28,19 @@
           DestinationFiles="@(WatchdogOutputFile->'$(WatchdogDeployDir)%(RecursiveDir)%(Filename)%(Extension)')"
           SkipUnchangedFiles="true" />
   </Target>
+
+  <!-- Мост браузера тоже в своей папке: на его файл указывают записи native messaging в реестре. -->
+  <Target Name="DeployBrowserHostToApp"
+          AfterTargets="Build"
+          Condition="'$(MSBuildProjectName)' == 'ADHDWindows.BrowserHost'">
+    <PropertyGroup>
+      <BrowserHostDeployDir>$(RepoRoot)src\ADHDWindows.App\bin\$(Configuration)\net10.0-windows\browser-host\</BrowserHostDeployDir>
+    </PropertyGroup>
+    <ItemGroup>
+      <BrowserHostOutputFile Include="$(OutDir)**\*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(BrowserHostOutputFile)"
+          DestinationFiles="@(BrowserHostOutputFile->'$(BrowserHostDeployDir)%(RecursiveDir)%(Filename)%(Extension)')"
+          SkipUnchangedFiles="true" />
+  </Target>
 </Project>

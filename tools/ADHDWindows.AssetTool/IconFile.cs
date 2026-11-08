@@ -39,7 +39,7 @@ internal static class IconFile
         return stream.ToArray();
     }
 
-    private static byte[] Render(SpriteDefinition sprite, Palette palette, int scale)
+    public static byte[] Render(SpriteDefinition sprite, Palette palette, int scale)
     {
         var width = sprite.Width * scale;
         var height = sprite.Height * scale;

@@ -1,12 +1,17 @@
 using System.Collections.Concurrent;
 using ADHDWindows.Core.Locks;
+using ADHDWindows.Core.Safety;
 using ADHDWindows.Core.Modules;
 using ADHDWindows.Modules.Locks.Games;
+using ADHDWindows.Modules.Locks.Sites;
 using ADHDWindows.Platform;
 
 namespace ADHDWindows.Modules.Locks;
 
-/// <summary>Блокировка программ: разовая покупка за монетки, до покупки программа свёрнута и заморожена.</summary>
+/// <summary>
+/// Блокировка программ, игр и сайтов: разовая покупка за монетки. До покупки программа свёрнута и заморожена,
+/// а сайт закрыт экраном покупки расширения браузера.
+/// </summary>
 public sealed class LocksModule : IModule
 {
     /// <summary>Настройка для проверок: блокировать только файлы из этой папки.</summary>
@@ -18,18 +23,27 @@ public sealed class LocksModule : IModule
     /// <summary>Настройка для проверок: папка с файлами установок Epic Games.</summary>
     public const string EpicManifestsSetting = "epicManifests";
 
+    /// <summary>Настройка для проверок: следить только за браузерами с этим текстом в командной строке.</summary>
+    /// <remarks>В режиме разработчика без неё браузеры без расширения не сворачиваются.</remarks>
+    public const string BrowserProfileSetting = "browserProfile";
+
     private const int QueueLimit = 512;
 
     private static readonly TimeSpan ScanInterval = TimeSpan.FromSeconds(3);
     private static readonly TimeSpan LibraryInterval = TimeSpan.FromSeconds(30);
     private static readonly TimeSpan StopTimeout = TimeSpan.FromSeconds(2);
+    private static readonly TimeSpan BrowserCheckPause = TimeSpan.FromMilliseconds(500);
 
-    private readonly ConcurrentQueue<Action<LockEngine>> _queue = new();
+    private readonly ConcurrentQueue<Action> _queue = new();
     private readonly SemaphoreSlim _wake = new(0);
     private readonly CancellationTokenSource _stop = new();
     private IModuleContext? _context;
     private LockEngine? _engine;
     private GameLibrary? _games;
+    private SiteLocks? _sites;
+    private BrowserWatch? _browsers;
+    private BrowserBridge? _bridge;
+    private DateTime _nextBrowserCheck;
     private WindowWatcher? _watcher;
     private Thread? _worker;
 
@@ -61,17 +75,41 @@ public sealed class LocksModule : IModule
         var gameCatalog = GameCatalog.Load(context.Data);
         _games = new GameLibrary(GameSources(context), gameCatalog, context.Log, TimeProvider.System);
         var classifier = new ProgramClassifier(ProgramCatalog.Load(context.Data), OwnFiles(), onlyUnder, _games);
+        var siteCatalog = SiteCatalog.Load(context.Data);
+        var system = new WindowsProgramSystem();
+
+        // Одна книга покупок на программы и сайты: обе части пишут в одно сохранение из одного потока.
+        var ledger = new UnlockLedger(context.Saves);
         _engine = new LockEngine(
-            new WindowsProgramSystem(),
+            system,
             classifier,
-            new UnlockLedger(context.Saves),
+            ledger,
             context.Economy,
             context.Changes,
             context.Events,
             context.Log,
             TimeProvider.System);
 
-        context.Events.Subscribe<UnlockRequested>(request => Enqueue(engine => engine.Unlock(request.Key)));
+        _sites = new SiteLocks(new SiteClassifier(siteCatalog), ledger, context.Economy, context.Events, context.Log, TimeProvider.System);
+        var profile = Setting(context, BrowserProfileSetting);
+        if (!context.DeveloperMode || profile is not null)
+        {
+            _browsers = new BrowserWatch(siteCatalog, system, new WindowsBrowserSystem(), context.Events, context.Log, TimeProvider.System, profile);
+        }
+        else
+        {
+            context.Log.Warn($"Режим разработчика: браузеры без расширения не сворачиваются, пока не задана настройка {BrowserProfileSetting}");
+        }
+
+        NativeHost.Register(NativeHost.DefaultHostPath, context.Log);
+        _bridge = new BrowserBridge(
+            ScopedName.BrowserBridge(),
+            (peer, message) => Enqueue(() => _sites.OnMessage(peer, message)),
+            context.Log);
+        _bridge.Start();
+
+        context.Events.Subscribe<UnlockRequested>(request => Enqueue(() => _engine.Unlock(request.Key)));
+        context.Events.Subscribe<ExtensionPageRequested>(request => Enqueue(() => _browsers?.OpenExtensionsPage(request.BrowserId)));
         _watcher = new WindowWatcher(OnWindow, context.Log);
         _watcher.Start();
         _worker = new Thread(Work) { IsBackground = true, Name = "Locks" };
@@ -81,6 +119,9 @@ public sealed class LocksModule : IModule
     public void Stop()
     {
         _watcher?.Dispose();
+
+        // Расширения узнают, что программы нет, и открывают закрытые вкладки.
+        _bridge?.Dispose();
         _stop.Cancel();
         _wake.Release();
         if (_worker?.Join(StopTimeout) == false)
@@ -90,6 +131,7 @@ public sealed class LocksModule : IModule
 
         // Реестр изменений откатил бы заморозку и сам, но так программы оживают сразу и вместе с окнами.
         _engine?.ReleaseAll();
+        _browsers?.ReleaseAll();
     }
 
     private static List<IGameSource> GameSources(IModuleContext context)
@@ -121,11 +163,26 @@ public sealed class LocksModule : IModule
         // Показов окон бывает очень много. Потерянное событие подберёт следующий осмотр.
         if (_queue.Count < QueueLimit)
         {
-            Enqueue(engine => engine.OnWindow(window, activated));
+            Enqueue(() =>
+            {
+                _engine!.OnWindow(window, activated);
+
+                // Развёрнутое окно браузера без расширения сворачивается сразу, а не при следующем осмотре.
+                if (activated && DateTime.UtcNow >= _nextBrowserCheck)
+                {
+                    CheckBrowsers();
+                }
+            });
         }
     }
 
-    private void Enqueue(Action<LockEngine> command)
+    private void CheckBrowsers()
+    {
+        _browsers?.Check(_sites!.Sessions);
+        _nextBrowserCheck = DateTime.UtcNow + BrowserCheckPause;
+    }
+
+    private void Enqueue(Action command)
     {
         _queue.Enqueue(command);
         _wake.Release();
@@ -140,11 +197,11 @@ public sealed class LocksModule : IModule
             // Новая установка получает цену сразу. Уже открытые процессы пересматриваются.
             if (DateTime.UtcNow >= nextLibrary)
             {
-                Execute(engine =>
+                Execute(() =>
                 {
                     if (_games!.Refresh())
                     {
-                        engine.ForgetVerdicts();
+                        _engine!.ForgetVerdicts();
                     }
                 });
                 nextLibrary = DateTime.UtcNow + LibraryInterval;
@@ -152,7 +209,8 @@ public sealed class LocksModule : IModule
 
             if (DateTime.UtcNow >= nextScan)
             {
-                Execute(engine => engine.Scan(_stop.Token));
+                Execute(() => _engine!.Scan(_stop.Token));
+                Execute(CheckBrowsers);
                 nextScan = DateTime.UtcNow + ScanInterval;
             }
 
@@ -169,11 +227,11 @@ public sealed class LocksModule : IModule
         }
     }
 
-    private void Execute(Action<LockEngine> command)
+    private void Execute(Action command)
     {
         try
         {
-            command(_engine!);
+            command();
         }
         catch (OperationCanceledException)
         {

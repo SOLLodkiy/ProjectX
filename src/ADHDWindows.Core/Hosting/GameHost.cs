@@ -1,6 +1,7 @@
 using ADHDWindows.Core.Data;
 using ADHDWindows.Core.Economy;
 using ADHDWindows.Core.Events;
+using ADHDWindows.Core.Locks;
 using ADHDWindows.Core.Logging;
 using ADHDWindows.Core.Modules;
 using ADHDWindows.Core.Safety;
@@ -78,6 +79,8 @@ public sealed class GameHost : IDisposable
 
         // Изменения прошлого запуска, если сторож не смог их откатить. Модулям нужна чистая система.
         _recovery.RestoreAll();
+        // Покупка записывается сразу: после сбоя она не должна пропасть до следующего автосохранения.
+        _events.Subscribe<ItemUnlocked>(_ => Save());
         _modules.Start(ModuleLoader.Load(_paths.ModulesDir, _log));
         _events.Publish(new AppStarted());
         _autosave = new Timer(_ => Save(), null, AutosaveInterval, AutosaveInterval);

@@ -67,6 +67,19 @@ public static class WindowControl
 
     public static bool IsMinimized(IntPtr window) => IsIconic(window);
 
+    /// <summary>Заголовок окна. Для зависшего окна система отвечает сама, не дожидаясь программы.</summary>
+    public static string Title(IntPtr window)
+    {
+        var length = GetWindowTextLengthW(window);
+        if (length <= 0)
+        {
+            return string.Empty;
+        }
+
+        var text = new StringBuilder(length + 1);
+        return GetWindowTextW(window, text, text.Capacity) > 0 ? text.ToString() : string.Empty;
+    }
+
     /// <summary>Просит окно свернуться. Не ждёт ответа: завис процесс или нет, вызов вернётся сразу.</summary>
     public static void RequestMinimize(IntPtr window) => ShowWindowAsync(window, Minimize);
 
@@ -147,6 +160,12 @@ public static class WindowControl
 
     [DllImport("user32.dll")]
     private static extern uint GetWindowThreadProcessId(IntPtr window, out int processId);
+
+    [DllImport("user32.dll")]
+    private static extern int GetWindowTextLengthW(IntPtr window);
+
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+    private static extern int GetWindowTextW(IntPtr window, StringBuilder text, int capacity);
 
     [DllImport("user32.dll", CharSet = CharSet.Unicode)]
     private static extern int GetClassNameW(IntPtr window, StringBuilder name, int capacity);

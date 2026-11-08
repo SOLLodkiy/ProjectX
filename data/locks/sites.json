@@ -1,0 +1,114 @@
+{
+  // Цены сайтов. Запись действует на домен и все его поддомены, у которых нет своей записи.
+  // Сайт вне каталога стоит defaultPrice и покупается целиком: example.com вместе с его поддоменами.
+  "defaultPrice": 100,
+
+  // Окончания адресов из нескольких частей. Для news.example.co.uk покупается example.co.uk, а не co.uk.
+  "multiPartSuffixes": [
+    "co.uk", "org.uk", "ac.uk", "gov.uk", "com.au", "net.au", "org.au", "co.jp", "ne.jp", "co.kr",
+    "com.br", "com.cn", "com.tr", "com.ua", "co.il", "co.in", "co.nz", "co.za",
+    "com.ru", "net.ru", "org.ru", "pp.ru", "msk.ru", "spb.ru", "com.by", "com.kz",
+    "github.io", "gitlab.io", "pages.dev", "vercel.app", "netlify.app", "web.app", "firebaseapp.com",
+    "herokuapp.com", "blogspot.com", "narod.ru", "ucoz.ru", "tilda.ws"
+  ],
+
+  "sites": [
+    { "domain": "google.com", "name": "Google", "price": 25 },
+    { "domain": "google.ru", "name": "Google", "price": 25 },
+    { "domain": "yandex.ru", "name": "Яндекс", "price": 25 },
+    { "domain": "ya.ru", "name": "Яндекс", "price": 25 },
+    { "domain": "bing.com", "name": "Bing", "price": 25 },
+    { "domain": "duckduckgo.com", "name": "DuckDuckGo", "price": 25 },
+    { "domain": "wikipedia.org", "name": "Википедия", "price": 50 },
+    { "domain": "translate.google.com", "name": "Google Переводчик", "price": 50 },
+    { "domain": "translate.yandex.ru", "name": "Яндекс Переводчик", "price": 50 },
+    { "domain": "deepl.com", "name": "DeepL", "price": 50 },
+    { "domain": "pogoda.yandex.ru", "name": "Яндекс Погода", "price": 50 },
+    { "domain": "gismeteo.ru", "name": "Гисметео", "price": 50 },
+
+    { "domain": "mail.google.com", "name": "Gmail", "price": 150 },
+    { "domain": "mail.yandex.ru", "name": "Яндекс Почта", "price": 150 },
+    { "domain": "mail.ru", "name": "Почта Mail.ru", "price": 150 },
+    { "domain": "outlook.live.com", "name": "Outlook", "price": 150 },
+    { "domain": "drive.google.com", "name": "Google Диск", "price": 150 },
+    { "domain": "docs.google.com", "name": "Google Документы", "price": 200 },
+    { "domain": "disk.yandex.ru", "name": "Яндекс Диск", "price": 150 },
+    { "domain": "github.com", "name": "GitHub", "price": 200 },
+    { "domain": "stackoverflow.com", "name": "Stack Overflow", "price": 150 },
+    { "domain": "notion.so", "name": "Notion", "price": 200 },
+    { "domain": "habr.com", "name": "Хабр", "price": 150 },
+    { "domain": "ria.ru", "name": "РИА Новости", "price": 100 },
+    { "domain": "lenta.ru", "name": "Лента.ру", "price": 100 },
+    { "domain": "rbc.ru", "name": "РБК", "price": 100 },
+    { "domain": "ozon.ru", "name": "Ozon", "price": 200 },
+    { "domain": "wildberries.ru", "name": "Wildberries", "price": 200 },
+    { "domain": "market.yandex.ru", "name": "Яндекс Маркет", "price": 200 },
+    { "domain": "avito.ru", "name": "Авито", "price": 200 },
+    { "domain": "aliexpress.com", "name": "AliExpress", "price": 200 },
+    { "domain": "amazon.com", "name": "Amazon", "price": 200 },
+
+    { "domain": "web.telegram.org", "name": "Telegram Web", "price": 400 },
+    { "domain": "vk.com", "name": "ВКонтакте", "price": 500 },
+    { "domain": "web.whatsapp.com", "name": "WhatsApp Web", "price": 400 },
+    { "domain": "discord.com", "name": "Discord", "price": 500 },
+    { "domain": "x.com", "name": "X", "price": 500 },
+    { "domain": "twitter.com", "name": "X", "price": 500 },
+    { "domain": "instagram.com", "name": "Instagram", "price": 600 },
+    { "domain": "ok.ru", "name": "Одноклассники", "price": 300 },
+    { "domain": "facebook.com", "name": "Facebook", "price": 500 },
+
+    { "domain": "youtube.com", "name": "YouTube", "price": 800 },
+    { "domain": "youtu.be", "name": "YouTube", "price": 800 },
+    { "domain": "soundcloud.com", "name": "SoundCloud", "price": 700 },
+    { "domain": "music.yandex.ru", "name": "Яндекс Музыка", "price": 800 },
+    { "domain": "music.yandex.com", "name": "Яндекс Музыка", "price": 800 },
+    { "domain": "spotify.com", "name": "Spotify", "price": 900 },
+    { "domain": "twitch.tv", "name": "Twitch", "price": 1000 },
+    { "domain": "reddit.com", "name": "Reddit", "price": 1000 },
+    { "domain": "tiktok.com", "name": "TikTok", "price": 1200 },
+    { "domain": "kinopoisk.ru", "name": "Кинопоиск", "price": 1500 },
+    { "domain": "netflix.com", "name": "Netflix", "price": 1500 },
+    { "domain": "rutube.ru", "name": "Rutube", "price": 800 },
+    { "domain": "pinterest.com", "name": "Pinterest", "price": 700 },
+
+    { "domain": "store.steampowered.com", "name": "Steam", "price": 2000 },
+    { "domain": "steamcommunity.com", "name": "Сообщество Steam", "price": 2000 },
+    { "domain": "store.epicgames.com", "name": "Epic Games Store", "price": 2000 },
+
+    { "domain": "poki.com", "name": "Poki", "price": 1000 },
+    { "domain": "crazygames.com", "name": "CrazyGames", "price": 1000 },
+    { "domain": "lichess.org", "name": "Lichess", "price": 500 },
+    { "domain": "chess.com", "name": "Chess.com", "price": 800 }
+  ],
+
+  // Всегда бесплатно вместе со всеми поддоменами. Проверяется раньше цен.
+  "free": [
+    "claude.ai", "claude.com", "anthropic.com",
+
+    "localhost", "127.0.0.1",
+
+    "accounts.google.com", "accounts.youtube.com", "myaccount.google.com", "passport.yandex.ru", "id.yandex.ru",
+    "login.live.com", "login.microsoftonline.com", "account.microsoft.com", "appleid.apple.com", "id.vk.com", "oauth.vk.com",
+    "auth.mail.ru", "id.mail.ru",
+
+    "gosuslugi.ru", "nalog.gov.ru", "mos.ru", "sfr.gov.ru",
+    "sberbank.ru", "sber.ru", "tbank.ru", "tinkoff.ru", "vtb.ru", "alfabank.ru", "gazprombank.ru",
+    "raiffeisen.ru", "sovcombank.ru", "pochtabank.ru", "open.ru", "psbank.ru", "rshb.ru", "mkb.ru", "nspk.ru",
+    "emias.info", "gorzdrav.spb.ru", "prodoctorov.ru", "invitro.ru", "gemotest.ru"
+  ],
+
+  // Поддерживаемые браузеры. Остальные блокируются как обычные программы.
+  "browsers": [
+    { "id": "chrome", "name": "Google Chrome", "extensionsPage": "chrome://extensions",
+      "match": [ { "company": "Google*", "product": "Google Chrome*" } ] },
+    { "id": "edge", "name": "Microsoft Edge", "extensionsPage": "edge://extensions",
+      "match": [ { "company": "Microsoft*", "product": "Microsoft Edge*" } ] },
+    { "id": "yandex", "name": "Яндекс Браузер", "extensionsPage": "browser://extensions",
+      "match": [ { "company": "YANDEX*", "product": "Yandex" } ] },
+    { "id": "firefox", "name": "Firefox", "extensionsPage": "about:addons",
+      "match": [ { "company": "Mozilla*", "product": "Firefox*" } ] }
+  ],
+
+  // Слова в заголовке страницы управления расширениями. Пока она открыта, окно браузера не сворачивается.
+  "extensionPageTitles": [ "Расширения", "Extensions", "Дополнения", "Add-ons", "Отладка", "Debugging" ]
+}

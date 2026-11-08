@@ -27,6 +27,10 @@
     <ProjectReference Include="..\ADHDWindows.Watchdog\ADHDWindows.Watchdog.csproj"
                       ReferenceOutputAssembly="false"
                       Private="false" />
+    <!-- Мост браузера запускает сам браузер, приложению нужна только его сборка рядом. -->
+    <ProjectReference Include="..\ADHDWindows.BrowserHost\ADHDWindows.BrowserHost.csproj"
+                      ReferenceOutputAssembly="false"
+                      Private="false" />
     <!-- Только порядок сборки: приложение не знает о модулях, новый проект подхватывается по имени. -->
     <ProjectReference Include="..\ADHDWindows.Modules.*\*.csproj"
                       ReferenceOutputAssembly="false"
@@ -44,6 +48,28 @@
              Link="assets\%(RecursiveDir)%(Filename)%(Extension)"
              CopyToOutputDirectory="PreserveNewest"
              CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <!-- Расширение браузера: общие файлы, свой манифест для Chromium и Firefox и пиксельные ресурсы для экрана покупки. -->
+  <ItemGroup>
+    <Content Include="$(RepoRoot)browser-extension\src\**\*"
+             Link="browser-extension\chromium\%(RecursiveDir)%(Filename)%(Extension)"
+             CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="$(RepoRoot)browser-extension\src\**\*"
+             Link="browser-extension\firefox\%(RecursiveDir)%(Filename)%(Extension)"
+             CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="$(RepoRoot)browser-extension\manifest.chromium.json"
+             Link="browser-extension\chromium\manifest.json"
+             CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="$(RepoRoot)browser-extension\manifest.firefox.json"
+             Link="browser-extension\firefox\manifest.json"
+             CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="$(RepoRoot)assets\fonts\*.json;$(RepoRoot)assets\sprites\*;$(RepoRoot)assets\palette.json;$(RepoRoot)data\texts\ru.json"
+             Link="browser-extension\chromium\pixel\%(Filename)%(Extension)"
+             CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="$(RepoRoot)assets\fonts\*.json;$(RepoRoot)assets\sprites\*;$(RepoRoot)assets\palette.json;$(RepoRoot)data\texts\ru.json"
+             Link="browser-extension\firefox\pixel\%(Filename)%(Extension)"
+             CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

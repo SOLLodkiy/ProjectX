@@ -81,6 +81,56 @@ public static class ProcessControl
         return handle is not null && NtResumeProcess(handle) == 0;
     }
 
+    /// <summary>Процесс, который запустил данный. Null, если родитель уже закрыт и его номер мог достаться другому.</summary>
+    public static ProcessStamp? Parent(ProcessStamp stamp)
+    {
+        using var handle = Open(stamp, QueryLimited);
+        if (handle is null
+            || NtQueryInformationProcess(handle, BasicInformation, out var info, Marshal.SizeOf<BasicProcessInformation>(), out _) != 0)
+        {
+            return null;
+        }
+
+        // Родитель должен быть старше потомка, иначе это чужой процесс с освободившимся номером.
+        return Stamp((int)info.ParentId.ToInt64()) is { } parent && parent.StartTime <= stamp.StartTime ? parent : null;
+    }
+
+    /// <summary>Командная строка процесса или null, если прав не хватило.</summary>
+    public static string? CommandLine(ProcessStamp stamp)
+    {
+        using var handle = Open(stamp, QueryLimited);
+        if (handle is null)
+        {
+            return null;
+        }
+
+        NtQueryInformationProcess(handle, CommandLineInformation, IntPtr.Zero, 0, out var size);
+        if (size <= 0 || size > MaxCommandLineBytes)
+        {
+            return null;
+        }
+
+        var buffer = Marshal.AllocHGlobal(size);
+        try
+        {
+            if (NtQueryInformationProcess(handle, CommandLineInformation, buffer, size, out _) != 0)
+            {
+                return null;
+            }
+
+            var text = Marshal.PtrToStructure<UnicodeString>(buffer);
+            return text.Buffer == IntPtr.Zero ? string.Empty : Marshal.PtrToStringUni(text.Buffer, text.Length / 2);
+        }
+        finally
+        {
+            Marshal.FreeHGlobal(buffer);
+        }
+    }
+
+    private const int BasicInformation = 0;
+    private const int CommandLineInformation = 60;
+    private const int MaxCommandLineBytes = 1 << 20;
+
     private static SafeProcessHandle? Open(ProcessStamp stamp, uint access)
     {
         var handle = OpenProcess(access | QueryLimited, false, stamp.Id);
@@ -112,6 +162,31 @@ public static class ProcessControl
 
     [DllImport("ntdll.dll")]
     private static extern int NtSuspendProcess(SafeProcessHandle process);
+
+    [DllImport("ntdll.dll")]
+    private static extern int NtQueryInformationProcess(SafeProcessHandle process, int kind, out BasicProcessInformation info, int size, out int returned);
+
+    [DllImport("ntdll.dll")]
+    private static extern int NtQueryInformationProcess(SafeProcessHandle process, int kind, IntPtr buffer, int size, out int returned);
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct BasicProcessInformation
+    {
+        public IntPtr ExitStatus;
+        public IntPtr PebBaseAddress;
+        public IntPtr AffinityMask;
+        public IntPtr BasePriority;
+        public IntPtr UniqueProcessId;
+        public IntPtr ParentId;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct UnicodeString
+    {
+        public ushort Length;
+        public ushort MaximumLength;
+        public IntPtr Buffer;
+    }
 
     [DllImport("ntdll.dll")]
     private static extern int NtResumeProcess(SafeProcessHandle process);

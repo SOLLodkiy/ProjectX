@@ -1,6 +1,7 @@
 <Solution>
   <Folder Name="/src/">
     <Project Path="src/ADHDWindows.App/ADHDWindows.App.csproj" />
+    <Project Path="src/ADHDWindows.BrowserHost/ADHDWindows.BrowserHost.csproj" />
     <Project Path="src/ADHDWindows.Core/ADHDWindows.Core.csproj" />
     <Project Path="src/ADHDWindows.Modules.Clicks/ADHDWindows.Modules.Clicks.csproj" />
     <Project Path="src/ADHDWindows.Modules.Locks/ADHDWindows.Modules.Locks.csproj" />

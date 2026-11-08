@@ -30,6 +30,7 @@ public partial class App : Application
     private TrayIcon? _tray;
     private HudWindow? _hud;
     private LockScreen? _lockScreen;
+    private ExtensionScreen? _extensionScreen;
     private ShowcaseWindow? _showcase;
     private bool _designReady;
 
@@ -56,6 +57,7 @@ public partial class App : Application
         log.Info($"Запуск, режим разработчика: {options.DeveloperMode}");
         _host = new GameHost(paths, options, log);
         _lockScreen = new LockScreen(_host.Events, _host.Economy, _host.Texts, () => _designReady, Dispatcher);
+        _extensionScreen = new ExtensionScreen(_host.Events, _host.Texts, () => _designReady, Dispatcher);
         _host.Start(() => StartWatchdog(paths, log));
         _mouseHook = new MouseHook(_host.Events.Publish, log);
         _mouseHook.Start();
@@ -83,6 +85,7 @@ public partial class App : Application
 
         // Модуль мог заблокировать уже открытые программы раньше, чем загрузилась дизайн-система.
         _lockScreen.Open();
+        _extensionScreen.Open();
 
         if (_designReady && options.OpenShowcase)
         {
@@ -167,6 +170,7 @@ public partial class App : Application
     {
         _mouseHook?.Dispose();
         _lockScreen?.Dispose();
+        _extensionScreen?.Dispose();
         _hud?.Dispose();
         _tray?.Dispose();
         _watchdog?.Dispose();

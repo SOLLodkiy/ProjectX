@@ -27,6 +27,14 @@ internal static class SpriteCommand
         var icon = definitions.Single(sprite => sprite.Name == IconSprite);
         File.WriteAllBytes(Path.Combine(assetsDir, "app.ico"), IconFile.Build(icon, palette, [1, 2, 3, 8]));
 
+        // Значки расширения браузера из того же спрайта: 16, 32, 48 и 128 пикселей.
+        var extensionIcons = Path.Combine(assetsDir, "..", "browser-extension", "src", "icons");
+        Directory.CreateDirectory(extensionIcons);
+        foreach (var scale in new[] { 1, 2, 3, 8 })
+        {
+            File.WriteAllBytes(Path.Combine(extensionIcons, $"{icon.Width * scale}.png"), IconFile.Render(icon, palette, scale));
+        }
+
         Console.WriteLine($"Спрайтов: {definitions.Count}, атлас {packed.Atlas.Width}x{packed.Atlas.Height}");
         return 0;
     }
