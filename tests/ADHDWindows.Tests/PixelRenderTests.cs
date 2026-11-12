@@ -187,6 +187,60 @@ public class PixelRenderTests
     [Theory]
     [InlineData(1.0, 2)]
     [InlineData(1.5, 3)]
+    public void Progress_window_and_day_summary_stay_on_the_pixel_grid(double dpiScale, int devicePixels) => WpfThread.Run(() =>
+    {
+        var log = new RecordingLog();
+        var data = new GameData(Path.Combine(RepositoryRoot.Find(), "data"), log);
+        data.Load();
+        var texts = new TextCatalog(data, "ru", log);
+        texts.Use("ru");
+        var bus = new EventBus(log);
+        var clock = new LocalClock();
+        var economy = new CoinEconomy(new MemoryStore(), bus, clock);
+        var tracker = new ADHDWindows.Modules.Progress.ProgressTracker(
+            ADHDWindows.Modules.Progress.ProgressCatalog.Load(data, log), economy, bus, new MemoryStore(), new MemoryStore(), clock, new Random(3), log);
+        bus.Subscribe<CoinsEarned>(tracker.OnEarned);
+        tracker.Start();
+        for (var index = 0; index < 1200; index++)
+        {
+            tracker.OnClick(new ADHDWindows.Core.Input.ClickCounted(ADHDWindows.Core.Input.MouseButton.Left, TimeSpan.FromSeconds(index)));
+        }
+
+        tracker.OnMedia(new ADHDWindows.Core.Media.MediaTimeCounted("video", "youtube.com", 5400));
+        clock.Days(1);
+        tracker.Tick();
+        var snapshot = tracker.Snapshot();
+        Assert.True(snapshot.Level > 1);
+        Assert.NotNull(snapshot.LastSummary);
+
+        var window = new ADHDWindows.App.Progress.ProgressWindow(texts, (_, _) => { });
+        window.Update(snapshot);
+        Assert.Contains(texts.Get("progress.achievement.hidden"), window.TextsOf("achievements"));
+        Assert.Contains(snapshot.RankName, window.TextsOf("level"));
+        Assert.Contains(texts.Get("progress.day.record"), window.TextsOf("day"));
+        var content = (UIElement)window.Content;
+        window.Content = null;
+        for (var tab = 0; tab < window.TabCount; tab++)
+        {
+            window.SelectTab(tab);
+            var frame = new PixelFrame { Sprite = "window", Padding = new Thickness(5), Child = content };
+            AssertCrisp(frame, dpiScale, devicePixels, $"progress-{tab}");
+            frame.Child = null;
+        }
+
+        window.Close();
+
+        var summary = new ADHDWindows.App.Progress.DaySummaryWindow(texts, snapshot.LastSummary!);
+        Assert.Contains(texts.Get("progress.day.record"), summary.Texts);
+        var summaryContent = (UIElement)summary.Content;
+        summary.Content = null;
+        AssertCrisp(new PixelFrame { Sprite = "window", Padding = new Thickness(5), Child = summaryContent }, dpiScale, devicePixels, "day-summary");
+        summary.Close();
+    });
+
+    [Theory]
+    [InlineData(1.0, 2)]
+    [InlineData(1.5, 3)]
     public void Quests_window_stays_on_the_pixel_grid(double dpiScale, int devicePixels) => WpfThread.Run(() =>
     {
         var log = new RecordingLog();

@@ -1,0 +1,16 @@
+{
+  // Сколько целей выдаётся на неделю с понедельника. Прогресс считается от значения счётчика в момент выдачи.
+  "count": 3,
+  "goals": [
+    { "id": "clicks.5000", "metric": "clicks", "goal": 5000, "reward": 600, "icon": "cursor", "title": "Засчитать 5000 кликов" },
+    { "id": "media.10h", "metric": "media.seconds", "goal": 36000, "reward": 800, "icon": "clock", "title": "Набрать 10 часов видео, музыки или игр" },
+    { "id": "music.5h", "metric": "media.music.seconds", "goal": 18000, "reward": 600, "icon": "heart", "title": "Послушать музыку 5 часов" },
+    { "id": "quests.15", "metric": "quests.completed", "goal": 15, "reward": 1000, "icon": "quest", "title": "Выполнить 15 заданий" },
+    { "id": "hardships.10", "metric": "hardships.survived", "goal": 10, "reward": 1200, "icon": "warning", "title": "Пережить 10 усложнений" },
+    { "id": "earned.20000", "metric": "earned", "goal": 20000, "reward": 1500, "icon": "coin", "title": "Заработать 20 000 монеток" },
+    { "id": "spent.10000", "metric": "spent", "goal": 10000, "reward": 1000, "icon": "shop", "title": "Потратить 10 000 монеток" },
+    { "id": "unlocks.3", "metric": "unlocks", "goal": 3, "reward": 900, "icon": "unlock", "title": "Купить 3 программы, игры или сайта" },
+    { "id": "upgrades.3", "metric": "upgrades", "goal": 3, "reward": 700, "icon": "arrow_up", "title": "Купить 3 уровня улучшений" },
+    { "id": "days.5", "metric": "days.active", "goal": 5, "reward": 1000, "icon": "flame", "title": "Заходить 5 разных дней" }
+  ]
+}

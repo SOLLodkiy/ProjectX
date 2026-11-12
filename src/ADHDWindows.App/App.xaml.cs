@@ -6,6 +6,7 @@ using ADHDWindows.App.Design;
 using ADHDWindows.App.Hardships;
 using ADHDWindows.App.Hud;
 using ADHDWindows.App.Locks;
+using ADHDWindows.App.Progress;
 using ADHDWindows.App.Quests;
 using ADHDWindows.App.Shop;
 using ADHDWindows.App.Stats;
@@ -48,6 +49,7 @@ public partial class App : Application
     private ShopScreen? _shopScreen;
     private StatsScreen? _statsScreen;
     private QuestScreen? _questScreen;
+    private ProgressScreen? _progressScreen;
     private HardshipScreen? _hardshipScreen;
     private GlobalHotkey? _statsHotkey;
     private ShowcaseWindow? _showcase;
@@ -81,10 +83,12 @@ public partial class App : Application
         _shopScreen = new ShopScreen(_host.Events, _host.Economy, _host.Texts, () => _designReady, Dispatcher);
         _statsScreen = new StatsScreen(_host.Events, _host.Texts, () => _designReady, Dispatcher, _host.ResetProgress, log);
         _questScreen = new QuestScreen(_host.Events, _host.Texts, () => _designReady, Dispatcher);
+        _progressScreen = new ProgressScreen(_host.Events, _host.Texts, () => _designReady, Dispatcher);
         _hardshipScreen = new HardshipScreen(_host.Events, _host.Texts, () => _designReady, Dispatcher, options.DeveloperMode);
         _host.Start(() => StartWatchdog(paths, log));
         _statsScreen.Request();
         _questScreen.Request();
+        _progressScreen.Request();
         _hardshipScreen.Request();
         _mouseHook = new MouseHook(_host.Events.Publish, log);
         var mouseHook = _mouseHook;
@@ -105,6 +109,7 @@ public partial class App : Application
                 () => _host.Events.Publish(new QuestsRefreshRequested()),
                 () => _shopScreen.Open(),
                 () => _questScreen.Open(),
+                () => _progressScreen.Open(),
                 () => _statsScreen.Open(),
                 () => _lockScreen.Open(),
                 () => Shutdown(),
@@ -117,10 +122,12 @@ public partial class App : Application
             _hud.ConnectShop(_shopScreen.Open, () => _shopScreen.Available);
             _hud.ConnectLogs(_statsScreen.Open, () => _statsScreen.Available);
             _hud.ConnectQuests(_questScreen.Open, () => _questScreen.Available);
+            _hud.ConnectProgress(_progressScreen.Open, () => _progressScreen.Available);
             _hud.Start();
         }
 
         StartStatsHotkey(log);
+        _progressScreen.ShowPending();
 
         // Модуль мог заблокировать уже открытые программы раньше, чем загрузилась дизайн-система.
         _lockScreen.Open();
@@ -249,6 +256,7 @@ public partial class App : Application
         _statsHotkey?.Dispose();
         _statsScreen?.Dispose();
         _questScreen?.Dispose();
+        _progressScreen?.Dispose();
         _hardshipScreen?.Dispose();
         _hud?.Dispose();
         _tray?.Dispose();

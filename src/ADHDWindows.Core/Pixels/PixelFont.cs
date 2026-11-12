@@ -30,9 +30,14 @@ public sealed class PixelFont
 
     public bool Contains(int code) => _glyphs.ContainsKey(code);
 
-    /// <summary>Символ текста. Вместо отсутствующего в шрифте показывается «?».</summary>
+    /// <summary>
+    /// Символ текста. Неразрывные и узкие пробелы (разделитель тысяч в русских числах) рисуются обычным пробелом,
+    /// вместо остальных отсутствующих в шрифте символов показывается «?».
+    /// </summary>
     public PixelGlyph Glyph(int code) =>
-        _glyphs.TryGetValue(code, out var glyph) ? glyph : _glyphs['?'];
+        _glyphs.TryGetValue(code, out var glyph) ? glyph
+        : code <= char.MaxValue && char.IsWhiteSpace((char)code) && _glyphs.TryGetValue(' ', out var space) ? space
+        : _glyphs['?'];
 
     public int MeasureWidth(ReadOnlySpan<char> text)
     {

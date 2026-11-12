@@ -125,4 +125,15 @@ public class PixelCoreTests
         var font = new PixelFont("test", 8, [new PixelGlyph('?', 5, 0, 0, [])]);
         Assert.Equal(10, font.MeasureWidth("Ж€"));
     }
+
+    [Fact]
+    public void Thousands_separator_is_drawn_as_a_space()
+    {
+        var font = new PixelFont("test", 8, [new PixelGlyph(' ', 2, 0, 0, []), new PixelGlyph('?', 5, 0, 0, [])]);
+
+        // Русские числа делят тысячи неразрывным или узким пробелом, а не обычным.
+        Assert.Equal(' ', font.Glyph(' ').Code);
+        Assert.Equal(' ', font.Glyph(' ').Code);
+        Assert.Equal(' ', font.Glyph(1200.ToString("N0", System.Globalization.CultureInfo.GetCultureInfo("ru-RU"))[1]).Code);
+    }
 }

@@ -27,6 +27,7 @@
     <ProjectReference Include="..\..\src\ADHDWindows.Modules.Time\ADHDWindows.Modules.Time.csproj" />
     <ProjectReference Include="..\..\src\ADHDWindows.Modules.Upgrades\ADHDWindows.Modules.Upgrades.csproj" />
     <ProjectReference Include="..\..\src\ADHDWindows.Modules.Stats\ADHDWindows.Modules.Stats.csproj" />
+    <ProjectReference Include="..\..\src\ADHDWindows.Modules.Progress\ADHDWindows.Modules.Progress.csproj" />
     <ProjectReference Include="..\..\src\ADHDWindows.Modules.Quests\ADHDWindows.Modules.Quests.csproj" />
     <ProjectReference Include="..\..\src\ADHDWindows.Modules.Hardships\ADHDWindows.Modules.Hardships.csproj" />
     <ProjectReference Include="..\..\src\ADHDWindows.Modules.Hardships.Basic\ADHDWindows.Modules.Hardships.Basic.csproj" />

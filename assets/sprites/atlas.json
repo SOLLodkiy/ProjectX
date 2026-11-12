@@ -73,7 +73,7 @@
       "frames": 4
     },
     {
-      "name": "cursor",
+      "name": "crown",
       "x": 183,
       "y": 0,
       "width": 16,
@@ -83,7 +83,7 @@
       "frames": 1
     },
     {
-      "name": "gear",
+      "name": "cursor",
       "x": 200,
       "y": 0,
       "width": 16,
@@ -93,7 +93,7 @@
       "frames": 1
     },
     {
-      "name": "heart",
+      "name": "flame",
       "x": 217,
       "y": 0,
       "width": 16,
@@ -103,7 +103,7 @@
       "frames": 1
     },
     {
-      "name": "lock",
+      "name": "gear",
       "x": 234,
       "y": 0,
       "width": 16,
@@ -113,7 +113,7 @@
       "frames": 1
     },
     {
-      "name": "quest",
+      "name": "heart",
       "x": 0,
       "y": 33,
       "width": 16,
@@ -123,7 +123,7 @@
       "frames": 1
     },
     {
-      "name": "shop",
+      "name": "lock",
       "x": 17,
       "y": 33,
       "width": 16,
@@ -133,7 +133,7 @@
       "frames": 1
     },
     {
-      "name": "star",
+      "name": "medal",
       "x": 34,
       "y": 33,
       "width": 16,
@@ -143,7 +143,7 @@
       "frames": 1
     },
     {
-      "name": "trophy",
+      "name": "quest",
       "x": 51,
       "y": 33,
       "width": 16,
@@ -153,7 +153,7 @@
       "frames": 1
     },
     {
-      "name": "unlock",
+      "name": "shop",
       "x": 68,
       "y": 33,
       "width": 16,
@@ -163,7 +163,7 @@
       "frames": 1
     },
     {
-      "name": "warning",
+      "name": "star",
       "x": 85,
       "y": 33,
       "width": 16,
@@ -173,8 +173,38 @@
       "frames": 1
     },
     {
-      "name": "grip",
+      "name": "trophy",
       "x": 102,
+      "y": 33,
+      "width": 16,
+      "height": 16,
+      "slice": 0,
+      "fps": 0,
+      "frames": 1
+    },
+    {
+      "name": "unlock",
+      "x": 119,
+      "y": 33,
+      "width": 16,
+      "height": 16,
+      "slice": 0,
+      "fps": 0,
+      "frames": 1
+    },
+    {
+      "name": "warning",
+      "x": 136,
+      "y": 33,
+      "width": 16,
+      "height": 16,
+      "slice": 0,
+      "fps": 0,
+      "frames": 1
+    },
+    {
+      "name": "grip",
+      "x": 153,
       "y": 33,
       "width": 5,
       "height": 14,
@@ -184,7 +214,7 @@
     },
     {
       "name": "close",
-      "x": 108,
+      "x": 159,
       "y": 33,
       "width": 9,
       "height": 9,
@@ -194,7 +224,7 @@
     },
     {
       "name": "button",
-      "x": 118,
+      "x": 169,
       "y": 33,
       "width": 7,
       "height": 7,
@@ -204,7 +234,7 @@
     },
     {
       "name": "button_danger",
-      "x": 126,
+      "x": 177,
       "y": 33,
       "width": 7,
       "height": 7,
@@ -214,7 +244,7 @@
     },
     {
       "name": "button_danger_down",
-      "x": 134,
+      "x": 185,
       "y": 33,
       "width": 7,
       "height": 7,
@@ -224,7 +254,7 @@
     },
     {
       "name": "button_danger_hover",
-      "x": 142,
+      "x": 193,
       "y": 33,
       "width": 7,
       "height": 7,
@@ -234,7 +264,7 @@
     },
     {
       "name": "button_disabled",
-      "x": 150,
+      "x": 201,
       "y": 33,
       "width": 7,
       "height": 7,
@@ -244,7 +274,7 @@
     },
     {
       "name": "button_down",
-      "x": 158,
+      "x": 209,
       "y": 33,
       "width": 7,
       "height": 7,
@@ -254,7 +284,7 @@
     },
     {
       "name": "button_hover",
-      "x": 166,
+      "x": 217,
       "y": 33,
       "width": 7,
       "height": 7,
@@ -264,7 +294,7 @@
     },
     {
       "name": "button_primary",
-      "x": 174,
+      "x": 225,
       "y": 33,
       "width": 7,
       "height": 7,
@@ -274,7 +304,7 @@
     },
     {
       "name": "button_primary_down",
-      "x": 182,
+      "x": 233,
       "y": 33,
       "width": 7,
       "height": 7,
@@ -284,7 +314,7 @@
     },
     {
       "name": "button_primary_hover",
-      "x": 190,
+      "x": 241,
       "y": 33,
       "width": 7,
       "height": 7,
@@ -294,7 +324,7 @@
     },
     {
       "name": "inset",
-      "x": 198,
+      "x": 249,
       "y": 33,
       "width": 7,
       "height": 7,
@@ -304,66 +334,6 @@
     },
     {
       "name": "panel",
-      "x": 206,
-      "y": 33,
-      "width": 7,
-      "height": 7,
-      "slice": 3,
-      "fps": 0,
-      "frames": 1
-    },
-    {
-      "name": "tab",
-      "x": 214,
-      "y": 33,
-      "width": 7,
-      "height": 7,
-      "slice": 3,
-      "fps": 0,
-      "frames": 1
-    },
-    {
-      "name": "tab_active",
-      "x": 222,
-      "y": 33,
-      "width": 7,
-      "height": 7,
-      "slice": 3,
-      "fps": 0,
-      "frames": 1
-    },
-    {
-      "name": "tab_hover",
-      "x": 230,
-      "y": 33,
-      "width": 7,
-      "height": 7,
-      "slice": 3,
-      "fps": 0,
-      "frames": 1
-    },
-    {
-      "name": "toast_danger",
-      "x": 238,
-      "y": 33,
-      "width": 7,
-      "height": 7,
-      "slice": 3,
-      "fps": 0,
-      "frames": 1
-    },
-    {
-      "name": "toast_info",
-      "x": 246,
-      "y": 33,
-      "width": 7,
-      "height": 7,
-      "slice": 3,
-      "fps": 0,
-      "frames": 1
-    },
-    {
-      "name": "toast_reward",
       "x": 0,
       "y": 50,
       "width": 7,
@@ -373,7 +343,7 @@
       "frames": 1
     },
     {
-      "name": "toast_success",
+      "name": "tab",
       "x": 8,
       "y": 50,
       "width": 7,
@@ -383,7 +353,7 @@
       "frames": 1
     },
     {
-      "name": "window",
+      "name": "tab_active",
       "x": 16,
       "y": 50,
       "width": 7,
@@ -393,8 +363,68 @@
       "frames": 1
     },
     {
-      "name": "list_hover",
+      "name": "tab_hover",
       "x": 24,
+      "y": 50,
+      "width": 7,
+      "height": 7,
+      "slice": 3,
+      "fps": 0,
+      "frames": 1
+    },
+    {
+      "name": "toast_danger",
+      "x": 32,
+      "y": 50,
+      "width": 7,
+      "height": 7,
+      "slice": 3,
+      "fps": 0,
+      "frames": 1
+    },
+    {
+      "name": "toast_info",
+      "x": 40,
+      "y": 50,
+      "width": 7,
+      "height": 7,
+      "slice": 3,
+      "fps": 0,
+      "frames": 1
+    },
+    {
+      "name": "toast_reward",
+      "x": 48,
+      "y": 50,
+      "width": 7,
+      "height": 7,
+      "slice": 3,
+      "fps": 0,
+      "frames": 1
+    },
+    {
+      "name": "toast_success",
+      "x": 56,
+      "y": 50,
+      "width": 7,
+      "height": 7,
+      "slice": 3,
+      "fps": 0,
+      "frames": 1
+    },
+    {
+      "name": "window",
+      "x": 64,
+      "y": 50,
+      "width": 7,
+      "height": 7,
+      "slice": 3,
+      "fps": 0,
+      "frames": 1
+    },
+    {
+      "name": "list_hover",
+      "x": 72,
       "y": 50,
       "width": 5,
       "height": 5,
@@ -404,7 +434,7 @@
     },
     {
       "name": "list_selected",
-      "x": 30,
+      "x": 78,
       "y": 50,
       "width": 5,
       "height": 5,
@@ -414,7 +444,7 @@
     },
     {
       "name": "scroll_thumb",
-      "x": 36,
+      "x": 84,
       "y": 50,
       "width": 5,
       "height": 5,
@@ -424,7 +454,7 @@
     },
     {
       "name": "scroll_thumb_hover",
-      "x": 42,
+      "x": 90,
       "y": 50,
       "width": 5,
       "height": 5,
@@ -434,7 +464,7 @@
     },
     {
       "name": "title_bar",
-      "x": 48,
+      "x": 96,
       "y": 50,
       "width": 5,
       "height": 5,

@@ -50,6 +50,7 @@ public sealed class HudWindow : Window, IDisposable
     private Func<bool>? _shopAvailable;
     private Func<bool>? _logsAvailable;
     private Func<bool>? _questsAvailable;
+    private Func<bool>? _progressAvailable;
     private string? _configuration;
     private ScreenPoint _position;
     private ScreenPoint? _grab;
@@ -159,6 +160,17 @@ public sealed class HudWindow : Window, IDisposable
     {
         _questsAvailable = available;
         _panel.Quests.Click += (_, _) =>
+        {
+            CloseMiniPanel();
+            open();
+        };
+    }
+
+    /// <summary>Подключает кнопку «Прогресс» мини-панели. Без модуля прогресса кнопка выключена.</summary>
+    public void ConnectProgress(Action open, Func<bool> available)
+    {
+        _progressAvailable = available;
+        _panel.Progress.Click += (_, _) =>
         {
             CloseMiniPanel();
             open();
@@ -373,6 +385,7 @@ public sealed class HudWindow : Window, IDisposable
         _panel.Shop.IsEnabled = _shopAvailable?.Invoke() == true;
         _panel.Logs.IsEnabled = _logsAvailable?.Invoke() == true;
         _panel.Quests.IsEnabled = _questsAvailable?.Invoke() == true;
+        _panel.Progress.IsEnabled = _progressAvailable?.Invoke() == true;
         _panel.Show(_economy.Balance, _economy.IncomePerMinute, _hardship, _quest);
     }
 

@@ -12,6 +12,7 @@
     <Project Path="src/ADHDWindows.Modules.Hardships.Screen/ADHDWindows.Modules.Hardships.Screen.csproj" />
     <Project Path="src/ADHDWindows.Modules.Hardships.Sounds/ADHDWindows.Modules.Hardships.Sounds.csproj" />
     <Project Path="src/ADHDWindows.Modules.Locks/ADHDWindows.Modules.Locks.csproj" />
+    <Project Path="src/ADHDWindows.Modules.Progress/ADHDWindows.Modules.Progress.csproj" />
     <Project Path="src/ADHDWindows.Modules.Quests/ADHDWindows.Modules.Quests.csproj" />
     <Project Path="src/ADHDWindows.Modules.Sample/ADHDWindows.Modules.Sample.csproj" />
     <Project Path="src/ADHDWindows.Modules.Stats/ADHDWindows.Modules.Stats.csproj" />

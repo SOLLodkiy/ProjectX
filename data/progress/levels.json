@@ -1,0 +1,35 @@
+{
+  // Опыт до следующего уровня: first с первого на второй и на step больше на каждом следующем.
+  "xp": { "first": 100, "step": 50 },
+  // Награда за уровень L: base + perLevel × (L − 2), плюс coins звания на его первом уровне.
+  "coins": { "base": 50, "perLevel": 20 },
+  "maxLevel": 100,
+  // Звание действует с уровня level. cosmetic — косметика, которую открывает звание (магазин косметики, идея 012).
+  "ranks": [
+    { "id": "novice", "level": 1, "name": "Новичок" },
+    { "id": "clicker", "level": 3, "name": "Кликер", "coins": 100 },
+    { "id": "watcher", "level": 6, "name": "Зритель", "coins": 200 },
+    { "id": "collector", "level": 10, "name": "Коллекционер", "coins": 400, "cosmetic": "rank.collector" },
+    { "id": "questor", "level": 15, "name": "Охотник за заданиями", "coins": 700 },
+    { "id": "survivor", "level": 20, "name": "Покоритель усложнений", "coins": 1000, "cosmetic": "rank.survivor" },
+    { "id": "tycoon", "level": 25, "name": "Монетный магнат", "coins": 1500 },
+    { "id": "master", "level": 30, "name": "Хозяин окон", "coins": 2000, "cosmetic": "rank.master" },
+    { "id": "legend", "level": 40, "name": "Легенда рабочего стола", "coins": 5000, "cosmetic": "rank.legend" }
+  ],
+  // Опыт за действия: каждые per единиц счётчика metric дают xp опыта. Счётчики описаны в ProgressMetrics.
+  "xpRules": [
+    { "metric": "clicks", "per": 25, "xp": 1 },
+    { "metric": "media.seconds", "per": 60, "xp": 2 },
+    { "metric": "earned", "per": 100, "xp": 1 },
+    { "metric": "unlocks", "per": 1, "xp": 25 },
+    { "metric": "upgrades", "per": 1, "xp": 15 },
+    { "metric": "quests.completed.easy", "per": 1, "xp": 10 },
+    { "metric": "quests.completed.medium", "per": 1, "xp": 25 },
+    { "metric": "quests.completed.hard", "per": 1, "xp": 60 },
+    { "metric": "hardships.survived.easy", "per": 1, "xp": 10 },
+    { "metric": "hardships.survived.medium", "per": 1, "xp": 20 },
+    { "metric": "hardships.survived.hard", "per": 1, "xp": 40 },
+    { "metric": "days.active", "per": 1, "xp": 30 },
+    { "metric": "programs.distinct", "per": 1, "xp": 2 }
+  ]
+}

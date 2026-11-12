@@ -1,0 +1,68 @@
+{
+  // Достижения. Любой файл data/progress/achievements*.json с массивом achievements добавляет свои, код id не должен повторяться.
+  // metric — счётчик (список в ProgressMetrics), goal — сколько набрать. reward — монетки через общую формулу дохода,
+  // xp — опыт (без него пятая часть награды, не меньше 10). icon — спрайт. hidden — до получения видно только «???».
+  // hours — [с, до) по местному времени, через полночь можно: засчитывается только набранное в эти часы.
+  "achievements": [
+    { "id": "clicks.100", "metric": "clicks", "goal": 100, "reward": 20, "icon": "cursor", "title": "Разминка", "text": "Засчитать 100 кликов" },
+    { "id": "clicks.1000", "metric": "clicks", "goal": 1000, "reward": 100, "icon": "cursor", "title": "Тысяча кликов", "text": "Засчитать 1000 кликов" },
+    { "id": "clicks.10000", "metric": "clicks", "goal": 10000, "reward": 500, "icon": "cursor", "title": "Стальной палец", "text": "Засчитать 10 000 кликов" },
+    { "id": "clicks.100000", "metric": "clicks", "goal": 100000, "reward": 3000, "icon": "cursor", "title": "Мышь просит пощады", "text": "Засчитать 100 000 кликов" },
+    { "id": "clicks.right.500", "metric": "clicks.right", "goal": 500, "reward": 100, "icon": "cursor", "title": "Правая рука", "text": "Засчитать 500 кликов правой кнопкой" },
+    { "id": "clicks.middle.100", "metric": "clicks.middle", "goal": 100, "reward": 100, "icon": "cursor", "title": "Золотая середина", "text": "Засчитать 100 кликов колесом" },
+
+    { "id": "video.1h", "metric": "media.video.seconds", "goal": 3600, "reward": 50, "icon": "clock", "title": "Первая серия", "text": "Посмотреть видео 1 час" },
+    { "id": "video.10h", "metric": "media.video.seconds", "goal": 36000, "reward": 300, "icon": "clock", "title": "Сериальный марафон", "text": "Посмотреть видео 10 часов" },
+    { "id": "video.100h", "metric": "media.video.seconds", "goal": 360000, "reward": 2000, "icon": "clock", "title": "Кинокритик", "text": "Посмотреть видео 100 часов" },
+    { "id": "music.1h", "metric": "media.music.seconds", "goal": 3600, "reward": 50, "icon": "heart", "title": "Первый альбом", "text": "Послушать музыку 1 час" },
+    { "id": "music.10h", "metric": "media.music.seconds", "goal": 36000, "reward": 300, "icon": "heart", "title": "Меломан", "text": "Послушать музыку 10 часов" },
+    { "id": "music.100h", "metric": "media.music.seconds", "goal": 360000, "reward": 2000, "icon": "heart", "title": "100 часов музыки", "text": "Послушать музыку 100 часов" },
+    { "id": "game.1h", "metric": "media.game.seconds", "goal": 3600, "reward": 50, "icon": "star", "title": "Ещё один уровень", "text": "Поиграть 1 час" },
+    { "id": "game.10h", "metric": "media.game.seconds", "goal": 36000, "reward": 300, "icon": "star", "title": "Геймер", "text": "Поиграть 10 часов" },
+    { "id": "game.100h", "metric": "media.game.seconds", "goal": 360000, "reward": 2000, "icon": "star", "title": "Ветеран", "text": "Поиграть 100 часов" },
+
+    { "id": "earned.1000", "metric": "earned", "goal": 1000, "reward": 50, "icon": "coin", "title": "Копилка", "text": "Заработать 1000 монеток" },
+    { "id": "earned.10000", "metric": "earned", "goal": 10000, "reward": 300, "icon": "coin", "title": "Кошелёк потяжелел", "text": "Заработать 10 000 монеток" },
+    { "id": "earned.100000", "metric": "earned", "goal": 100000, "reward": 2000, "icon": "coin", "title": "Сундук с монетками", "text": "Заработать 100 000 монеток" },
+    { "id": "earned.1000000", "metric": "earned", "goal": 1000000, "reward": 10000, "icon": "chest", "title": "Монетный двор", "text": "Заработать миллион монеток" },
+    { "id": "spent.1000", "metric": "spent", "goal": 1000, "reward": 50, "icon": "shop", "title": "Первые траты", "text": "Потратить 1000 монеток" },
+    { "id": "spent.100000", "metric": "spent", "goal": 100000, "reward": 2000, "icon": "shop", "title": "Транжира", "text": "Потратить 100 000 монеток" },
+
+    { "id": "unlocks.1", "metric": "unlocks", "goal": 1, "reward": 30, "icon": "unlock", "title": "Свобода!", "text": "Купить первую программу, игру или сайт" },
+    { "id": "unlocks.10", "metric": "unlocks", "goal": 10, "reward": 300, "icon": "unlock", "title": "Коллекция растёт", "text": "Купить 10 программ, игр или сайтов" },
+    { "id": "unlocks.site.50", "metric": "unlocks.site", "goal": 50, "reward": 2000, "icon": "unlock", "title": "Открыть 50 сайтов", "text": "Купить доступ к 50 сайтам" },
+    { "id": "unlocks.game.5", "metric": "unlocks.game", "goal": 5, "reward": 500, "icon": "star", "title": "Полка с играми", "text": "Купить 5 игр" },
+    { "id": "unlocks.program.10", "metric": "unlocks.program", "goal": 10, "reward": 500, "icon": "unlock", "title": "Набор инструментов", "text": "Купить 10 программ" },
+    { "id": "upgrades.1", "metric": "upgrades", "goal": 1, "reward": 30, "icon": "arrow_up", "title": "Апгрейд", "text": "Купить первое улучшение" },
+    { "id": "upgrades.10", "metric": "upgrades", "goal": 10, "reward": 300, "icon": "arrow_up", "title": "Тюнинг", "text": "Купить 10 уровней улучшений" },
+    { "id": "upgrades.25", "metric": "upgrades", "goal": 25, "reward": 1000, "icon": "arrow_up", "title": "Всё на максимум", "text": "Купить 25 уровней улучшений" },
+
+    { "id": "quests.1", "metric": "quests.completed", "goal": 1, "reward": 30, "icon": "quest", "title": "Первое задание", "text": "Выполнить задание" },
+    { "id": "quests.25", "metric": "quests.completed", "goal": 25, "reward": 500, "icon": "quest", "title": "Исполнитель", "text": "Выполнить 25 заданий" },
+    { "id": "quests.hard.5", "metric": "quests.completed.hard", "goal": 5, "reward": 800, "icon": "quest", "title": "Не ищу лёгких путей", "text": "Выполнить 5 сложных заданий" },
+    { "id": "quests.chains.3", "metric": "quests.chains", "goal": 3, "reward": 500, "icon": "chest", "title": "Цепная реакция", "text": "Собрать 3 цепочки заданий" },
+    { "id": "hardships.1", "metric": "hardships.survived", "goal": 1, "reward": 30, "icon": "warning", "title": "Выжил", "text": "Пережить усложнение до конца" },
+    { "id": "hardships.25", "metric": "hardships.survived", "goal": 25, "reward": 800, "icon": "warning", "title": "Закалённый", "text": "Пережить 25 усложнений" },
+    { "id": "hardships.hard.5", "metric": "hardships.survived.hard", "goal": 5, "reward": 1000, "icon": "warning", "title": "Мастер терпения", "text": "Пережить 5 сложных усложнений" },
+
+    { "id": "streak.3", "metric": "streak.best", "goal": 3, "reward": 50, "icon": "flame", "title": "Три дня подряд", "text": "Серия входов 3 дня" },
+    { "id": "streak.7", "metric": "streak.best", "goal": 7, "reward": 200, "icon": "flame", "title": "Неделя без перерыва", "text": "Серия входов 7 дней" },
+    { "id": "streak.30", "metric": "streak.best", "goal": 30, "reward": 1500, "icon": "flame", "title": "Привычка", "text": "Серия входов 30 дней" },
+    { "id": "days.30", "metric": "days.active", "goal": 30, "reward": 500, "icon": "clock", "title": "Старожил", "text": "Заходить 30 разных дней" },
+    { "id": "level.5", "metric": "level", "goal": 5, "reward": 100, "icon": "crown", "title": "Уровень 5", "text": "Достичь 5 уровня" },
+    { "id": "level.10", "metric": "level", "goal": 10, "reward": 300, "icon": "crown", "title": "Уровень 10", "text": "Достичь 10 уровня" },
+    { "id": "level.20", "metric": "level", "goal": 20, "reward": 1000, "icon": "crown", "title": "Уровень 20", "text": "Достичь 20 уровня" },
+    { "id": "level.40", "metric": "level", "goal": 40, "reward": 5000, "icon": "crown", "title": "Легенда", "text": "Достичь 40 уровня" },
+    { "id": "achievements.10", "metric": "achievements", "goal": 10, "reward": 200, "icon": "medal", "title": "Охотник за медалями", "text": "Получить 10 достижений" },
+    { "id": "achievements.25", "metric": "achievements", "goal": 25, "reward": 1000, "icon": "medal", "title": "Стена славы", "text": "Получить 25 достижений" },
+    { "id": "programs.25", "metric": "programs.distinct", "goal": 25, "reward": 200, "icon": "gear", "title": "Многозадачность", "text": "Поработать в 25 разных программах" },
+
+    { "id": "night.notepad", "metric": "program.notepad", "goal": 1, "hours": [3, 4], "hidden": true, "reward": 300, "icon": "medal", "title": "Ночные мысли", "text": "Открыть Блокнот в 3 часа ночи" },
+    { "id": "night.clicks", "metric": "clicks", "goal": 300, "hours": [0, 1], "hidden": true, "reward": 200, "icon": "medal", "title": "Полуночник", "text": "Накликать 300 раз с полуночи до часу" },
+    { "id": "morning.clicks", "metric": "clicks", "goal": 100, "hours": [5, 7], "hidden": true, "reward": 200, "icon": "medal", "title": "Ранняя пташка", "text": "Накликать 100 раз с 5 до 7 утра" },
+    { "id": "taskmgr", "metric": "program.taskmgr", "goal": 1, "hidden": true, "reward": 100, "icon": "medal", "title": "Кто тут главный?", "text": "Открыть Диспетчер задач" },
+    { "id": "calculator", "metric": "program.calculatorapp", "goal": 1, "hidden": true, "reward": 100, "icon": "medal", "title": "Бухгалтерия", "text": "Открыть Калькулятор" },
+    { "id": "paint", "metric": "program.mspaint", "goal": 1, "hidden": true, "reward": 100, "icon": "medal", "title": "Пиксель-артист", "text": "Открыть Paint" },
+    { "id": "launches.100", "metric": "app.launches", "goal": 100, "hidden": true, "reward": 300, "icon": "medal", "title": "Выключить и включить", "text": "Запустить ADHDWindows 100 раз" }
+  ]
+}
