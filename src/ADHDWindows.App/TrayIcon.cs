@@ -54,6 +54,11 @@ internal sealed class TrayIcon : IDisposable
         }
 
         menu.Items.Add(texts.Get("tray.shop"), null, (_, _) => actions.OnShop());
+        if (actions.OnCosmetics is { } onCosmetics)
+        {
+            menu.Items.Add(texts.Get("tray.cosmetics"), null, (_, _) => onCosmetics());
+        }
+
         menu.Items.Add(texts.Get("tray.quests"), null, (_, _) => actions.OnQuests());
         menu.Items.Add(texts.Get("tray.progress"), null, (_, _) => actions.OnProgress());
         menu.Items.Add(texts.Get("tray.stats"), null, (_, _) => actions.OnStats());
@@ -138,4 +143,5 @@ internal sealed record TrayActions(
     Action OnExit,
     string EmergencyHotkey,
     Action<ToolStripMenuItem>? FillHardships = null,
-    Action<ToolStripMenuItem>? FillEvents = null);
+    Action<ToolStripMenuItem>? FillEvents = null,
+    Action? OnCosmetics = null);

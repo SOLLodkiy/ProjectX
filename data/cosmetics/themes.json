@@ -1,0 +1,36 @@
+{
+  // Темы интерфейса: colors заменяют цвета палитры (названия из assets/palette.json) во всех окнах программы.
+  // Темы сезонов (newYear, valentine, spring, halloween) не продаются: их дарит сезонное событие (data/events/seasons.json).
+  "items": [
+    { "code": "theme.retro", "rarity": "common", "price": 300, "colors": {
+      "ink": "#0C160C", "night": "#132313", "panel": "#1C361C", "panelHi": "#2A4E2A", "line": "#4C7C4C", "mist": "#9CC79C", "text": "#E2F6D2"
+    } },
+    { "code": "theme.forest", "rarity": "common", "price": 300, "colors": {
+      "ink": "#12170E", "night": "#1C2716", "panel": "#2B3C21", "panelHi": "#3E552F", "line": "#6A8949", "mist": "#B8C89F", "text": "#F2EEDB"
+    } },
+    { "code": "theme.space", "rarity": "rare", "price": 600, "colors": {
+      "ink": "#05060F", "night": "#0B0F24", "panel": "#141A3A", "panelHi": "#212B57", "line": "#3E4F8F", "mist": "#9AA7D9", "text": "#EEF1FF"
+    } },
+    { "code": "theme.cyber", "rarity": "rare", "price": 600, "colors": {
+      "ink": "#0B0614", "night": "#170B2B", "panel": "#26103F", "panelHi": "#3B1760", "line": "#C2187F", "mist": "#5CE1E6", "text": "#F7F2FF"
+    } },
+    { "code": "theme.candy", "rarity": "epic", "price": 0, "chest": true, "colors": {
+      "ink": "#2A1424", "night": "#3D1B35", "panel": "#5A2650", "panelHi": "#7A3570", "line": "#B5559A", "mist": "#F2B5D9", "text": "#FFF0F7"
+    } },
+    { "code": "theme.gold", "rarity": "legendary", "price": 0, "chest": false, "unlockLevel": 30, "colors": {
+      "ink": "#1A1206", "night": "#2A1D0A", "panel": "#3D2B10", "panelHi": "#57401A", "line": "#8F6A2A", "mist": "#D9C08A", "text": "#FFF6DC"
+    } },
+    { "code": "theme.newYear", "rarity": "epic", "price": 0, "chest": false, "colors": {
+      "ink": "#0A1424", "night": "#10203A", "panel": "#183056", "panelHi": "#22447A", "line": "#4F7FC4", "mist": "#BFD8F5", "text": "#FFFFFF"
+    } },
+    { "code": "theme.valentine", "rarity": "epic", "price": 0, "chest": false, "colors": {
+      "ink": "#24080F", "night": "#3A0F1C", "panel": "#561A2C", "panelHi": "#7A2640", "line": "#C44A6E", "mist": "#F5B5C8", "text": "#FFF0F4"
+    } },
+    { "code": "theme.spring", "rarity": "epic", "price": 0, "chest": false, "colors": {
+      "ink": "#10180F", "night": "#18261A", "panel": "#23382A", "panelHi": "#315040", "line": "#5FA07A", "mist": "#CDEBC0", "text": "#FFFCEB"
+    } },
+    { "code": "theme.halloween", "rarity": "epic", "price": 0, "chest": false, "colors": {
+      "ink": "#120A05", "night": "#1F1008", "panel": "#2E180B", "panelHi": "#432410", "line": "#A0521A", "mist": "#E8A65A", "text": "#FFEBD0"
+    } }
+  ]
+}

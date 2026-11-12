@@ -193,7 +193,7 @@ public sealed class ChestEvent : OverlayEvent
     {
         _opener = new ChestOpener(Context.Economy, Context.Events, Context.Texts, Context.Log, Random.Shared);
         _opener.Load(Context.Data);
-        Context.Events.Subscribe<CosmeticsAvailable>(available => _opener.SetCosmetics(available.Codes));
+        Context.Events.Subscribe<CosmeticsAvailable>(available => _opener.SetCosmetics(available.ChestCodes ?? available.Codes));
         Context.Events.Subscribe<ChestGrantRequested>(request => _opener.Open(request.Tier, request.Reason));
 
         // Три задания подряд — бонусный сундук (идея 008). Он ждёт в очереди, пока экран свободен.

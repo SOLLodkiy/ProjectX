@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Threading;
+using ADHDWindows.App.Cosmetics;
 using ADHDWindows.App.Design;
 using ADHDWindows.App.Events;
 using ADHDWindows.App.Hardships;
@@ -53,6 +54,7 @@ public partial class App : Application
     private ProgressScreen? _progressScreen;
     private HardshipScreen? _hardshipScreen;
     private EventScreen? _eventScreen;
+    private CosmeticsScreen? _cosmeticsScreen;
     private GlobalHotkey? _statsHotkey;
     private ShowcaseWindow? _showcase;
     private bool _designReady;
@@ -88,18 +90,25 @@ public partial class App : Application
         _progressScreen = new ProgressScreen(_host.Events, _host.Texts, () => _designReady, Dispatcher);
         _hardshipScreen = new HardshipScreen(_host.Events, _host.Texts, () => _designReady, Dispatcher, options.DeveloperMode);
         _eventScreen = new EventScreen(_host.Events, _host.Economy, _host.Texts, () => _designReady, Dispatcher, options.DeveloperMode);
+        _cosmeticsScreen = new CosmeticsScreen(_host.Events, _host.Economy, _host.Texts, () => _designReady, Dispatcher);
         _host.Start(() => StartWatchdog(paths, log));
         _statsScreen.Request();
         _questScreen.Request();
         _progressScreen.Request();
         _hardshipScreen.Request();
         _eventScreen.Request();
+        _cosmeticsScreen.Request();
         _mouseHook = new MouseHook(_host.Events.Publish, log);
         var mouseHook = _mouseHook;
         _host.Events.Subscribe<MouseButtonsSwapped>(swap => mouseHook.Unswap = swap.Swapped);
         _mouseHook.Start();
 
         _designReady = InstallDesignSystem(paths, log);
+        if (_designReady)
+        {
+            _cosmeticsScreen.ApplyLook();
+        }
+
         var hudSettings = _designReady ? new HudSettings(_host.Settings) : null;
         _tray = new TrayIcon(
             _host.Texts,
@@ -119,7 +128,8 @@ public partial class App : Application
                 () => Shutdown(),
                 _hotkey.ToString(),
                 _hardshipScreen.Fill,
-                _eventScreen.Fill));
+                _eventScreen.Fill,
+                () => _cosmeticsScreen.Open()));
 
         if (hudSettings is not null)
         {
@@ -272,6 +282,7 @@ public partial class App : Application
         _progressScreen?.Dispose();
         _hardshipScreen?.Dispose();
         _eventScreen?.Dispose();
+        _cosmeticsScreen?.Dispose();
         _hud?.Dispose();
         _tray?.Dispose();
         _watchdog?.Dispose();

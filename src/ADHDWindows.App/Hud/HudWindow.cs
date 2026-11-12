@@ -33,6 +33,7 @@ public sealed class HudWindow : Window, IDisposable
     private const int SlowPollEvery = 12;
 
     private readonly IEconomy _economy;
+    private readonly IEventBus _events;
     private readonly HudSettings _settings;
     private readonly ILog _log;
     private readonly TimeProvider _clock;
@@ -75,6 +76,7 @@ public sealed class HudWindow : Window, IDisposable
     {
         _economy = economy;
         _settings = settings;
+        _events = events;
         _log = log;
         _clock = clock ?? TimeProvider.System;
         _screens = screens ?? Desktop.Screens;
@@ -117,6 +119,7 @@ public sealed class HudWindow : Window, IDisposable
         _subscriptions.Add(events.Subscribe<CoinsSpent>(_ => QueueRefresh()));
         _subscriptions.Add(events.Subscribe<HudStatusChanged>(OnStatusChanged));
         _subscriptions.Add(events.Subscribe<ProgressReset>(_ => QueueRefresh()));
+        _subscriptions.Add(events.Subscribe<HudBoundsRequested>(_ => Dispatcher.BeginInvoke(AnnouncePlace)));
     }
 
     /// <summary>Положение полоски на экране.</summary>
@@ -268,6 +271,16 @@ public sealed class HudWindow : Window, IDisposable
 
         _position = HudPlacement.Keep(BarRect(position), screens);
         WindowTraits.Move(Handle, new ScreenPoint(_position.X, _position.Y - (FlightZone * ArtPixel)));
+        AnnouncePlace();
+    }
+
+    /// <summary>Сообщает, где полоска HUD: рядом с ней садится питомец.</summary>
+    private void AnnouncePlace()
+    {
+        if (!_disposed)
+        {
+            _events.Publish(new HudMoved(BarBounds, IsVisible && _configuration is not null));
+        }
     }
 
     private ScreenRect BarRect(ScreenPoint position) =>
@@ -316,6 +329,7 @@ public sealed class HudWindow : Window, IDisposable
         {
             CloseMiniPanel();
             Hide();
+            AnnouncePlace();
         }
     }
 

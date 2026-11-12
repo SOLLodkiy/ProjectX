@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="ADHDWindows.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Поиск ресурсов и «Не беспокоить», оверлеи и пиксельные картинки из сборок усложнений, доступ к системе. -->
+    <ProjectReference Include="..\ADHDWindows.Modules.Hardships.Basic\ADHDWindows.Modules.Hardships.Basic.csproj" />
+    <ProjectReference Include="..\ADHDWindows.Modules.Hardships.Screen\ADHDWindows.Modules.Hardships.Screen.csproj" />
+    <ProjectReference Include="..\ADHDWindows.Platform\ADHDWindows.Platform.csproj" />
+  </ItemGroup>
+
+</Project>

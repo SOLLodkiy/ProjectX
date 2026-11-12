@@ -1,0 +1,78 @@
+{
+  // Питомцы 16×16. Анимации: idle — обычная, happy — радость, eat — еда, sleep — сон; кадры по fps в секунду.
+  // starter — есть с начала, unlockLevel — открывается на уровне, chest — может выпасть из сундука, price — цена в магазине.
+  "items": [
+    { "code": "pet.blob", "rarity": "common", "price": 0, "chest": false, "starter": true, "fps": 3, "animations": {
+      "idle": [
+        [".", ".", ".", ".", ".", "......KKKK", "....KKGGGGKK", "...KGGTGGGGGK", "..KGGTGGGGGGGK", "..KGGKGGGGKGGK", ".KGGGKGGGGKGGGK", ".KGGGGGGGGGGGGK", ".KGGGGGGGGGGGgK", ".KgGGGGGGGGGggK", "..KggggggggggK", "...KKKKKKKKKK"],
+        [".", ".", ".", ".", ".", "......KKKK", "....KKGGGGKK", "...KGGTGGGGGK", "..KGGTGGGGGGGK", "..KGGGGGGGGGGK", ".KGGGKGGGGKGGGK", ".KGGGGGGGGGGGGK", ".KGGGGGGGGGGGgK", ".KgGGGGGGGGGggK", "..KggggggggggK", "...KKKKKKKKKK"]
+      ],
+      "happy": [
+        [".", ".", ".", "......KKKK", "....KKGGGGKK", "...KGGTGGGGGK", "..KGGTGGGGGGGK", "..KGGKGGGGKGGK", ".KGGGGGGGGGGGGK", ".KGGGGGGGGGGGGK", ".KGGGGGRRGGGGgK", ".KgGGGGGGGGGggK", "..KggggggggggK", "...KKKKKKKKKK", ".", "."],
+        [".", ".", ".", ".", ".", "......KKKK", "....KKGGGGKK", "...KGGTGGGGGK", "..KGGTGGGGGGGK", "..KGGKGGGGKGGK", ".KGGGGGGGGGGGGK", ".KGGGGGGGGGGGGK", ".KGGGGGRRGGGGgK", ".KgGGGGGGGGGggK", "..KggggggggggK", "...KKKKKKKKKK"]
+      ],
+      "eat": [
+        [".", ".", ".", ".", ".", "......KKKK", "....KKGGGGKK", "...KGGTGGGGGK", "..KGGTGGGGGGGK", "..KGGKGGGGKGGK", ".KGGGKGGGGKGGGK", ".KGGGGGGGGGGGGK", ".KGGGGGKKGGGGgK", ".KgGGGGGGGGGggK", "..KggggggggggK", "...KKKKKKKKKK"],
+        [".", ".", ".", ".", ".", "......KKKK", "....KKGGGGKK", "...KGGTGGGGGK", "..KGGTGGGGGGGK", "..KGGKGGGGKGGK", ".KGGGKGGGGKGGGK", ".KGGGGGGGGGGGGK", ".KGGGGGRRGGGGgK", ".KgGGGGGGGGGggK", "..KggggggggggK", "...KKKKKKKKKK"]
+      ],
+      "sleep": [
+        ["...........TT", "............T", ".", ".", ".", "......KKKK", "....KKGGGGKK", "...KGGTGGGGGK", "..KGGTGGGGGGGK", "..KGGGGGGGGGGK", ".KGGGKGGGGKGGGK", ".KGGGGGGGGGGGGK", ".KGGGGGGGGGGGgK", ".KgGGGGGGGGGggK", "..KggggggggggK", "...KKKKKKKKKK"],
+        ["............TTT", ".............T", ".", ".", ".", "......KKKK", "....KKGGGGKK", "...KGGTGGGGGK", "..KGGTGGGGGGGK", "..KGGGGGGGGGGK", ".KGGGKGGGGKGGGK", ".KGGGGGGGGGGGGK", ".KGGGGGGGGGGGgK", ".KgGGGGGGGGGggK", "..KggggggggggK", "...KKKKKKKKKK"]
+      ]
+    } },
+    { "code": "pet.cat", "rarity": "rare", "price": 900, "chest": true, "fps": 3, "animations": {
+      "idle": [
+        [".", ".", ".", ".", "...K.......K", "..KMK.....KMK", "..KNMKKKKKMNK", "..KMMMMMMMMMK", ".KMMKMMMMMKMMK", ".KMMKMMMMMKMMK", ".KMMMMMNMMMMMK", "..KMMMWMMWMMK", "..KMMMMMMMMMK.KK", "..KLMMMMMMMLKKMK", "..KLLKLLLKLLKKK", "...KKK.KKK.KK"],
+        [".", ".", ".", ".", "...K.......K", "..KMK.....KMK", "..KNMKKKKKMNK", "..KMMMMMMMMMK", ".KMMMMMMMMMMMK", ".KMMKMMMMMKMMK", ".KMMMMMNMMMMMK", "..KMMMWMMWMMK", "..KMMMMMMMMMK.KK", "..KLMMMMMMMLKKMK", "..KLLKLLLKLLKKK", "...KKK.KKK.KK"]
+      ],
+      "happy": [
+        [".", ".", "...K.......K", "..KMK.....KMK", "..KNMKKKKKMNK", "..KMMMMMMMMMK", ".KMMKMMMMMKMMK", ".KMMMMMMMMMMMK", ".KMMMMMNMMMMMK", "..KMMMWRRWMMK", "..KMMMMMMMMMK.KK", "..KLMMMMMMMLKKMK", "..KLLKLLLKLLKKK", "...KKK.KKK.KK", ".", "."],
+        [".", ".", ".", ".", "...K.......K", "..KMK.....KMK", "..KNMKKKKKMNK", "..KMMMMMMMMMK", ".KMMKMMMMMKMMK", ".KMMMMMMMMMMMK", ".KMMMMMNMMMMMK", "..KMMMWRRWMMK", "..KMMMMMMMMMK.KK", "..KLMMMMMMMLKKMK", "..KLLKLLLKLLKKK", "...KKK.KKK.KK"]
+      ],
+      "eat": [
+        [".", ".", ".", ".", "...K.......K", "..KMK.....KMK", "..KNMKKKKKMNK", "..KMMMMMMMMMK", ".KMMKMMMMMKMMK", ".KMMKMMMMMKMMK", ".KMMMMMNMMMMMK", "..KMMMWKKWMMK", "..KMMMMMMMMMK.KK", "..KLMMMMMMMLKKMK", "..KLLKLLLKLLKKK", "...KKK.KKK.KK"],
+        [".", ".", ".", ".", "...K.......K", "..KMK.....KMK", "..KNMKKKKKMNK", "..KMMMMMMMMMK", ".KMMKMMMMMKMMK", ".KMMKMMMMMKMMK", ".KMMMMMNMMMMMK", "..KMMMWRRWMMK", "..KMMMMMMMMMK.KK", "..KLMMMMMMMLKKMK", "..KLLKLLLKLLKKK", "...KKK.KKK.KK"]
+      ],
+      "sleep": [
+        ["...........TT", "............T", ".", ".", "...K.......K", "..KMK.....KMK", "..KNMKKKKKMNK", "..KMMMMMMMMMK", ".KMMMMMMMMMMMK", ".KMMKMMMMMKMMK", ".KMMMMMNMMMMMK", "..KMMMWMMWMMK", "..KMMMMMMMMMK.KK", "..KLMMMMMMMLKKMK", "..KLLKLLLKLLKKK", "...KKK.KKK.KK"],
+        ["............TTT", ".............T", ".", ".", "...K.......K", "..KMK.....KMK", "..KNMKKKKKMNK", "..KMMMMMMMMMK", ".KMMMMMMMMMMMK", ".KMMKMMMMMKMMK", ".KMMMMMNMMMMMK", "..KMMMWMMWMMK", "..KMMMMMMMMMK.KK", "..KLMMMMMMMLKKMK", "..KLLKLLLKLLKKK", "...KKK.KKK.KK"]
+      ]
+    } },
+    { "code": "pet.fox", "rarity": "epic", "price": 0, "chest": false, "unlockLevel": 10, "fps": 3, "animations": {
+      "idle": [
+        [".", ".", ".", "..K.........K", ".KOK.......KOK", ".KOOK.....KOOK", ".KOOOKKKKKOOOK", ".KOOOOOOOOOOOK", "KOOKOOOOOOOKOOK", "KOOKOOOOOOOKOOK", ".KTTOOOKOOOTTK", "..KTTTTOOTTTK", "...KOOTTTTOOK.KK", "...KOOOOOOOOKKOK", "....KBKKKKBKKTK", "....KK....KK.K"],
+        [".", ".", ".", "..K.........K", ".KOK.......KOK", ".KOOK.....KOOK", ".KOOOKKKKKOOOK", ".KOOOOOOOOOOOK", "KOOOOOOOOOOOOOK", "KOOKOOOOOOOKOOK", ".KTTOOOKOOOTTK", "..KTTTTOOTTTK", "...KOOTTTTOOK.KK", "...KOOOOOOOOKKOK", "....KBKKKKBKKTK", "....KK....KK.K"]
+      ],
+      "happy": [
+        [".", "..K.........K", ".KOK.......KOK", ".KOOK.....KOOK", ".KOOOKKKKKOOOK", ".KOOOOOOOOOOOK", "KOOKOOOOOOOKOOK", "KOOOOOOOOOOOOOK", ".KTTOOOKOOOTTK", "..KTTTTRRTTTK", "...KOOTTTTOOK.KK", "...KOOOOOOOOKKOK", "....KBKKKKBKKTK", "....KK....KK.K", ".", "."],
+        [".", ".", ".", "..K.........K", ".KOK.......KOK", ".KOOK.....KOOK", ".KOOOKKKKKOOOK", ".KOOOOOOOOOOOK", "KOOKOOOOOOOKOOK", "KOOOOOOOOOOOOOK", ".KTTOOOKOOOTTK", "..KTTTTRRTTTK", "...KOOTTTTOOK.KK", "...KOOOOOOOOKKOK", "....KBKKKKBKKTK", "....KK....KK.K"]
+      ],
+      "eat": [
+        [".", ".", ".", "..K.........K", ".KOK.......KOK", ".KOOK.....KOOK", ".KOOOKKKKKOOOK", ".KOOOOOOOOOOOK", "KOOKOOOOOOOKOOK", "KOOKOOOOOOOKOOK", ".KTTOOOKOOOTTK", "..KTTTTKKTTTK", "...KOOTTTTOOK.KK", "...KOOOOOOOOKKOK", "....KBKKKKBKKTK", "....KK....KK.K"],
+        [".", ".", ".", "..K.........K", ".KOK.......KOK", ".KOOK.....KOOK", ".KOOOKKKKKOOOK", ".KOOOOOOOOOOOK", "KOOKOOOOOOOKOOK", "KOOKOOOOOOOKOOK", ".KTTOOOKOOOTTK", "..KTTTTRRTTTK", "...KOOTTTTOOK.KK", "...KOOOOOOOOKKOK", "....KBKKKKBKKTK", "....KK....KK.K"]
+      ],
+      "sleep": [
+        ["...........TT", "............T", ".", "..K.........K", ".KOK.......KOK", ".KOOK.....KOOK", ".KOOOKKKKKOOOK", ".KOOOOOOOOOOOK", "KOOOOOOOOOOOOOK", "KOOKOOOOOOOKOOK", ".KTTOOOKOOOTTK", "..KTTTTOOTTTK", "...KOOTTTTOOK.KK", "...KOOOOOOOOKKOK", "....KBKKKKBKKTK", "....KK....KK.K"],
+        ["............TTT", ".............T", ".", "..K.........K", ".KOK.......KOK", ".KOOK.....KOOK", ".KOOOKKKKKOOOK", ".KOOOOOOOOOOOK", "KOOOOOOOOOOOOOK", "KOOKOOOOOOOKOOK", ".KTTOOOKOOOTTK", "..KTTTTOOTTTK", "...KOOTTTTOOK.KK", "...KOOOOOOOOKKOK", "....KBKKKKBKKTK", "....KK....KK.K"]
+      ]
+    } },
+    { "code": "pet.dragon", "rarity": "legendary", "price": 0, "chest": true, "fps": 4, "animations": {
+      "idle": [
+        [".", ".", "..KK.......KK", "..KYK.....KYK", "...KKKKKKKKK", "..KGGGGGGGGGK", ".KGGKGGGGGKGGK", ".KGGKGGGGGKGGK", "KVKGGGGGGGGGKVK", "KVVKGGgGGgGGKVVK", "KVVKGOOOOOOGKVVK", ".KKKGOOOOOOGKKK", "...KGGOOOOGGK.KK", "...KGGGGGGGGKKGK", "....KKgKKgKKK.K", ".....KK..KK"],
+        [".", ".", "..KK.......KK", "..KYK.....KYK", "...KKKKKKKKK", "..KGGGGGGGGGK", ".KGGGGGGGGGGGK", ".KGGKGGGGGKGGK", "KVKGGGGGGGGGKVK", "KVVKGGgGGgGGKVVK", "KVVKGOOOOOOGKVVK", ".KKKGOOOOOOGKKK", "...KGGOOOOGGK.KK", "...KGGGGGGGGKKGK", "....KKgKKgKKK.K", ".....KK..KK"]
+      ],
+      "happy": [
+        ["..KK.......KK", "..KYK.....KYK", "...KKKKKKKKK", "..KGGGGGGGGGK", ".KGGKGGGGGKGGK", ".KGGGGGGGGGGGK", "KVKGGGGGGGGGKVK", "KVVKGGgRRgGGKVVK", "KVVKGOOOOOOGKVVK", ".KKKGOOOOOOGKKK", "...KGGOOOOGGK.KK", "...KGGGGGGGGKKGK", "....KKgKKgKKK.K", ".....KK..KK", ".", "."],
+        [".", ".", "..KK.......KK", "..KYK.....KYK", "...KKKKKKKKK", "..KGGGGGGGGGK", ".KGGKGGGGGKGGK", ".KGGGGGGGGGGGK", "KVKGGGGGGGGGKVK", "KVVKGGgRRgGGKVVK", "KVVKGOOOOOOGKVVK", ".KKKGOOOOOOGKKK", "...KGGOOOOGGK.KK", "...KGGGGGGGGKKGK", "....KKgKKgKKK.K", ".....KK..KK"]
+      ],
+      "eat": [
+        [".", ".", "..KK.......KK", "..KYK.....KYK", "...KKKKKKKKK", "..KGGGGGGGGGK", ".KGGKGGGGGKGGK", ".KGGKGGGGGKGGK", "KVKGGGGGGGGGKVK", "KVVKGGgKKgGGKVVK", "KVVKGOOOOOOGKVVK", ".KKKGOOOOOOGKKK", "...KGGOOOOGGK.KK", "...KGGGGGGGGKKGK", "....KKgKKgKKK.K", ".....KK..KK"],
+        [".", ".", "..KK.......KK", "..KYK.....KYK", "...KKKKKKKKK", "..KGGGGGGGGGK", ".KGGKGGGGGKGGK", ".KGGKGGGGGKGGK", "KVKGGGGGGGGGKVK", "KVVKGGgRRgGGKVVK", "KVVKGOOOOOOGKVVK", ".KKKGOOOOOOGKKK", "...KGGOOOOGGK.KK", "...KGGGGGGGGKKGK", "....KKgKKgKKK.K", ".....KK..KK"]
+      ],
+      "sleep": [
+        ["...........TT", "............T", "..KK.......KK", "..KYK.....KYK", "...KKKKKKKKK", "..KGGGGGGGGGK", ".KGGGGGGGGGGGK", ".KGGKGGGGGKGGK", "KVKGGGGGGGGGKVK", "KVVKGGgGGgGGKVVK", "KVVKGOOOOOOGKVVK", ".KKKGOOOOOOGKKK", "...KGGOOOOGGK.KK", "...KGGGGGGGGKKGK", "....KKgKKgKKK.K", ".....KK..KK"],
+        ["............TTT", ".............T", "..KK.......KK", "..KYK.....KYK", "...KKKKKKKKK", "..KGGGGGGGGGK", ".KGGGGGGGGGGGK", ".KGGKGGGGGKGGK", "KVKGGGGGGGGGKVK", "KVVKGGgGGgGGKVVK", "KVVKGOOOOOOGKVVK", ".KKKGOOOOOOGKKK", "...KGGOOOOGGK.KK", "...KGGGGGGGGKKGK", "....KKgKKgKKK.K", ".....KK..KK"]
+      ]
+    } }
+  ]
+}

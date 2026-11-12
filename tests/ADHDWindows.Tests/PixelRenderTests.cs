@@ -366,6 +366,74 @@ public class PixelRenderTests
     [Theory]
     [InlineData(1.0, 2)]
     [InlineData(1.5, 3)]
+    public void Cosmetics_window_buys_equips_and_repaints_the_interface_in_the_theme(double dpiScale, int devicePixels) => WpfThread.Run(() =>
+    {
+        var log = new RecordingLog();
+        var data = new GameData(Path.Combine(RepositoryRoot.Find(), "data"), log);
+        data.Load();
+        var texts = new TextCatalog(data, "ru", log);
+        texts.Use("ru");
+        var bus = new EventBus(log);
+        var saves = new MemoryStore();
+        var economy = new CoinEconomy(saves, bus, TimeProvider.System);
+        var wardrobe = new ADHDWindows.Modules.Cosmetics.Wardrobe(CosmeticsRepo.Items(log), economy, bus, saves, new MemoryStore(), TimeProvider.System, log);
+        var screen = new ADHDWindows.App.Cosmetics.CosmeticsScreen(bus, economy, texts, () => true, System.Windows.Threading.Dispatcher.CurrentDispatcher);
+        var requested = new List<string>();
+        bus.Subscribe<ADHDWindows.Core.Cosmetics.CosmeticPurchaseRequested>(request => requested.Add(request.Code));
+        var panel = PixelAssets.Current.Brush("panel");
+        try
+        {
+            economy.Earn("developer", 700);
+            screen.Update(wardrobe.Snapshot());
+            screen.Open();
+            var window = screen.Window!;
+            Assert.Equal(6, window.TabCount);
+            var row = window.Rows["theme.space"];
+            Assert.True(row.Button.IsEnabled);
+            Assert.False(window.Rows["cursor.wand"].Button.IsEnabled, "на дорогой курсор не хватает");
+            Assert.Equal(texts.Get("cosmetics.fromChest"), window.Rows["cursor.feather"].Status);
+            Assert.Equal(texts.Get("cosmetics.fromLevel", 20), window.Rows["cursor.gold"].Status);
+            row.Button.RaiseEvent(new RoutedEventArgs(System.Windows.Controls.Primitives.ButtonBase.ClickEvent));
+            Assert.Equal(["theme.space"], requested);
+
+            // Купленная тема сразу перекрашивает интерфейс, скин монеток подменяет монетку.
+            economy.Earn("developer", 300);
+            Assert.Null(wardrobe.Buy("theme.space"));
+            Assert.Null(wardrobe.Buy("coin.ruby"));
+            screen.Update(wardrobe.Snapshot());
+            Assert.Equal(Color.FromRgb(0x14, 0x1A, 0x3A), ((SolidColorBrush)PixelAssets.Current.Brush("panel")).Color);
+            Assert.NotSame(panel, PixelAssets.Current.Brush("panel"));
+            Assert.Equal("cosmetic:coin.ruby", PixelAssets.Current.Find("coin")!.Name);
+            Assert.Equal(texts.Get("cosmetics.equipped"), window.Rows["theme.space"].Status);
+
+            window.Close();
+
+            // Снимок нового окна в теме: открытое окно держит содержимое в своём шаблоне.
+            foreach (var tab in new[] { "cursor", "pet" })
+            {
+                var fresh = new ADHDWindows.App.Cosmetics.CosmeticsWindow(texts, bus);
+                fresh.Update(wardrobe.Snapshot(), economy.Balance);
+                fresh.ShowPet(new ADHDWindows.Core.Cosmetics.PetState("pet.blob", true, ADHDWindows.Core.Cosmetics.PetPlace.Hud, 2, 5, 3, 8, 25, ADHDWindows.Core.Cosmetics.PetMood.Idle));
+                fresh.SelectTab(tab);
+                var content = (UIElement)fresh.Content;
+                fresh.Content = null;
+                AssertCrisp(new PixelFrame { Sprite = "window", Padding = new Thickness(5), Child = content }, dpiScale, devicePixels, $"cosmetics-{tab}");
+            }
+        }
+        finally
+        {
+            PixelAssets.Current.ApplyTheme(null);
+            PixelAssets.Current.SetAlias("coin", null);
+            screen.Dispose();
+        }
+
+        Assert.Equal(((SolidColorBrush)panel).Color, ((SolidColorBrush)PixelAssets.Current.Brush("panel")).Color);
+        Assert.Empty(log.Errors);
+    });
+
+    [Theory]
+    [InlineData(1.0, 2)]
+    [InlineData(1.5, 3)]
     public void Event_window_stays_on_the_pixel_grid_and_the_wheel_stops_on_the_prize(double dpiScale, int devicePixels) => WpfThread.Run(() =>
     {
         var log = new RecordingLog();
@@ -501,7 +569,9 @@ public class PixelRenderTests
         var pixels = Render(child, dpiScale, out var width, out var height);
         Snapshot(pixels, width, height, $"{name}-{dpiScale * 100}");
 
+        // Тема косметики заменяет часть цветов палитры, картинки косметики остаются в исходной палитре.
         var allowed = PixelAssets.Current.Palette.Colors.Select(color => color.Argb).ToHashSet();
+        allowed.UnionWith(PixelAssets.Current.ThemeColors.Values.Select(color => 0xFF000000u | ((uint)color.R << 16) | ((uint)color.G << 8) | color.B));
         for (var index = 0; index < pixels.Length; index++)
         {
             var pixel = pixels[index];

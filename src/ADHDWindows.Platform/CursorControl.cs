@@ -60,9 +60,16 @@ public static class CursorControl
     /// Заменяет курсоры системы картинкой <paramref name="argb"/> (строки сверху вниз, 0xAARRGGBB).
     /// Отменяется только <see cref="RestoreCursors"/>, поэтому изменение нужно записать в реестр изменений до вызова.
     /// </summary>
-    public static void ReplaceCursors(uint[] argb, int size, int hotX, int hotY, bool allKinds)
+    public static void ReplaceCursors(uint[] argb, int size, int hotX, int hotY, bool allKinds) =>
+        ReplaceCursors(argb, size, hotX, hotY, allKinds ? AllCursors : [ArrowCursor]);
+
+    /// <summary>Курсоры-указатели: стрелка, рука над ссылкой и стрелка с фоновой работой. Текстовый курсор и стрелки размеров не трогаются.</summary>
+    public static readonly IReadOnlyList<uint> PointerCursors = [ArrowCursor, 32649, 32650];
+
+    /// <summary>Заменяет только курсоры <paramref name="kinds"/> (OCR_*). Отменяется <see cref="RestoreCursors"/>.</summary>
+    public static void ReplaceCursors(uint[] argb, int size, int hotX, int hotY, IReadOnlyList<uint> kinds)
     {
-        foreach (var kind in allKinds ? AllCursors : [ArrowCursor])
+        foreach (var kind in kinds)
         {
             // Система забирает переданный курсор себе, поэтому на каждый вид нужен свой.
             var cursor = CreateCursor(argb, size, hotX, hotY);

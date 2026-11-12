@@ -1,0 +1,12 @@
+{
+  // Скины монеток: recolor заменяет символы палитры в спрайте coin (Y — золото, O — тень, T — блик).
+  // Скин виден в HUD, вылетающих монетках и окнах программы.
+  "items": [
+    { "code": "coin.copper", "rarity": "common", "price": 150, "recolor": { "Y": "O", "O": "B" } },
+    { "code": "coin.silver", "rarity": "common", "price": 250, "recolor": { "Y": "M", "O": "L", "T": "W" } },
+    { "code": "coin.ruby", "rarity": "rare", "price": 400, "recolor": { "Y": "R", "O": "r", "T": "N" } },
+    { "code": "coin.emerald", "rarity": "rare", "price": 400, "recolor": { "Y": "G", "O": "g" } },
+    { "code": "coin.amethyst", "rarity": "epic", "price": 700, "recolor": { "Y": "V", "O": "v", "T": "N" } },
+    { "code": "coin.sapphire", "rarity": "epic", "price": 0, "chest": true, "recolor": { "Y": "C", "O": "c" } }
+  ]
+}

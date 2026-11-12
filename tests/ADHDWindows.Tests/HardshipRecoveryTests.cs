@@ -225,7 +225,29 @@ public sealed class HardshipRecoveryTests : IDisposable
         return window;
     }
 
-    private Process StartApp(string hardship)
+    [Fact]
+    public void Killed_app_brings_back_the_user_cursor_after_a_cursor_skin()
+    {
+        var visible = CursorControl.VisiblePixelsOfArrow();
+        var paths = new AppPaths(_temp.Path, UserDir);
+        var saves = new JsonFileStore(paths.SavePath, _log);
+        saves.Load();
+        saves.Set($"modules/cosmetics/{ADHDWindows.Modules.Cosmetics.Wardrobe.OwnedKey}", new List<string> { "cursor.sword" });
+        saves.Set($"modules/cosmetics/{ADHDWindows.Modules.Cosmetics.Wardrobe.EquippedKey}", new Dictionary<string, string> { ["Cursor"] = "cursor.sword" });
+        saves.Flush();
+        var app = StartApp(null);
+        WaitUntil(() => AppLog().Contains("Скин курсора поставлен: cursor.sword"), "скин курсора");
+        Assert.NotEqual(visible, CursorControl.VisiblePixelsOfArrow());
+        var watchdog = FindWatchdog();
+
+        app.Kill();
+
+        WaitUntil(() => CursorControl.VisiblePixelsOfArrow() == visible, "возврат курсора");
+        WaitUntil(() => watchdog.HasExited, "завершение сторожа");
+        Assert.Contains($"Откачено: {ADHDWindows.Modules.Cosmetics.CursorSkinRestorer.ChangeKind}", WatchdogLog());
+    }
+
+    private Process StartApp(string? hardship)
     {
         var paths = new AppPaths(_temp.Path, UserDir);
         var settings = new JsonFileStore(paths.SettingsPath, _log);
@@ -248,7 +270,10 @@ public sealed class HardshipRecoveryTests : IDisposable
         };
         info.ArgumentList.Add(AppOptions.DeveloperFlag);
         info.ArgumentList.Add(AppOptions.UserDirPrefix + UserDir);
-        info.ArgumentList.Add(AppOptions.HardshipPrefix + hardship);
+        if (hardship is not null)
+        {
+            info.ArgumentList.Add(AppOptions.HardshipPrefix + hardship);
+        }
         var process = Process.Start(info)!;
         _started.Add(process);
         return process;

@@ -1,0 +1,19 @@
+{
+  // Звуки программы: файл в assets/sounds и громкость от 0 до 1 относительно общей громкости из настроек.
+  // Новый звук добавляется строкой здесь; модуль просит его событием SoundCueRequested с названием звука.
+  "cues": {
+    "purchase": { "file": "ui/purchase.wav", "volume": 0.8 },
+    "denied": { "file": "ui/denied.wav", "volume": 0.6 },
+    "quest": { "file": "ui/quest.wav", "volume": 0.8 },
+    "level": { "file": "ui/level.wav", "volume": 0.9 },
+    "achievement": { "file": "ui/achievement.wav", "volume": 0.8 },
+    "chest": { "file": "ui/chest.wav", "volume": 0.8 },
+    "event": { "file": "ui/event.wav", "volume": 0.7 },
+    "warning": { "file": "ui/warning.wav", "volume": 0.7 },
+    "survived": { "file": "ui/survived.wav", "volume": 0.7 },
+    "feed": { "file": "ui/feed.wav", "volume": 0.7 },
+    "pet": { "file": "ui/pet.wav", "volume": 0.5 }
+  },
+  // Фоновая мелодия: файлы играют друг за другом по кругу. Выключена по умолчанию.
+  "music": ["music/theme.wav"]
+}

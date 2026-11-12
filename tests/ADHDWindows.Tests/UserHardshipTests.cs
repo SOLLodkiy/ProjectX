@@ -553,7 +553,10 @@ public sealed class UserHardshipPartsTests
     {
         var folder = Path.Combine(RepositoryRoot.Find(), "assets", "sounds");
         var files = Directory.GetFiles(folder, "*.wav", SearchOption.AllDirectories);
-        Assert.Equal(4, files.Length);
+
+        // Выстрел и три случайных звука, звуки интерфейса и мелодия (этап 19).
+        Assert.Equal(4, files.Count(file => Path.GetFileName(Path.GetDirectoryName(file)) is "sounds" or "random"));
+        Assert.True(files.Length >= 16);
         foreach (var file in files)
         {
             var bytes = File.ReadAllBytes(file);
@@ -562,7 +565,8 @@ public sealed class UserHardshipPartsTests
             Assert.Equal(1, BitConverter.ToInt16(bytes, 22));
             Assert.Equal(8, BitConverter.ToInt16(bytes, 34));
             var seconds = BitConverter.ToInt32(bytes, 40) / (double)BitConverter.ToInt32(bytes, 24);
-            Assert.InRange(seconds, 0.2, 3);
+            var music = Path.GetFileName(Path.GetDirectoryName(file)) == "music";
+            Assert.InRange(seconds, music ? 5 : 0.1, music ? 30 : 3);
         }
     }
 

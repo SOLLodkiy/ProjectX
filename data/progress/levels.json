@@ -9,12 +9,12 @@
     { "id": "novice", "level": 1, "name": "Новичок" },
     { "id": "clicker", "level": 3, "name": "Кликер", "coins": 100 },
     { "id": "watcher", "level": 6, "name": "Зритель", "coins": 200 },
-    { "id": "collector", "level": 10, "name": "Коллекционер", "coins": 400, "cosmetic": "rank.collector" },
+    { "id": "collector", "level": 10, "name": "Коллекционер", "coins": 400, "cosmetic": "pet.fox" },
     { "id": "questor", "level": 15, "name": "Охотник за заданиями", "coins": 700 },
-    { "id": "survivor", "level": 20, "name": "Покоритель усложнений", "coins": 1000, "cosmetic": "rank.survivor" },
+    { "id": "survivor", "level": 20, "name": "Покоритель усложнений", "coins": 1000, "cosmetic": "cursor.gold" },
     { "id": "tycoon", "level": 25, "name": "Монетный магнат", "coins": 1500 },
-    { "id": "master", "level": 30, "name": "Хозяин окон", "coins": 2000, "cosmetic": "rank.master" },
-    { "id": "legend", "level": 40, "name": "Легенда рабочего стола", "coins": 5000, "cosmetic": "rank.legend" }
+    { "id": "master", "level": 30, "name": "Хозяин окон", "coins": 2000, "cosmetic": "theme.gold" },
+    { "id": "legend", "level": 40, "name": "Легенда рабочего стола", "coins": 5000, "cosmetic": "trail.rainbow" }
   ],
   // Опыт за действия: каждые per единиц счётчика metric дают xp опыта. Счётчики описаны в ProgressMetrics.
   "xpRules": [

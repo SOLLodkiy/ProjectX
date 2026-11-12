@@ -38,6 +38,9 @@
     <ProjectReference Include="..\..\src\ADHDWindows.Modules.Hardships.Sounds\ADHDWindows.Modules.Hardships.Sounds.csproj" />
     <ProjectReference Include="..\..\src\ADHDWindows.Modules.Events\ADHDWindows.Modules.Events.csproj" />
     <ProjectReference Include="..\..\src\ADHDWindows.Modules.Events.Basic\ADHDWindows.Modules.Events.Basic.csproj" />
+    <ProjectReference Include="..\..\src\ADHDWindows.Modules.Cosmetics\ADHDWindows.Modules.Cosmetics.csproj" />
+    <ProjectReference Include="..\..\src\ADHDWindows.Modules.Pet\ADHDWindows.Modules.Pet.csproj" />
+    <ProjectReference Include="..\..\src\ADHDWindows.Modules.Sound\ADHDWindows.Modules.Sound.csproj" />
     <!-- Отдельная программа: тесты запускают и замораживают её как процесс. -->
     <ProjectReference Include="..\ADHDWindows.TestApp\ADHDWindows.TestApp.csproj"
                       ReferenceOutputAssembly="false"
