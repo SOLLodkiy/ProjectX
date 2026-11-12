@@ -1,0 +1,36 @@
+{
+  // Сундуки: сколько секунд сундук ждёт клика на экране, увеличение картинки и редкости.
+  // weight — шанс редкости у случайного сундука, rolls — сколько предметов внутри.
+  // Предметы: coins (min–max монет), booster (весь доход ×multiplier на minutes минут), cosmetic (выпадает, только если есть модуль косметики).
+  "seconds": 12,
+  "scale": 4,
+  "tiers": {
+    "common": {
+      "weight": 80,
+      "rolls": 1,
+      "loot": [
+        { "kind": "coins", "weight": 70, "min": 40, "max": 90 },
+        { "kind": "booster", "weight": 25, "multiplier": 1.5, "minutes": 5 },
+        { "kind": "cosmetic", "weight": 5 }
+      ]
+    },
+    "rare": {
+      "weight": 17,
+      "rolls": 2,
+      "loot": [
+        { "kind": "coins", "weight": 60, "min": 120, "max": 250 },
+        { "kind": "booster", "weight": 25, "multiplier": 2, "minutes": 5 },
+        { "kind": "cosmetic", "weight": 15 }
+      ]
+    },
+    "legendary": {
+      "weight": 3,
+      "rolls": 3,
+      "loot": [
+        { "kind": "coins", "weight": 45, "min": 400, "max": 800 },
+        { "kind": "booster", "weight": 25, "multiplier": 3, "minutes": 5 },
+        { "kind": "cosmetic", "weight": 30 }
+      ]
+    }
+  }
+}

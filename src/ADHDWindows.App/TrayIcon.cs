@@ -45,6 +45,14 @@ internal sealed class TrayIcon : IDisposable
             menu.Items.Add(hardships);
         }
 
+        if (actions.FillEvents is { } fillEvents)
+        {
+            var events = new ToolStripMenuItem(texts.Get("tray.events"));
+            events.DropDownItems.Add(new ToolStripMenuItem("…") { Enabled = false });
+            events.DropDownOpening += (_, _) => fillEvents(events);
+            menu.Items.Add(events);
+        }
+
         menu.Items.Add(texts.Get("tray.shop"), null, (_, _) => actions.OnShop());
         menu.Items.Add(texts.Get("tray.quests"), null, (_, _) => actions.OnQuests());
         menu.Items.Add(texts.Get("tray.progress"), null, (_, _) => actions.OnProgress());
@@ -129,4 +137,5 @@ internal sealed record TrayActions(
     Action OnLocks,
     Action OnExit,
     string EmergencyHotkey,
-    Action<ToolStripMenuItem>? FillHardships = null);
+    Action<ToolStripMenuItem>? FillHardships = null,
+    Action<ToolStripMenuItem>? FillEvents = null);

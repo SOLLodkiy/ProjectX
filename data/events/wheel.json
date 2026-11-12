@@ -1,0 +1,17 @@
+{
+  // Колесо фортуны: один бесплатный спин в день, дополнительный стоит price монет.
+  // Секторы: coins (amount монет), booster (весь доход ×multiplier на minutes минут), chest (сундук tier), nothing.
+  "price": 100,
+  "segments": [
+    { "kind": "coins", "weight": 20, "amount": 25 },
+    { "kind": "coins", "weight": 18, "amount": 50 },
+    { "kind": "nothing", "weight": 14 },
+    { "kind": "coins", "weight": 14, "amount": 100 },
+    { "kind": "booster", "weight": 10, "multiplier": 2, "minutes": 3 },
+    { "kind": "coins", "weight": 8, "amount": 200 },
+    { "kind": "chest", "weight": 10, "tier": "common" },
+    { "kind": "chest", "weight": 4, "tier": "rare" },
+    { "kind": "coins", "weight": 1.5, "amount": 1000 },
+    { "kind": "chest", "weight": 0.5, "tier": "legendary" }
+  ]
+}

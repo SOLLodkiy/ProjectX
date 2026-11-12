@@ -1,0 +1,13 @@
+{
+  // Торговец показывает count случайных товаров. booster: доход source (null — весь) ×multiplier на minutes минут; chest: сундук tier.
+  "count": 3,
+  "offers": [
+    { "id": "clicks2", "kind": "booster", "price": 120, "multiplier": 2, "minutes": 10, "source": "click" },
+    { "id": "video2", "kind": "booster", "price": 150, "multiplier": 2, "minutes": 15, "source": "video" },
+    { "id": "music2", "kind": "booster", "price": 120, "multiplier": 2, "minutes": 20, "source": "music" },
+    { "id": "game2", "kind": "booster", "price": 150, "multiplier": 2, "minutes": 15, "source": "game" },
+    { "id": "all15", "kind": "booster", "price": 250, "multiplier": 1.5, "minutes": 10 },
+    { "id": "rareChest", "kind": "chest", "price": 300, "tier": "rare" },
+    { "id": "legendaryChest", "kind": "chest", "price": 1500, "tier": "legendary" }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  // Сезонные события: даты «месяц-день» включительно, могут переходить через Новый год.
+  // picture: gift, pumpkin, heart, flower, snowflake. cosmetic — тема сезона, выдаётся модулем косметики (этап 19).
+  "seconds": 10,
+  "scale": 5,
+  "seasons": [
+    { "id": "newYear", "from": "12-20", "to": "01-10", "reward": 300, "picture": "gift", "cosmetic": "theme.newYear" },
+    { "id": "winter", "from": "01-11", "to": "02-05", "reward": 120, "picture": "snowflake", "cosmetic": null },
+    { "id": "valentine", "from": "02-10", "to": "02-16", "reward": 200, "picture": "heart", "cosmetic": "theme.valentine" },
+    { "id": "spring", "from": "03-01", "to": "03-10", "reward": 200, "picture": "flower", "cosmetic": "theme.spring" },
+    { "id": "halloween", "from": "10-25", "to": "11-02", "reward": 300, "picture": "pumpkin", "cosmetic": "theme.halloween" }
+  ]
+}

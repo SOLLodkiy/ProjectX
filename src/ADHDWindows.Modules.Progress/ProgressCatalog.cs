@@ -413,7 +413,7 @@ public static class ProgressMetrics
 
     private static readonly string[] Prefixes =
     [
-        "clicks.", "earned.", "media.", "unlocks.", "quests.completed.", "hardships.survived.", ProgramPrefix,
+        "clicks.", "earned.", "media.", "unlocks.", "quests.completed.", "hardships.survived.", ProgramPrefix, "events.", "chests.",
     ];
 
     public static bool IsGauge(string metric) => Gauges.Contains(metric);

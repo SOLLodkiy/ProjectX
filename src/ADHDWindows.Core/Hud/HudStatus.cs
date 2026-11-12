@@ -5,6 +5,9 @@ public enum HudSlot
 {
     Hardship,
     Quest,
+
+    /// <summary>Действующие бустеры случайных событий.</summary>
+    Event,
 }
 
 /// <summary>Новый текст строки мини-панели. Значение null означает, что показывать нечего.</summary>

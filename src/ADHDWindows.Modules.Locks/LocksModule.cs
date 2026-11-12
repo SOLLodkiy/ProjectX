@@ -46,6 +46,7 @@ public sealed class LocksModule : IModule
     private ProgramCatalog? _programCatalog;
     private SiteCatalog? _siteCatalog;
     private SiteLocks? _sites;
+    private SaleBook? _sales;
     private BrowserWatch? _browsers;
     private BrowserBridge? _bridge;
     private DateTime _nextBrowserCheck;
@@ -66,8 +67,33 @@ public sealed class LocksModule : IModule
             onlyUnder = null;
         }
 
+        // Каталоги, покупки и распродажи нужны и без блокировки: событие «Распродажа» уценяет запись каталога.
+        var disabled = context.DeveloperMode && onlyUnder is null;
+        try
+        {
+            _programCatalog = ProgramCatalog.Load(context.Data);
+            _siteCatalog = SiteCatalog.Load(context.Data);
+        }
+        catch (InvalidDataException exception) when (disabled)
+        {
+            // Блокировка всё равно выключена: без каталога недоступны только распродажи.
+            context.Log.Warn($"Распродажи недоступны: {exception.Message}");
+            context.Log.Warn($"Режим разработчика: блокировка выключена, пока не задана настройка {OnlyUnderSetting}");
+            return;
+        }
+
+        var siteCatalog = _siteCatalog;
+
+        // Одна книга покупок на программы и сайты: обе части пишут в одно сохранение из одного потока.
+        var ledger = new UnlockLedger(context.Saves);
+        _ledger = ledger;
+        var sales = new SaleBook(context.Saves, TimeProvider.System);
+        _sales = sales;
+        context.Events.Subscribe<LockSaleRequested>(request => Run(() => StartSale(request)));
+        sales.Changed += () => Run(() => _engine?.PublishOffers());
+
         // Проверка не должна замораживать настоящие программы человека из-за забытой настройки.
-        if (context.DeveloperMode && onlyUnder is null)
+        if (disabled)
         {
             context.Log.Warn($"Режим разработчика: блокировка выключена, пока не задана настройка {OnlyUnderSetting}");
             return;
@@ -80,15 +106,8 @@ public sealed class LocksModule : IModule
 
         var gameCatalog = GameCatalog.Load(context.Data);
         _games = new GameLibrary(GameSources(context), gameCatalog, context.Log, TimeProvider.System);
-        _programCatalog = ProgramCatalog.Load(context.Data);
         var classifier = new ProgramClassifier(_programCatalog, OwnFiles(), onlyUnder, _games);
-        var siteCatalog = SiteCatalog.Load(context.Data);
-        _siteCatalog = siteCatalog;
         var system = new WindowsProgramSystem();
-
-        // Одна книга покупок на программы и сайты: обе части пишут в одно сохранение из одного потока.
-        var ledger = new UnlockLedger(context.Saves);
-        _ledger = ledger;
         _engine = new LockEngine(
             system,
             classifier,
@@ -97,9 +116,10 @@ public sealed class LocksModule : IModule
             context.Changes,
             context.Events,
             context.Log,
-            TimeProvider.System);
+            TimeProvider.System,
+            sales);
 
-        _sites = new SiteLocks(new SiteClassifier(siteCatalog), ledger, context.Economy, context.Events, context.Log, TimeProvider.System);
+        _sites = new SiteLocks(new SiteClassifier(siteCatalog), ledger, context.Economy, context.Events, context.Log, TimeProvider.System, sales);
         var profile = Setting(context, BrowserProfileSetting);
         if (!context.DeveloperMode || profile is not null)
         {
@@ -208,6 +228,32 @@ public sealed class LocksModule : IModule
             _siteCatalog!,
             _games!.Games.Select(game => game.Key)));
 
+    /// <summary>Распродажа идёт в рабочем потоке блокировки, а если блокировка выключена — сразу.</summary>
+    private void Run(Action action)
+    {
+        if (_worker is not null)
+        {
+            Enqueue(action);
+        }
+        else
+        {
+            Execute(action);
+        }
+    }
+
+    private void StartSale(LockSaleRequested request)
+    {
+        if (_sales!.Start(request, _programCatalog!, _siteCatalog!, _ledger!.Contains, Random.Shared) is { } started)
+        {
+            _context!.Log.Info($"Распродажа: {started.Offer.Name} −{started.Percent}% до {started.Until.ToLocalTime():HH:mm}");
+            _context.Events.Publish(started);
+        }
+        else
+        {
+            _context!.Events.Publish(new LockSaleUnavailable(request.Requester));
+        }
+    }
+
     private void CheckBrowsers()
     {
         _browsers?.Check(_sites!.Sessions);
@@ -242,6 +288,7 @@ public sealed class LocksModule : IModule
 
             if (DateTime.UtcNow >= nextScan)
             {
+                Execute(() => _sales!.Tick());
                 Execute(() => _engine!.Scan(_stop.Token));
                 Execute(CheckBrowsers);
                 nextScan = DateTime.UtcNow + ScanInterval;

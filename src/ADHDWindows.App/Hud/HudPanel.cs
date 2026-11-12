@@ -18,6 +18,7 @@ public sealed class HudPanel : PixelFrame
     private readonly PixelText _rate;
     private readonly PixelText _hardship;
     private readonly PixelText _quest;
+    private readonly PixelText _booster;
 
     public HudPanel(TextCatalog texts)
     {
@@ -31,6 +32,7 @@ public sealed class HudPanel : PixelFrame
         _rate = AddRow(rows, "chart", "hud.rate");
         _hardship = AddTextRow(rows, "warning", "hud.hardship");
         _quest = AddTextRow(rows, "quest", "hud.quest");
+        _booster = AddTextRow(rows, "star", "hud.booster");
 
         var buttons = new UniformGrid { Columns = 2, Margin = new Thickness(0, 3, 0, 0) };
         Shop = new PixelButton { Content = texts.Get("hud.shop"), IsEnabled = false };
@@ -59,8 +61,9 @@ public sealed class HudPanel : PixelFrame
     /// <summary>Открывает окно прогресса, подключается через <see cref="HudWindow.ConnectProgress"/>.</summary>
     public PixelButton Progress { get; }
 
-    public void Show(long balance, long perMinute, string? hardship, string? quest)
+    public void Show(long balance, long perMinute, string? hardship, string? quest, string? booster = null)
     {
+        _booster.Text = booster ?? _texts.Get("hud.none");
         _balance.Text = balance.ToString(CultureInfo.InvariantCulture);
         _rate.Text = CoinFormat.Gain(perMinute);
         _hardship.Text = hardship ?? _texts.Get("hud.none");

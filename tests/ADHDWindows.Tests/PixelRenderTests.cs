@@ -363,6 +363,139 @@ public class PixelRenderTests
         Assert.Equal("button_disabled", button.FrameSprite);
     });
 
+    [Theory]
+    [InlineData(1.0, 2)]
+    [InlineData(1.5, 3)]
+    public void Event_window_stays_on_the_pixel_grid_and_the_wheel_stops_on_the_prize(double dpiScale, int devicePixels) => WpfThread.Run(() =>
+    {
+        var log = new RecordingLog();
+        var data = new GameData(Path.Combine(RepositoryRoot.Find(), "data"), log);
+        data.Load();
+        var texts = new TextCatalog(data, "ru", log);
+        texts.Use("ru");
+        var bus = new EventBus(log);
+        var economy = new CoinEconomy(new MemoryStore(), bus, TimeProvider.System);
+        economy.Earn("developer", 150);
+        var chosen = new List<string>();
+
+        var riddle = new ADHDWindows.Core.RandomEvents.EventDialog(
+            "riddle.1",
+            "quest",
+            texts.Get("events.riddle.title"),
+            texts.Get("events.riddle.text", "Есть клавиши, но нет замка. Что это?", "40"),
+            [new("answer.0", "Клавиатура"), new("answer.1", "Пианино без крышки"), new("answer.2", "Сейф", 500)],
+            DateTimeOffset.UtcNow.AddSeconds(30));
+        var window = new ADHDWindows.App.Events.EventDialogWindow(texts, economy, riddle, chosen.Add);
+        Assert.False(window.Buttons[2].IsEnabled, "на дорогую кнопку монеток не хватает");
+        window.Buttons[0].RaiseEvent(new RoutedEventArgs(System.Windows.Controls.Primitives.ButtonBase.ClickEvent));
+        Assert.Equal(["answer.0"], chosen);
+        var content = (UIElement)window.Content;
+        window.Content = null;
+        AssertCrisp(new PixelFrame { Sprite = "window", Padding = new Thickness(5), Child = content }, dpiScale, devicePixels, "event-riddle");
+        window.Content = content;
+
+        // Окно закрыло событие — ответа «закрыто» нет; закрыл игрок — есть.
+        window.CloseByEvent();
+        Assert.Equal(["answer.0"], chosen);
+
+        string[] segments = ["25", "50", "Пусто", "100", "×2", "200", "Сундук", "1000"];
+        var wheel = new ADHDWindows.Core.RandomEvents.EventDialog(
+            "wheel.1",
+            "star",
+            texts.Get("events.wheel.title"),
+            texts.Get("events.wheel.text"),
+            [new("spin", texts.Get("events.wheel.free"))],
+            Wheel: segments);
+        window = new ADHDWindows.App.Events.EventDialogWindow(texts, economy, wheel, chosen.Add);
+        content = (UIElement)window.Content;
+        window.Content = null;
+        AssertCrisp(new PixelFrame { Sprite = "window", Padding = new Thickness(5), Child = content }, dpiScale, devicePixels, "event-wheel");
+        window.Content = content;
+
+        window.Update(wheel with { Text = texts.Get("events.wheel.won.coins", "200"), WheelResult = 5, Spin = 1, Choices = [new("spin", texts.Get("events.wheel.paid"), 100)] });
+        Assert.True(window.Spinning);
+        Assert.Equal("…", window.Text);
+        Assert.False(window.Buttons[0].IsEnabled, "пока колесо крутится, кнопки ждут");
+        var watch = System.Diagnostics.Stopwatch.StartNew();
+        while (window.Spinning && watch.Elapsed < TimeSpan.FromSeconds(10))
+        {
+            Pump(TimeSpan.FromMilliseconds(50));
+        }
+
+        Assert.False(window.Spinning);
+        Assert.Equal(5, window.Highlighted);
+        Assert.Equal(texts.Get("events.wheel.won.coins", "200"), window.Text);
+        Assert.True(window.Buttons[0].IsEnabled);
+        window.Close();
+        Assert.Equal(["answer.0", ADHDWindows.Core.RandomEvents.EventDialogChosen.CloseChoice], chosen);
+    });
+
+    [Fact]
+    public void Event_pictures_use_only_the_palette()
+    {
+        var pictures = typeof(ADHDWindows.Modules.Events.Basic.ChestEvent).Assembly
+            .GetType("ADHDWindows.Modules.Events.Basic.EventPictures")!
+            .GetFields(System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public)
+            .Where(field => field.FieldType == typeof(ADHDWindows.Modules.Hardships.Screen.Picture))
+            .Select(field => (ADHDWindows.Modules.Hardships.Screen.Picture)field.GetValue(null)!)
+            .ToList();
+        var chest = typeof(ADHDWindows.Modules.Events.Basic.ChestEvent).Assembly
+            .GetType("ADHDWindows.Modules.Events.Basic.EventPictures")!
+            .GetMethod("Chest")!;
+        foreach (var tier in ADHDWindows.Core.RandomEvents.ChestTiers.All)
+        {
+            pictures.Add((ADHDWindows.Modules.Hardships.Screen.Picture)chest.Invoke(null, [tier, false])!);
+            pictures.Add((ADHDWindows.Modules.Hardships.Screen.Picture)chest.Invoke(null, [tier, true])!);
+        }
+
+        Assert.True(pictures.Count >= 15);
+        var palette = ADHDWindows.Core.Pixels.Palette.Parse(File.ReadAllText(Path.Combine(RepositoryRoot.Find(), "assets", "palette.json")));
+        var allowed = palette.Colors.Select(color => color.Argb).ToHashSet();
+        foreach (var picture in pictures)
+        {
+            Assert.All(picture.Pixels, pixel => Assert.True(pixel >> 24 == 0 || allowed.Contains(pixel), $"цвет {pixel:X8} вне палитры"));
+            Assert.Contains(picture.Pixels, pixel => pixel >> 24 != 0);
+        }
+
+        // Лист со всеми картинками ×4 для просмотра глазами.
+        const int scale = 4;
+        var width = pictures.Sum(picture => (picture.Width + 2) * scale);
+        var height = pictures.Max(picture => picture.Height) * scale;
+        var sheet = Enumerable.Repeat(0xFF14121Fu, width * height).ToArray();
+        var left = 0;
+        foreach (var picture in pictures)
+        {
+            for (var y = 0; y < picture.Height * scale; y++)
+            {
+                for (var x = 0; x < picture.Width * scale; x++)
+                {
+                    var pixel = picture[x / scale, y / scale];
+                    if (pixel >> 24 != 0)
+                    {
+                        sheet[(y * width) + left + x] = pixel;
+                    }
+                }
+            }
+
+            left += (picture.Width + 2) * scale;
+        }
+
+        Snapshot(sheet, width, height, "event-pictures");
+    }
+
+    private static void Pump(TimeSpan time)
+    {
+        var frame = new System.Windows.Threading.DispatcherFrame();
+        var timer = new System.Windows.Threading.DispatcherTimer { Interval = time };
+        timer.Tick += (_, _) =>
+        {
+            timer.Stop();
+            frame.Continue = false;
+        };
+        timer.Start();
+        System.Windows.Threading.Dispatcher.PushFrame(frame);
+    }
+
     private static void AssertCrisp(UIElement child, double dpiScale, int devicePixels, string name)
     {
         var pixels = Render(child, dpiScale, out var width, out var height);

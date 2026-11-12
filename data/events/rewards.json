@@ -1,0 +1,12 @@
+{
+  // Настройки простых событий. Монетки идут через общую формулу дохода, источник «event».
+  "goldenCoin": { "seconds": 8, "reward": 150, "scale": 5 },
+  // Монетки ловятся курсором: радиус в пикселях, скорость падения — пикселей в секунду.
+  "coinRain": { "seconds": 20, "perSecond": 3, "reward": 5, "catchRadius": 48, "minSpeed": 160, "maxSpeed": 320, "scale": 3 },
+  "goblin": { "speed": 380, "minReward": 60, "maxReward": 140, "scale": 4 },
+  // Босс выдерживает health кликов и ждёт seconds секунд.
+  "boss": { "health": 30, "seconds": 45, "reward": 400, "scale": 5 },
+  "luckyHour": { "multiplier": 2, "minutes": 5 },
+  // Скидка на случайный сайт или программу из каталога.
+  "sale": { "minPercent": 30, "maxPercent": 60, "hours": 1 }
+}

@@ -44,3 +44,16 @@ public sealed record CollectionChanged(IReadOnlyList<CollectionItem> Items, IRea
 
 /// <summary>Модулю нужна коллекция купленного.</summary>
 public sealed record CollectionRequested;
+
+/// <summary>
+/// Распродажа: уценить случайный сайт или программу из каталога, которые ещё не куплены, на <paramref name="Percent"/>%
+/// на <paramref name="Duration"/>. Ответ — <see cref="LockSaleStarted"/> или <see cref="LockSaleUnavailable"/>
+/// с тем же <paramref name="Requester"/>; он может прийти из другого потока.
+/// </summary>
+public sealed record LockSaleRequested(string Requester, int Percent, TimeSpan Duration);
+
+/// <summary>Распродажа началась: <paramref name="Offer"/> с обычной ценой, <paramref name="SalePrice"/> — цена со скидкой.</summary>
+public sealed record LockSaleStarted(string Requester, LockOffer Offer, long SalePrice, int Percent, DateTimeOffset Until);
+
+/// <summary>Уценить нечего: всё куплено или уже со скидкой.</summary>
+public sealed record LockSaleUnavailable(string Requester);

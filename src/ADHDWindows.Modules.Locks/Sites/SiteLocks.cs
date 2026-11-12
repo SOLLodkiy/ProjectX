@@ -37,7 +37,8 @@ public sealed class SiteLocks(
     IEconomy economy,
     IEventBus events,
     ILog log,
-    TimeProvider clock)
+    TimeProvider clock,
+    SaleBook? sales = null)
 {
     private const int MaxTitles = 200;
     private const int MaxTitleLength = 1024;
@@ -192,11 +193,13 @@ public sealed class SiteLocks(
         }
 
         if (Domain.FromUrl(url) is not { } host
-            || classifier.Classify(host).Offer is not { } offer
-            || ledger.Contains(offer.Key))
+            || classifier.Classify(host).Offer is not { } found
+            || ledger.Contains(found.Key))
         {
             return new JsonObject { ["free"] = true };
         }
+
+        var offer = sales?.Apply(found) ?? found;
 
         return new JsonObject
         {
@@ -209,11 +212,12 @@ public sealed class SiteLocks(
 
     private JsonObject Unlock(string? key)
     {
-        if (key is null || classifier.OfferFor(key) is not { } offer)
+        if (key is null || classifier.OfferFor(key) is not { } found)
         {
             return new JsonObject { ["error"] = "unknown" };
         }
 
+        var offer = sales?.Apply(found) ?? found;
         if (ledger.Contains(offer.Key))
         {
             return new JsonObject { ["unlocked"] = true };

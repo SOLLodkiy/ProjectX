@@ -56,6 +56,7 @@ public sealed class HudWindow : Window, IDisposable
     private ScreenPoint? _grab;
     private string? _hardship;
     private string? _quest;
+    private string? _booster;
     private long _pendingCoins;
     private int _refreshQueued;
     private int _pollCount;
@@ -386,7 +387,7 @@ public sealed class HudWindow : Window, IDisposable
         _panel.Logs.IsEnabled = _logsAvailable?.Invoke() == true;
         _panel.Quests.IsEnabled = _questsAvailable?.Invoke() == true;
         _panel.Progress.IsEnabled = _progressAvailable?.Invoke() == true;
-        _panel.Show(_economy.Balance, _economy.IncomePerMinute, _hardship, _quest);
+        _panel.Show(_economy.Balance, _economy.IncomePerMinute, _hardship, _quest, _booster);
     }
 
     private void OnGrab(object sender, MouseButtonEventArgs e)
@@ -436,13 +437,17 @@ public sealed class HudWindow : Window, IDisposable
 
     private void OnStatusChanged(HudStatusChanged status) => Dispatcher.BeginInvoke(() =>
     {
-        if (status.Slot == HudSlot.Hardship)
+        switch (status.Slot)
         {
-            _hardship = status.Text;
-        }
-        else
-        {
-            _quest = status.Text;
+            case HudSlot.Hardship:
+                _hardship = status.Text;
+                break;
+            case HudSlot.Quest:
+                _quest = status.Text;
+                break;
+            default:
+                _booster = status.Text;
+                break;
         }
 
         if (_panelWindow is { IsVisible: true })

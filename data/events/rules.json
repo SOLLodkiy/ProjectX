@@ -1,0 +1,27 @@
+{
+  // Планировщик случайных событий (идея 011). Интервал 22,5 ± 7,5 минуты — в среднем раз в 15–30 минут.
+  "intervalMinutes": 22.5,
+  "spreadMinutes": 7.5,
+  // Первое событие после запуска — не раньше этого.
+  "firstDelayMinutes": 4,
+  // На сколько откладывается событие, если сейчас нельзя мешать (игра, UAC, пароль, «Не беспокоить», созвон).
+  "postponeMinutes": 3,
+  // Пауза вокруг усложнения в секундах: событие не начинается перед ним, во время и сразу после.
+  "hardshipGapSeconds": 90,
+  // Во сколько раз чаще обычного при каждой частоте из меню трея.
+  "frequencies": { "Off": 0, "Rare": 0.5, "Normal": 1, "Often": 2 },
+  // Вес при случайном выборе, самая большая длительность в секундах и сколько раз за день событие может выпасть само (0 — без ограничения).
+  "events": {
+    "goldenCoin": { "weight": 6, "seconds": 12, "perDay": 0 },
+    "coinRain": { "weight": 4, "seconds": 30, "perDay": 0 },
+    "goblin": { "weight": 4, "seconds": 15, "perDay": 0 },
+    "chest": { "weight": 4, "seconds": 20, "perDay": 0 },
+    "luckyHour": { "weight": 2, "seconds": 10, "perDay": 2 },
+    "sale": { "weight": 2, "seconds": 10, "perDay": 3 },
+    "wheel": { "weight": 2, "seconds": 120, "perDay": 1 },
+    "boss": { "weight": 3, "seconds": 50, "perDay": 1 },
+    "riddle": { "weight": 4, "seconds": 45, "perDay": 0 },
+    "merchant": { "weight": 1, "seconds": 90, "perDay": 2 },
+    "seasonal": { "weight": 5, "seconds": 15, "perDay": 3 }
+  }
+}

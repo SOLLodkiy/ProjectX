@@ -3,6 +3,7 @@ using System.IO;
 using System.Windows;
 using System.Windows.Threading;
 using ADHDWindows.App.Design;
+using ADHDWindows.App.Events;
 using ADHDWindows.App.Hardships;
 using ADHDWindows.App.Hud;
 using ADHDWindows.App.Locks;
@@ -51,6 +52,7 @@ public partial class App : Application
     private QuestScreen? _questScreen;
     private ProgressScreen? _progressScreen;
     private HardshipScreen? _hardshipScreen;
+    private EventScreen? _eventScreen;
     private GlobalHotkey? _statsHotkey;
     private ShowcaseWindow? _showcase;
     private bool _designReady;
@@ -85,11 +87,13 @@ public partial class App : Application
         _questScreen = new QuestScreen(_host.Events, _host.Texts, () => _designReady, Dispatcher);
         _progressScreen = new ProgressScreen(_host.Events, _host.Texts, () => _designReady, Dispatcher);
         _hardshipScreen = new HardshipScreen(_host.Events, _host.Texts, () => _designReady, Dispatcher, options.DeveloperMode);
+        _eventScreen = new EventScreen(_host.Events, _host.Economy, _host.Texts, () => _designReady, Dispatcher, options.DeveloperMode);
         _host.Start(() => StartWatchdog(paths, log));
         _statsScreen.Request();
         _questScreen.Request();
         _progressScreen.Request();
         _hardshipScreen.Request();
+        _eventScreen.Request();
         _mouseHook = new MouseHook(_host.Events.Publish, log);
         var mouseHook = _mouseHook;
         _host.Events.Subscribe<MouseButtonsSwapped>(swap => mouseHook.Unswap = swap.Swapped);
@@ -114,7 +118,8 @@ public partial class App : Application
                 () => _lockScreen.Open(),
                 () => Shutdown(),
                 _hotkey.ToString(),
-                _hardshipScreen.Fill));
+                _hardshipScreen.Fill,
+                _eventScreen.Fill));
 
         if (hudSettings is not null)
         {
@@ -147,6 +152,14 @@ public partial class App : Application
         {
             // Модули усложнений отвечают из потока планировщика, поэтому запуск не задерживает интерфейс.
             Task.Run(() => _host.Events.Publish(new HardshipTestRequested(hardship == "random" ? null : hardship)));
+        }
+
+        if (options.Event is { } randomEvent)
+        {
+            var parts = randomEvent.Split(':', 2);
+            Task.Run(() => _host.Events.Publish(new ADHDWindows.Core.RandomEvents.RandomEventTestRequested(
+                parts[0] == "random" ? null : parts[0],
+                parts.Length > 1 ? parts[1] : null)));
         }
     }
 
@@ -258,6 +271,7 @@ public partial class App : Application
         _questScreen?.Dispose();
         _progressScreen?.Dispose();
         _hardshipScreen?.Dispose();
+        _eventScreen?.Dispose();
         _hud?.Dispose();
         _tray?.Dispose();
         _watchdog?.Dispose();

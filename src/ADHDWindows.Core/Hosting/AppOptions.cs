@@ -8,6 +8,7 @@ public sealed record AppOptions(bool DeveloperMode)
     public const string UserDirPrefix = "--user-dir=";
     public const string RecoveryProbePrefix = "--recovery-probe=";
     public const string HardshipPrefix = "--hardship=";
+    public const string EventPrefix = "--event=";
 
     /// <summary>Открыть витрину компонентов при запуске. Работает только в режиме разработчика.</summary>
     public bool OpenShowcase { get; init; }
@@ -20,6 +21,12 @@ public sealed record AppOptions(bool DeveloperMode)
 
     /// <summary>Запустить усложнение с этим кодом сразу после запуска, «random» — случайное. Только в режиме разработчика.</summary>
     public string? Hardship { get; init; }
+
+    /// <summary>
+    /// Начать случайное событие с этим кодом сразу после запуска, «random» — случайное. Вариант пишется через
+    /// двоеточие: <c>--event=chest:legendary</c>. Только в режиме разработчика.
+    /// </summary>
+    public string? Event { get; init; }
 
     public static AppOptions Parse(IEnumerable<string> args)
     {
@@ -36,6 +43,7 @@ public sealed record AppOptions(bool DeveloperMode)
             UserDir = Value(list, UserDirPrefix),
             RecoveryProbe = Value(list, RecoveryProbePrefix),
             Hardship = Value(list, HardshipPrefix),
+            Event = Value(list, EventPrefix),
         };
     }
 

@@ -16,7 +16,8 @@ public sealed class LockEngine(
     ISystemChanges changes,
     IEventBus events,
     ILog log,
-    TimeProvider clock)
+    TimeProvider clock,
+    SaleBook? sales = null)
 {
     private const int VerdictCacheLimit = 4096;
 
@@ -63,18 +64,20 @@ public sealed class LockEngine(
             return;
         }
 
-        if (!economy.TrySpend(group.Offer.Price, $"unlock:{key}"))
+        // Цена со скидкой распродажи, если она сейчас действует.
+        var offer = Priced(group.Offer);
+        if (!economy.TrySpend(offer.Price, $"unlock:{key}"))
         {
-            events.Publish(new UnlockDenied(key, group.Offer.Price));
+            events.Publish(new UnlockDenied(key, offer.Price));
             return;
         }
 
         var when = clock.GetUtcNow();
-        ledger.Add(group.Offer, when);
+        ledger.Add(offer, when);
         _groups.Remove(group);
         Release(group);
-        log.Info($"Разблокировано: {group.Offer.Name} за {group.Offer.Price}");
-        events.Publish(new ItemUnlocked(group.Offer, when));
+        log.Info($"Разблокировано: {offer.Name} за {offer.Price}");
+        events.Publish(new ItemUnlocked(offer, when));
         PublishOffers();
     }
 
@@ -266,8 +269,11 @@ public sealed class LockEngine(
         }
     }
 
-    private void PublishOffers() =>
-        events.Publish(new LockOffersChanged([.. _groups.Select(group => group.Offer)]));
+    /// <summary>Рассылает список заблокированного с текущими ценами, например после начала или конца распродажи.</summary>
+    public void PublishOffers() =>
+        events.Publish(new LockOffersChanged([.. _groups.Select(group => Priced(group.Offer))]));
+
+    private LockOffer Priced(LockOffer offer) => sales?.Apply(offer) ?? offer;
 
     private sealed class LockGroup(LockOffer offer)
     {
